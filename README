@@ -1,0 +1,20 @@
+Mr-Voxel is a combination of an accelerated voxel data-structure and volume
+rendering library.  Long term goals involve including importance-sampled 
+light caches for all polygonal, implicit and volume objects in a scene.
+
+This is the culmination of research and design surrounding my graphics graduate
+thesis.  It is important to note that, while I may have a fully fledged volume 
+renderer, that is not the focus of my thesis.  It is also important to note 
+that many of the lighting equations specific to my volume rendering process are
+derived or loosely based off of the volume rendering sections of "Physically 
+Based Rendering, 2nd edition" by Matt Pharr. http://pharr.org/matt/ .  Thank 
+you, Matt, for indirectly helping me so much through the course of my work 
+through your book!
+
+Mr-Voxel is licensed under a modified MIT license. Don't worry, the modifications
+are minimal. See the LICENSE file for details.
+
+Until my thesis work is complete (June 2011) the code is open source,
+but I am not taking outside contributions to the project. After that,
+I may start taking community input at my discretion. It depends.
+
