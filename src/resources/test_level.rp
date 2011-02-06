@@ -1,0 +1,108 @@
+{
+    "render_size" : [ 1280, 800 ],
+    
+    "camera" : {
+        "eye" : [ 0.0, 5.0, 14.0 ],
+        "up" : [ 0.0, 1.0, 0.0 ],
+        "right" : [ 1.333, 0.0, 0.0 ],
+        "look_at" : [ 0.0, 0.0, 0.0 ]
+    },
+    
+    // All of the spheres in the scene
+    "spheres" : [
+        {
+            "center" : [ 0.0, 0.0, 0.0 ],
+            "radius" : 2.0,
+            
+            "pigment" : [ 0.2, 0.2, 1.0, 0.2 ],
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.3,
+                "specular" : 0.8,
+                "roughness" : 0.004,
+                "reflection" : 0.4,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+            "modifiers" : [
+                { "translate" : [ -2.5, 2.0, 0.0 ] }
+            ]
+        },
+        {
+            "center" : [ 0.0, 0.0, 0.0 ],
+            "radius" : 2.0,
+            
+            "pigment" : [ 1.0, 1.0, 0.2 ],
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.5,
+                "specular" : 0.6,
+                "roughness" : 0.03,
+                "reflection" : 0.4,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+            "modifiers" : [
+                { "translate" : [ 2.5, 0.0, 0.0 ] }
+            ]
+        }
+    ],
+        
+    // All planes in the scene
+    "planes" : [
+        {
+            "normal" : [ 0.0, 1.0, 0.0 ],
+            "distance" : -3.0,
+            
+            "pigment" : [ 0.8, 0.8, 0.8 ],
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.5,
+                "specular" : 0.0,
+                "roughness" : 0.004,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            }
+        }
+    ],
+        
+    // All lights in the scene
+    "lights" : [
+        {
+            "location" : [ 0.0, 20.0, 0.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ]
+        }
+    ],
+
+
+    // All of the boxes in the scene
+    "volumes" : [
+        {
+            "data" :
+                {
+                    "file" : "resources/volume_data/CThead.",
+                    "slices" : 113
+
+                },
+            "min" : [ -10.0, -1.0, -10.0 ],
+            "max" : [ 10.0, 1.0, 10.0 ],
+            "size" : 256,
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.5,
+                "specular" : 0.6,
+                "roughness" : 0.03,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+            "modifiers" : [
+                { "translate" : [ 0.0, 0.0, 3.0 ] }
+            ]
+        }
+    ]
+    
+}

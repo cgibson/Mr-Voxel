@@ -1,0 +1,81 @@
+{
+    "render_size" : [ 800, 600 ],
+    
+    "volSampleStep" : 0.005,
+    
+    "camera" : {
+        "eye" : [ %XPOS%, %YPOS%, %ZPOS% ],
+        "up" : [ 0.0, 1.0, 0.0 ],
+        "right" : [ 1.333, 0.0, 0.0 ],
+        "look_at" : [ 0.0, 0.0, 0.0 ]
+    },
+        
+    // All planes in the scene
+    "planes" : [
+        {
+            "normal" : [ 0.0, 1.0, 0.0 ],
+            "distance" : -1.0,
+            
+            "pigment" : [ 0.8, 0.8, 0.8 ],
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.5,
+                "specular" : 0.0,
+                "roughness" : 0.004,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            }
+        }
+    ],
+        
+    // All lights in the scene
+    "lights" : [
+        {
+            "location" : [ 5.0, 7.0, 5.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ]
+        }
+    ],
+    
+    // All of the spheres in the scene
+    "spheres" : [
+        {
+            "center" : [ 0.0, 1.5, 0.0 ],
+            "radius" : 0.5,
+            
+            "pigment" : [ 0.2, 0.2, 1.0, 0.2 ],
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.3,
+                "specular" : 0.8,
+                "roughness" : 0.004,
+                "reflection" : 0.4,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            }
+        }
+    ],
+
+    // All of the boxes in the scene
+    "volumes" : [
+        {
+            "type" : "homogeneous",
+            "min" : [ -1.0, -1.0, -1.0 ],
+            "max" : [ 1.0, 1.0, 1.0 ],
+            "size" : 256,
+            
+            "density" : 3.5,
+            "absorbtion" : [ 0.061, 0.97, 1.45 ],
+            "scatter" : [ 0.18, 0.07, 0.03 ],
+            "emitt" : [ 0.0, 0.0, 0.0 ],
+            
+            "greenstein" : 2.0,
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "modifiers" : [
+            ]
+        }
+    ]
+    
+}

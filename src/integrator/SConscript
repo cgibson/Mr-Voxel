@@ -1,0 +1,8 @@
+Import("env")
+
+objects = [
+	'integrator'
+	]
+
+for obj in objects:
+	env.Object(obj + '.cpp')

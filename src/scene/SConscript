@@ -1,0 +1,14 @@
+Import("env")
+
+objects = [
+	'scene',
+	'volume',
+	'modifier',
+	'objectList',
+	'BBNode',
+	'Geometry',
+	'Object',
+	]
+
+for obj in objects:
+	env.Object(obj + '.cpp')

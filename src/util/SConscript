@@ -1,0 +1,8 @@
+Import("env")
+
+objects = [
+	'image','MyMat','rayutil','util'
+	]
+
+for obj in objects:
+	env.Object(obj + '.cpp')
