@@ -67,7 +67,8 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 			const float continueProb = .5f;
 			if ((rand() / (float)RAND_MAX) > continueProb) break;
 			Tr = Tr / continueProb;
-		}
+		}//else if (stepTau.toTrans() > 0.99995)
+         //   continue;
 
 	  
 		Lv = Lv + volumes[0]->Lve(p);
@@ -86,12 +87,15 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 		  if(!mScene->intersect(shadRay, &surface))
 		  {
 
-                          Spectrum lTr = Exp(volumes[0]->tau(ray, mStepSize * 2, 0.0) * -1);
+                          Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
 	
 			  //printf("P: %s\n", p.str());
 			  //printf("LTR: %f, %f, %f\n", lTr.r(), lTr.g(), lTr.b());
 
 			  Spectrum Ld = lTr * lights[0]->color;
+
+              //printf("Not black.\n\tcurloc: %f, %f, %f\n\tlightTrn: %.2f, %.2f, %.2f\n\tLightCol: %.2f, %.2f, %.2f\n\tSingleSc: %.2f, %.2f, %.2f\n\tCurTrans: %.2f, %.2f, %.2f\n", \
+                    p.x(), p.y(), p.z(), lTr.r(), lTr.g(), lTr.b(), lights[0]->color.r(), lights[0]->color.g(), lights[0]->color.b(), ss.r(), ss.g(), ss.b(), Tr.r(), Tr.g(), Tr.b());
 
 			  Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * -1);
 
