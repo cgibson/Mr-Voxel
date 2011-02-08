@@ -21,6 +21,8 @@ public:
   Vector up;
   Vector right;
   Vector look_at;
+  double fov;
+  double fov_ratio;
 
 private:
 };

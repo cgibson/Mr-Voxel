@@ -24,10 +24,14 @@ Raycaster::Raycaster( Scene* scene )
   Vector right = camera->right;
   Vector up = camera->up;
   double ratio =  right.norm() / up.norm();
-  mLeft = -0.5 * ratio;
-  mRight = 0.5 * ratio;
-  mTop = 0.5;
-  mBottom = -0.5;
+
+  mLeft = -camera->fov_ratio * ratio;
+  mRight = camera->fov_ratio * ratio;
+  mTop = camera->fov_ratio;
+  mBottom = -camera->fov_ratio;
+
+  printf("left: %f, right: %f, up: %f, down: %f\n", mLeft,mRight,mTop,mBottom);
+
   mNear = 0.5;
   mScene = scene;
   background = Color(0.0, 0.0, 0.0, 1.0);
@@ -375,6 +379,9 @@ Color Raycaster::initialCast( Ray ray, int depth )
 Color Raycaster::cast( int x, int y, int width, int height )
 {
   Color color;
+
+  Camera *camera = mScene->getCamera();
+
   double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
   double vs = mBottom + ((mTop - mBottom)
@@ -382,7 +389,6 @@ Color Raycaster::cast( int x, int y, int width, int height )
   //cout << "US: " << us << "  VS: " << vs << endl;
   Ray ray = Ray();
 
-  Camera *camera = mScene->getCamera();
   
   if( mCastMode == ORTHOGRAPHIC ) {
     ray.start.set(camera->location);
@@ -462,10 +468,12 @@ int Raycaster::raycast(
   int x, y;
   mDepth = depth;
   
-  double ratio = width / (double)height;
+  Camera *camera = mScene->getCamera();
 
-  mLeft = -0.5 * ratio;
-  mRight = 0.5 * ratio;
+  //double ratio = height / (double)width;
+
+  //mLeft = -camera->fov_ratio * ratio;
+  //mRight = camera->fov_ratio * ratio;
   
   mVolumeIntegrator = new VolumeIntegrator(mScene);
 

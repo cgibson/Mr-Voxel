@@ -81,6 +81,13 @@ bool parseCamera(Json::Value val, Scene *scene)
   camera->up = parseVector(val["up"]);
   camera->right = parseVector(val["right"]);
   camera->look_at = parseVector(val["look_at"]);
+  camera->fov = val["fov"].asDouble();
+  // translation into radians:
+
+  camera->fov = (camera->fov / 360.) * 2 * PI;
+
+  // we divide the FOV to create the right triangle
+  camera->fov_ratio = sin(camera->fov / 2.0);
   
   scene->setCamera(camera);
   return true;

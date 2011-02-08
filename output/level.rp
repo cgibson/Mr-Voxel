@@ -1,13 +1,14 @@
 {
-    "render_size" : [ 800, 600 ],
+    "render_size" : [ 1920, 1080 ],
     
-    "volSampleStep" : 0.005,
+    "volSampleStep" : 0.001,
     
     "camera" : {
-        "eye" : [ -2.0, 2.0, 5.0 ],
+        "eye" : [ -1.4, 1.6, 3.75 ],
         "up" : [ 0.0, 1.0, 0.0 ],
-        "right" : [ 1.333, 0.0, 0.0 ],
-        "look_at" : [ 0.0, 0.0, 0.0 ]
+        "right" : [ 1.777, 0.0, 0.0 ],
+        "look_at" : [ 0.0, -0.2, 0.75 ],
+	"fov" : 18
     },
         
     // All planes in the scene
@@ -32,7 +33,7 @@
     // All lights in the scene
     "lights" : [
         {
-            "location" : [ 5.0, 7.0, 5.0 ],
+            "location" : [ 8.0, 7.0, 9.0 ],
             "color" : [ 1.5, 1.5, 1.5 ]
         }
     ],
@@ -40,16 +41,16 @@
     // All of the spheres in the scene
     "spheres" : [
         {
-            "center" : [ 0.0, 1.5, 0.0 ],
-            "radius" : 0.5,
+            "center" : [ 0.0, 0.0, 0.0 ],
+            "radius" : 0.85,
             
-            "pigment" : [ 0.0, 0.0, 0.0, 0.0 ],
+            "pigment" : [ 0.95, 0.30, 0.15 ],
             "finish" : {
                 "ambient" : 0.05,
                 "diffuse" : 0.3,
-                "specular" : 0.8,
+                "specular" : 0.6,
                 "roughness" : 0.004,
-                "reflection" : 0.8,
+                "reflection" : 0.1,
                 "refraction" : 0.0,
                 "ior" : 1.0
             }
@@ -64,9 +65,9 @@
             "max" : [ 1.0, 1.0, 1.0 ],
             "size" : 256,
             
-            "density" : 20.5,
-            "absorbtion" : [ 0.05, 0.5, 0.5 ],
-            "scatter" : [ 0.05, 0.5, 0.5 ],
+            "density" : 2.0,
+            "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
+            "scatter" : [ 7.38, 5.47, 3.15 ],
             "emitt" : [ 0.0, 0.0, 0.0 ],
             
             "greenstein" : 2.0,
