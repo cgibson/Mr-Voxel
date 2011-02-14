@@ -5,20 +5,23 @@ BrickDensityRegion::BrickDensityRegion(
 		double greenstein, Spectrum emitt
 		):DensityRegion( min,max,absorbtion,scatter,greenstein,emitt ) {
 
-	m_brickData = BrickGrid(128,128,128);
+	int size = 512;
+
+	m_brickData = BrickGrid(size,size,size);
 
 	Voxel *tmp;
 
-	for(int i = 0; i < 128; i++) {
-		for(int j = 0; j < 128; j++) {
-			for(int k = 0; k < 128; k++) {
+
+	for(int i = 0; i < size; i++) {
+		for(int j = 0; j < size; j++) {
+			for(int k = 0; k < size; k++) {
 				tmp = m_brickData(i,j,k);
-				float d_x = (64. - (float)i) / 64.;
-				float d_y = (64. - (float)j) / 64.;
-				float d_z = (64. - (float)k) / 64.;
+				float d_x = ((size/2.) - (float)i) / (size/2.);
+				float d_y = ((size/2.) - (float)j) / (size/2.);
+				float d_z = ((size/2.) - (float)k) / (size/2.);
 				float d = sqrt(pow(d_x, 2) + pow(d_y, 2) + pow(d_z, 2));
 				if(d < 1)
-						tmp->set(1, 1. - (d * 0.5));
+						tmp->set(1, 1. - (d * 0.7));
 
 			}
 		}
