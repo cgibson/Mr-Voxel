@@ -4,6 +4,7 @@
 #include "../scene/scene.h"
 #include "../mrvoxel/VolumeRegion.h"
 #include "../mrvoxel/HomogeneousRegion.h"
+#include "../mrvoxel/BrickDensity.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -274,8 +275,8 @@ VolumeRegion *parseVolume(Json::Value val)
 	  Color emitt = parseColor(val["emitt"]);
 	  double greenstein = val["greenstein"].asDouble();
 
-	  region = new HomogeneousRegion(min, max, absorbtion, scatter, greenstein, \
-			                         emitt, density);
+	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+			                         emitt);
   }else{
 	  printf("ERROR: Unsupported volume type\n");
 	  exit(1);

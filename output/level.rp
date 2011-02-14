@@ -1,14 +1,14 @@
 {
-    "render_size" : [ 1920, 1080 ],
+    "render_size" : [ 800, 600 ],
     
-    "volSampleStep" : 0.001,
+    "volSampleStep" : 0.01,
     
     "camera" : {
-        "eye" : [ -1.4, 1.6, 3.75 ],
+        "eye" : [ -1.5, 2.0, 5 ],
         "up" : [ 0.0, 1.0, 0.0 ],
-        "right" : [ 1.777, 0.0, 0.0 ],
-        "look_at" : [ 0.0, -0.2, 0.75 ],
-	"fov" : 18
+        "right" : [ 1.333, 0.0, 0.0 ],
+        "look_at" : [ 0.0, 0.0, 0 ],
+	"fov" : 30
     },
         
     // All planes in the scene
@@ -41,8 +41,8 @@
     // All of the spheres in the scene
     "spheres" : [
         {
-            "center" : [ 0.0, 0.0, 0.0 ],
-            "radius" : 0.85,
+            "center" : [ 1.5, 0.0, 0.0 ],
+            "radius" : 0.5,
             
             "pigment" : [ 0.95, 0.30, 0.15 ],
             "finish" : {

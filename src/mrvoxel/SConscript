@@ -1,7 +1,7 @@
 Import("env")
 
 objects = [
-	'VolumeRegion','HomogeneousRegion',
+	'VolumeRegion','HomogeneousRegion','Voxel','Brick', 'BrickDensity'
 	]
 
 for obj in objects:

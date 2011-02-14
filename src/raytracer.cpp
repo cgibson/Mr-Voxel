@@ -72,6 +72,7 @@ int main(int argc, char* const argv[])
   char *filename = NULL;
   int current;
   int depth = 5;
+  bool single_thread = false;
 
   current = 1;
   while(current < argc) {
@@ -98,6 +99,10 @@ int main(int argc, char* const argv[])
     else if( strcmp(argv[current], "-D") == 0 ) {
       current++;
       sscanf(argv[current], "%d", &depth);
+      current++;
+    }
+    else if( strcmp(argv[current], "-s") == 0 ) {
+      single_thread = true;
       current++;
     }
     else {
@@ -147,9 +152,19 @@ int main(int argc, char* const argv[])
   
   raycaster = new Raycaster( scene );
   
-  const int cores = 4;
-  const int corethreadcount = 5;
-  const int jobs = cores*corethreadcount*2;
+  int cores;
+  int corethreadcount;
+  int jobs;
+
+  if(single_thread) {
+	  cores = 1;
+	  corethreadcount = 1;
+	  jobs = cores*corethreadcount*1;
+  } else {
+	  cores = 4;
+	  corethreadcount = 5;
+	  jobs = cores*corethreadcount*2;
+  }
   raytracer *rtrcs[jobs];
   thread thrds[jobs];
   
