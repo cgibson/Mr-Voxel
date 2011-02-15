@@ -30,6 +30,8 @@ BrickGrid::BrickGrid(int size_x, int size_y, int size_z)
 	for(int i = 0; i < size; i++) {
 		m_data[i] = new Brick();
 	}
+
+    m_zero_voxel = new Voxel(1, 0.0);
 }
 
 BrickGrid::~BrickGrid() {
@@ -37,6 +39,9 @@ BrickGrid::~BrickGrid() {
 }
 
 Voxel *BrickGrid::operator() (int i, int j, int k) {
+
+    if(i < 0 || j < 0 || k < 0 || i >= m_size_x || j >= m_size_y || k >= m_size_z)
+        return m_zero_voxel;
 
 	int x = i / BRICK_DIM;
 	int y = j / BRICK_DIM;
