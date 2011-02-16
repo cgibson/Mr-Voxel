@@ -267,7 +267,24 @@ VolumeRegion *parseVolume(Json::Value val)
   // homogeneous, data, procedural
   string type = val["type"].asString();
 
-  if(!type.compare("homogeneous")) {
+  if(!type.compare("brick")) {
+
+	  double density = val["density"].asDouble();
+	  Color absorbtion = parseColor(val["absorbtion"]);
+	  Color scatter = parseColor(val["scatter"]);
+	  Color emitt = parseColor(val["emitt"]);
+	  double greenstein = val["greenstein"].asDouble();
+
+      string file = val["file"].asString();
+      Vector file_res = parseVector(val["file_resolution"]);
+      Vector vol_res = parseVector(val["volume_resolution"]);
+
+	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+			                         emitt, density);
+
+      (dynamic_cast<BrickDensityRegion*>(region))->load(file, file_res, vol_res);
+
+  }else if(!type.compare("homogeneous")) {
 
 	  double density = val["density"].asDouble();
 	  Color absorbtion = parseColor(val["absorbtion"]);
@@ -276,7 +293,8 @@ VolumeRegion *parseVolume(Json::Value val)
 	  double greenstein = val["greenstein"].asDouble();
 
 	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
-			                         emitt);
+			                         emitt, density);
+
   }else{
 	  printf("ERROR: Unsupported volume type\n");
 	  exit(1);
