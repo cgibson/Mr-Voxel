@@ -16,6 +16,7 @@ public:
     float interpolate( float x, float y, float z, VoxVal val );
     void load(string file, Vector file_res, Vector vol_res);
     void set(int i, int j, int k, float val);
+    void add(int i, int j, int k, float val);
 
 
 

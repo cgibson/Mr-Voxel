@@ -41,6 +41,18 @@ void BrickDensityRegion::set(int i, int j, int k, float val) {
     tmp->set(1, val);
 }
 
+void BrickDensityRegion::add(int i, int j, int k, float val) {
+    if(i < 0 || i > m_brickData.size_x() ||
+       j < 0 || j > m_brickData.size_y() ||
+       k < 0 || k > m_brickData.size_z()) {
+        printf("Error: setting index out of value [%d, %d, %d]\n", i, j, k);
+        exit(1);
+    }
+
+    Voxel *tmp = m_brickData(i,j,k);
+    tmp->set(1, val + (*tmp)(DENSITY));
+}
+
 void BrickDensityRegion::load(string file, Vector file_res, Vector vol_res) {
 
 	 m_brickData = BrickGrid(vol_res.x(),vol_res.y(),vol_res.z());
@@ -197,6 +209,7 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector 
   //printf("MIN: %d, MAX: %d\n", min, max);
 
   unsigned short tmp;
+  float tmp_data;
 
   for(int i = 0; i < (int)file_res.x(); i++)
   {
@@ -208,7 +221,7 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector 
       tmp = (tmp > 60000) ? 0 : tmp;
 
       //printf("Voxel %d %d %d -> %f\n", (int)(i * multiply), (int)((file_res.y() - (y_val + 1)) * multiply), (int)(j * multiply), (float)tmp / (float)max);
-      set((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult / (float)max);
+      add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);
     }
   }
 }

@@ -1,12 +1,12 @@
 {
-    "render_size" : [ 1920, 1080 ],
+    "render_size" : [ 800, 600 ],
     
-    "volSampleStep" : 0.005,
+    "volSampleStep" : 0.01,
     
     "camera" : {
         "eye" : [ 1.5, 2.0, -5 ],
         "up" : [ 0.0, 1.0, 0.0 ],
-        "right" : [ 1.777, 0.0, 0.0 ],
+        "right" : [ 1.333, 0.0, 0.0 ],
         "look_at" : [ 0.0, 0.0, 0 ],
 	"fov" : 30
     },
@@ -68,7 +68,7 @@
             "file" : "/home/cgibson/tmp/bunny/",
 
             "file_resolution" : [512,360,512],
-            "volume_resolution" : [512,512,512],
+            "volume_resolution" : [32,32,32],
 
             "density" : 80.0,
             "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
