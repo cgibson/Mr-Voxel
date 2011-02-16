@@ -134,13 +134,13 @@ double BrickDensityRegion::density(Vector v) {
 	float off_z = (loc.z() / dim.z()) * m_brickData.size_z();
 
     // retrieve surrounding voxels
-	//Voxel *vox = m_brickData((int)off_x, (int)off_y, (int)off_z);
+    // Voxel *vox = m_brickData((int)off_x, (int)off_y, (int)off_z);
 
     return interpolate(off_x, off_y, off_z, DENSITY);
 
     // sum and interpolate voxel density values
     // interpolate(i, j, k, DENSITY)
-	//return (*vox)(DENSITY);
+    //	return (*vox)(DENSITY);
 }
 
 unsigned short BrickDensityRegion::twoByte2ShortX(char *ptr)
@@ -156,7 +156,7 @@ unsigned short BrickDensityRegion::twoByte2ShortX(char *ptr)
 void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val) {
   int size_squared = (int)(file_res.x() * file_res.z());
 
-  cout << "READING: " << file << endl;
+  //cout << "READING: " << file << endl;
 
   if(file_res.x() < vol_res.x() || file_res.z() < vol_res.z()) {
     printf("Error: Volume must be at most file_resolution large.\n");
@@ -204,7 +204,8 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector 
     {
       tmp = bufferShort[j * (int)file_res.x() + i];
       //printf("tmp is huge! %d\n", tmp);
-      tmp = (int(tmp) - 1024 > 0) ? tmp-1024 : 0;
+      tmp = (int(tmp) - 1248 > 0) ? tmp : 0;
+      tmp = (tmp > 60000) ? 0 : tmp;
 
       //printf("Voxel %d %d %d -> %f\n", (int)(i * multiply), (int)((file_res.y() - (y_val + 1)) * multiply), (int)(j * multiply), (float)tmp / (float)max);
       set((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult / (float)max);

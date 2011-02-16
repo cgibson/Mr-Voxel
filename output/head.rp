@@ -1,14 +1,14 @@
 {
-    "render_size" : [ 1920, 1080 ],
+    "render_size" : [ 800, 600 ],
     
     "volSampleStep" : 0.005,
     
     "camera" : {
         "eye" : [ 1.5, 2.0, -5 ],
         "up" : [ 0.0, 1.0, 0.0 ],
-        "right" : [ 1.777, 0.0, 0.0 ],
+        "right" : [ 1.333, 0.0, 0.0 ],
         "look_at" : [ 0.0, 0.0, 0 ],
-	"fov" : 30
+	"fov" : 12
     },
         
     // All planes in the scene
@@ -65,12 +65,12 @@
             "min" : [ -1.0, -1.0, -1.0 ],
             "max" : [ 1.0, 1.0, 1.0 ],
             "size" : 256,
-            "file" : "/home/cgibson/tmp/bunny/",
+            "file" : "/home/cgibson/tmp/head/CThead.",
 
-            "file_resolution" : [512,360,512],
-            "volume_resolution" : [512,512,512],
+            "file_resolution" : [256,113,256],
+            "volume_resolution" : [256,256,256],
 
-            "density" : 80.0,
+            "density" : 10.0,
             "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
             "scatter" : [ 7.38, 5.47, 3.15 ],
             "emitt" : [ 0.0, 0.0, 0.0 ],
