@@ -15,8 +15,10 @@ float PhaseHG(Vector w, Vector wp, float g) {
 	//printf("Phase teim: %s %s %f\n", w.str(), wp.str(), g);
     float costheta = w.dot(wp);
     //printf("Costheta: %f\n", costheta);
-    return 1.f / (4.f * M_PI) *
-        (1.f - g*g) / powf(1.f + g*g - 2.f * g * costheta, 1.5f);
+    float val = (1.f / (4.f * M_PI)) *
+        ((1.f - g*g) / powf(1.f + g*g - 2.f * g * costheta, 1.5f));
+    //printf("Val: %f\n", val);
+    return val;
 }
 
 Spectrum DensityRegion::tau( Ray ray, double stepSize, double offset) {

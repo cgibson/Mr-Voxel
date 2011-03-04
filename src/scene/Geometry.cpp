@@ -327,6 +327,16 @@ Triangle::Triangle( void )
 }
 
 /*
+ * Default Triangle Constructor
+ *----------------------------------------------------------------------------*/
+Triangle::Triangle( Vector c1, Vector c2, Vector c3 )
+       :corner1(c1),
+        corner2(c2),
+        corner3(c3)
+{
+}
+
+/*
  * Test triangle intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/

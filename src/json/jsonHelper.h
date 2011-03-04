@@ -5,6 +5,7 @@
 #include "../mrvoxel/VolumeRegion.h"
 #include "../mrvoxel/HomogeneousRegion.h"
 #include "../mrvoxel/BrickDensity.h"
+#include "include/json/value.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -163,6 +164,39 @@ Box *parseBox(Json::Value val)
   return box;
 }
 
+vector<GeomObj*> parsePolygon(Json::Value val)
+{
+    vector<GeomObj*> triangles;
+    Json::Value vlist = val["vertices"];
+
+    if(vlist.size() < 2){
+        printf("Error: Vertex count invalid for polygon\n");
+        exit(1);
+    }
+
+    std::vector<Vector> vertices;
+
+    Color color = parseColor(val["pigment"]);
+    Finish finish = parseFinish(val["finish"]);
+
+    int i = 0;
+
+    vertices.push_back(parseVector(vlist[i])); i++;
+    vertices.push_back(parseVector(vlist[i])); i++;
+
+    Triangle *tri;
+
+    for(i = 2; i < vlist.size(); i++) {
+        vertices.push_back(parseVector(vlist[i]));
+        tri = new Triangle(vertices[0], vertices[i-1], vertices[i]);
+        parseModifiers(val["modifiers"], (GeomObj*)tri);
+        tri->pigment.rgbf = color;
+        tri->finish = finish;
+        triangles.push_back(tri);
+    }
+    return triangles;
+}
+
 Plane *parsePlane(Json::Value val)
 {
   Plane *plane = new Plane();
@@ -279,10 +313,13 @@ VolumeRegion *parseVolume(Json::Value val)
       Vector file_res = parseVector(val["file_resolution"]);
       Vector vol_res = parseVector(val["volume_resolution"]);
 
+      int iso_min = val["iso_min"].asInt();
+      int iso_max = val["iso_max"].asInt();
+
 	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
 			                         emitt, density);
 
-      (dynamic_cast<BrickDensityRegion*>(region))->load(file, file_res, vol_res);
+      (dynamic_cast<BrickDensityRegion*>(region))->load(file, file_res, vol_res, iso_min, iso_max);
 
   }else if(!type.compare("homogeneous")) {
 
@@ -338,6 +375,12 @@ void parsePlanes(Json::Value planes, Scene *scene)
     scene->addObject((GeomObj*)parsePlane( planes[index] ));
 }
 
+void parsePolygons(Json::Value polygons, Scene *scene)
+{
+  for ( int index = 0; index < polygons.size(); ++index )
+    scene->addObjects(parsePolygon( polygons[index] ));
+}
+
 void parseVolumes(Json::Value volumes, Scene *scene)
 {
   for ( int index = 0; index < volumes.size(); ++index )
@@ -353,18 +396,19 @@ void parseLights(Json::Value lights, Scene *scene)
 bool parseWorld(Json::Value val, Scene *scene)
 {
   
-  parseSpheres(val["spheres"], scene);
-  parseBoxes(val["boxes"], scene);
-  parsePlanes(val["planes"], scene);
-  parseVolumes(val["volumes"], scene);
-  parseLights(val["lights"], scene);
-  return true;
+    parseSpheres(val["spheres"], scene);
+    parseBoxes(val["boxes"], scene);
+    parsePlanes(val["planes"], scene);
+    parsePolygons(val["polygons"], scene);
+    parseVolumes(val["volumes"], scene);
+    parseLights(val["lights"], scene);
+    return true;
 }
 
 bool parseVolSampleStep(Json::Value val, Scene *scene)
 {
-	scene->setVolSampleStep(val.asDouble());
-	return true;
+    scene->setVolSampleStep(val.asDouble());
+    return true;
 }
 
 bool parseScene(Json::Value val, Scene *scene)

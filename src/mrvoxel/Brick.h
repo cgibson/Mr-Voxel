@@ -46,9 +46,9 @@ public:
 private:
 
     Voxel *m_zero_voxel;
-	Brick **m_data;
-	int m_size_x, m_size_y, m_size_z;
-	int m_brick_size_x, m_brick_size_y, m_brick_size_z;
+    Brick **m_data;
+    int m_size_x, m_size_y, m_size_z;
+    int m_brick_size_x, m_brick_size_y, m_brick_size_z;
 
 };
 

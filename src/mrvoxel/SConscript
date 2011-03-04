@@ -1,8 +1,9 @@
 Import("env")
 
-objects = [
-	'VolumeRegion','HomogeneousRegion','Voxel','Brick', 'BrickDensity'
-	]
+sources = Glob('*.cpp')
+objects = []
 
-for obj in objects:
-	env.Object(obj + '.cpp')
+for srcs in sources:
+	objects = objects + env.Object(srcs)
+
+Return('objects')

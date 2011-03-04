@@ -38,7 +38,7 @@ void BrickDensityRegion::set(int i, int j, int k, float val) {
     }
 
     Voxel *tmp = m_brickData(i,j,k);
-    tmp->set(1, val);
+    tmp->set(0, val);
 }
 
 void BrickDensityRegion::add(int i, int j, int k, float val) {
@@ -50,10 +50,15 @@ void BrickDensityRegion::add(int i, int j, int k, float val) {
     }
 
     Voxel *tmp = m_brickData(i,j,k);
-    tmp->set(1, val + (*tmp)(DENSITY));
+    tmp->add(0, val);
 }
 
 void BrickDensityRegion::load(string file, Vector file_res, Vector vol_res) {
+    load(file, file_res, vol_res, 0, USHRT_MAX);
+
+}
+
+void BrickDensityRegion::load(string file, Vector file_res, Vector vol_res, int iso_min, int iso_max) {
 
 	 m_brickData = BrickGrid(vol_res.x(),vol_res.y(),vol_res.z());
 
@@ -74,7 +79,7 @@ void BrickDensityRegion::load(string file, Vector file_res, Vector vol_res) {
         tmp_str = out.str();
         //printf("loading slice %s\n", (file+tmp_str).c_str());
 
-        loadVolSlice(file + tmp_str, file_res, vol_res, i);
+        loadVolSlice(file + tmp_str, file_res, vol_res, i, iso_min, iso_max);
      }
 
 }
@@ -165,7 +170,7 @@ unsigned short BrickDensityRegion::twoByte2ShortX(char *ptr)
   return r;
 }
 
-void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val) {
+void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val, int iso_min, int iso_max) {
   int size_squared = (int)(file_res.x() * file_res.z());
 
   //cout << "READING: " << file << endl;
@@ -217,8 +222,8 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector 
     {
       tmp = bufferShort[j * (int)file_res.x() + i];
       //printf("tmp is huge! %d\n", tmp);
-      tmp = (int(tmp) - 1248 > 0) ? tmp : 0;
-      tmp = (tmp > 60000) ? 0 : tmp;
+      tmp = (int(tmp) - iso_min > 0) ? tmp : 0;
+      tmp = (tmp > iso_max) ? 0 : tmp;
 
       //printf("Voxel %d %d %d -> %f\n", (int)(i * multiply), (int)((file_res.y() - (y_val + 1)) * multiply), (int)(j * multiply), (float)tmp / (float)max);
       add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);

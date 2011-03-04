@@ -1,5 +1,5 @@
 all:
-	scons
+	scons -j 5 .
 
 clean:
 	scons -c .

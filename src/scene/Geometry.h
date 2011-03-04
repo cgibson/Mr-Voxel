@@ -96,6 +96,7 @@ public:
 class Triangle : public GeomObj{
 public:
   Triangle( void );
+  Triangle( Vector c1, Vector c2, Vector c3 );
   virtual char* str( void );
   virtual int test_intersect( Ray ray, double *t, Vector *n);
   virtual Vector get_normal( Vector pt );

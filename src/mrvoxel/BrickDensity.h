@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <limits.h>
 #include "VolumeRegion.h"
 #include "Brick.h"
 
@@ -15,6 +16,7 @@ public:
 	double density( Vector pt );
     float interpolate( float x, float y, float z, VoxVal val );
     void load(string file, Vector file_res, Vector vol_res);
+    void load(string file, Vector file_res, Vector vol_res, int iso_min, int iso_max);
     void set(int i, int j, int k, float val);
     void add(int i, int j, int k, float val);
 
@@ -22,7 +24,7 @@ public:
 
 private:
     unsigned short twoByte2ShortX(char *ptr);
-    void loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val);
+    void loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val, int iso_min, int iso_max);
 
     double m_density_mult;
 	BrickGrid m_brickData;

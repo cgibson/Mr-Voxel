@@ -1,9 +1,9 @@
 Import("env")
 
-objects = [
-	'raytracer',
-	'raycast',
-	]
+sources = Glob('*.cpp')
+objects = []
 
-for obj in objects:
-	env.Object(obj + '.cpp')
+for srcs in sources:
+	objects = objects + env.Object(srcs)
+
+Return('objects')

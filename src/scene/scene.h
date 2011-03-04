@@ -111,6 +111,7 @@ public:
 
   void generateBoxHierarchy();
   void addObject( GeomObj* object );
+  void addObjects( vector<GeomObj*> objects );
   void addVolume( VolumeRegion* volume );
   void addPlane( GeomObj* object );
   void addLightSource( LightSource* light );

@@ -16,10 +16,18 @@ public:
 	Voxel( Voxel const& v );
 
 	float operator () (VoxVal loc);
-	void set( int size, ... );
+	void set( int size, float val );
+	void add( int size, float val );
+	void fill( int size, ... );
 
-	float *m_data;
+	char *m_data;
 	int m_size;
+
+private:
+    union fl2Char{
+        float f;
+        char c[0];
+    };
 
 };
 

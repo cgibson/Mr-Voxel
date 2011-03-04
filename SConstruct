@@ -16,23 +16,18 @@ Export('env')
 
 #buildDir = 'build'
 
-env.SConscript('src/SConscript') #, build_dir=buildDir)
-env.SConscript('src/scene/SConscript')
-env.SConscript('src/util/SConscript')
-env.SConscript('src/json/SConscript')
-env.SConscript('src/mrvoxel/SConscript')
-env.SConscript('src/integrator/SConscript')
+objects = []
 
-objects = Glob('src/*.o') + \
-          Glob('src/scene/*.o') + \
-          Glob('src/util/*.o') + \
-          Glob('src/json/*.o') + \
-          Glob('src/mrvoxel/*.o') + \
-          Glob('src/integrator/*.o')
+objects = objects + SConscript('src/SConscript') #, build_dir=buildDir)
+objects = objects + SConscript('src/scene/SConscript')
+objects = objects + SConscript('src/util/SConscript')
+objects = objects + SConscript('src/json/SConscript')
+objects = objects + env.SConscript('src/mrvoxel/SConscript')
+objects = objects + env.SConscript('src/integrator/SConscript')
 
 if conf.CheckDeclaration("__i386__"):
-	objects = objects + ['lib/x86/libjson_linux-gcc-4.4.1_libmt.so'];
+	objects = objects + ['lib/x86/libjson_linux-gcc-4.4.1_libmt.a'];
 else:
-	objects = objects + ['lib/x86-64/libjson_linux-gcc-4.4.1_libmt.so'];
+	objects = objects + ['lib/x86-64/libjson_linux-gcc-4.4.1_libmt.a'];
 
 env.Program('raytracer', objects, LIBS=['boost_thread-mt'], LIBPATH='.')

@@ -293,6 +293,16 @@ void Scene::addLightSource( LightSource* light )
 }
 
 /*
+ * Add a set of objects to the scene
+ *----------------------------------------------------------------------------*/
+void Scene::addObjects( vector<GeomObj*> objects )
+{
+    for(int i = 0; i < objects.size(); i++) {
+        addObject(objects[i]);
+    }
+}
+
+/*
  * Add an object to the scene
  *----------------------------------------------------------------------------*/
 void Scene::addObject( GeomObj* object )

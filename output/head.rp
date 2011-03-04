@@ -1,40 +1,26 @@
 {
-    "render_size" : [ 800, 600 ],
+    "render_size" : [ 640, 480 ],
     
-    "volSampleStep" : 0.005,
+    "volSampleStep" : 0.01,
     
     "camera" : {
-        "eye" : [ 1.5, 2.0, -5 ],
-        "up" : [ 0.0, 1.0, 0.0 ],
-        "right" : [ 1.333, 0.0, 0.0 ],
-        "look_at" : [ 0.0, 0.0, 0 ],
-	"fov" : 12
+        "eye" :     [  0.00,  3.00, -10.00 ],
+        "up" :      [  0.00,  1.00,  0.00 ],
+        "right" :   [  1.33,  0.00,  0.00 ],
+        "look_at" : [  0.00,  3.00,  0.00 ],
+	"fov" : 45
     },
         
     // All planes in the scene
     "planes" : [
-        {
-            "normal" : [ 0.0, 1.0, 0.0, 0.0 ],
-            "distance" : -1.0,
-            
-            "pigment" : [ 0.8, 0.8, 0.8 ],
-            "finish" : {
-                "ambient" : 0.2,
-                "diffuse" : 0.5,
-                "specular" : 0.0,
-                "roughness" : 0.004,
-                "reflection" : 0.0,
-                "refraction" : 0.0,
-                "ior" : 1.0
-            }
-        }
+
     ],
         
     // All lights in the scene
     "lights" : [
         {
-            //"location" : [ 8.0, 7.0, 9.0 ],
-            "location" : [ 0.0, 10.0, -7.0 ],
+            //"location" : [ -4.0, -7.0, 10.0 ],
+            "location" : [ 0.0, 5.5, 0.0 ],
             "color" : [ 1.5, 1.5, 1.5 ]
         }
     ],
@@ -42,16 +28,16 @@
     // All of the spheres in the scene
     "spheres" : [
         {
-            "center" : [ 1.5, 0.0, 0.0 ],
-            "radius" : 0.5,
+            "center" : [ 1.25, 1.25, 0.0 ],
+            "radius" : 1.25,
             
-            "pigment" : [ 0.95, 0.30, 0.15 ],
+            "pigment" : [ 0.2, 0.2, 0.2 ],
             "finish" : {
                 "ambient" : 0.05,
                 "diffuse" : 0.3,
-                "specular" : 0.6,
+                "specular" : 0.8,
                 "roughness" : 0.004,
-                "reflection" : 0.1,
+                "reflection" : 0.7,
                 "refraction" : 0.0,
                 "ior" : 1.0
             }
@@ -62,25 +48,151 @@
     "volumes" : [
         {
             "type" : "brick",
-            "min" : [ -1.0, -1.0, -1.0 ],
-            "max" : [ 1.0, 1.0, 1.0 ],
+            "min" : [-2.5,  0.0, -1.25 ],
+            "max" : [ 0.0,  2.5,  1.25 ],
             "size" : 256,
+
             "file" : "/home/cgibson/tmp/head/CThead.",
+            "iso_min" : 2000,
+            "iso_max" : 60000,
 
             "file_resolution" : [256,113,256],
             "volume_resolution" : [256,256,256],
 
-            "density" : 10.0,
+            "density" : 3.0,
             "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
             "scatter" : [ 7.38, 5.47, 3.15 ],
             "emitt" : [ 0.0, 0.0, 0.0 ],
-            
+
             "greenstein" : 2.0,
 
             "pigment" : [ 1.0, 1.0, 1.0 ],
 
             "modifiers" : [
             ]
+        }
+    ],
+
+    // All of the boxes in the scene
+    "polygons" : [
+        {
+
+        "vertices" : [
+            [-3.0,  0.0, -3.0],
+            [-3.0,  0.0,  3.0],
+            [ 3.0,  0.0,  3.0],
+            [ 3.0,  0.0, -3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.4,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [-3.0,  6.0, -3.0],
+            [ 3.0,  6.0, -3.0],
+            [ 3.0,  6.0,  3.0],
+            [-3.0,  6.0,  3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.4,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [-3.0,  0.0, -3.0],
+            [-3.0,  6.0, -3.0],
+            [-3.0,  6.0,  3.0],
+            [-3.0,  0.0,  3.0]
+        ],
+
+            "pigment" : [ 0.05, 0.6, 0.1 ],
+
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.4,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [3.0,  0.0, -3.0],
+            [3.0,  0.0,  3.0],
+            [3.0,  6.0,  3.0],
+            [3.0,  6.0, -3.0]
+        ],
+
+            "pigment" : [ 0.6, 0.1, 0.05 ],
+
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.4,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [ 3.0,  0.0,  3.0],
+            [-3.0,  0.0,  3.0],
+            [-3.0,  6.0,  3.0],
+            [ 3.0,  6.0,  3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.4,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
         }
     ]
     
