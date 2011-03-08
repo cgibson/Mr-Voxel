@@ -303,11 +303,11 @@ VolumeRegion *parseVolume(Json::Value val)
 
   if(!type.compare("brick")) {
 
-	  double density = val["density"].asDouble();
-	  Color absorbtion = parseColor(val["absorbtion"]);
-	  Color scatter = parseColor(val["scatter"]);
-	  Color emitt = parseColor(val["emitt"]);
-	  double greenstein = val["greenstein"].asDouble();
+      double density = val["density"].asDouble();
+      Color absorbtion = parseColor(val["absorbtion"]);
+      Color scatter = parseColor(val["scatter"]);
+      Color emitt = parseColor(val["emitt"]);
+      double greenstein = val["greenstein"].asDouble();
 
       string file = val["file"].asString();
       Vector file_res = parseVector(val["file_resolution"]);
@@ -316,11 +316,30 @@ VolumeRegion *parseVolume(Json::Value val)
       int iso_min = val["iso_min"].asInt();
       int iso_max = val["iso_max"].asInt();
 
-	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
-			                         emitt, density);
+      region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+                                             emitt, density);
 
-      (dynamic_cast<BrickDensityRegion*>(region))->load(file, file_res, vol_res, iso_min, iso_max);
+      (dynamic_cast<BrickDensityRegion*>(region))->loadCT(file, file_res, vol_res, iso_min, iso_max);
 
+  }else if(!type.compare("ocean")) {
+
+      double density = val["density"].asDouble();
+      Color absorbtion = parseColor(val["absorbtion"]);
+      Color scatter = parseColor(val["scatter"]);
+      Color emitt = parseColor(val["emitt"]);
+      double greenstein = val["greenstein"].asDouble();
+
+      string file = val["file"].asString();
+      Vector vol_res = parseVector(val["volume_resolution"]);
+
+      int iso_min = val["iso_min"].asInt();
+      int iso_max = val["iso_max"].asInt();
+
+      region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+                                      emitt, density);
+
+      (dynamic_cast<BrickDensityRegion*>(region))->loadOceanData(file, vol_res, iso_min, iso_max);
+      
   }else if(!type.compare("homogeneous")) {
 
 	  double density = val["density"].asDouble();

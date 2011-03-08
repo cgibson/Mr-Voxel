@@ -52,14 +52,14 @@
             "max" : [ 0.0,  2.5,  1.25 ],
             "size" : 256,
 
-            "file" : "/home/cgibson/tmp/head/CThead.",
-            "iso_min" : 2000,
+            "file" : "/home/cgibson/tmp/bunny/",
+            "iso_min" : 0000,
             "iso_max" : 60000,
 
-            "file_resolution" : [256,113,256],
-            "volume_resolution" : [256,256,256],
+            "file_resolution" : [512,361,512],
+            "volume_resolution" : [128,128,128],
 
-            "density" : 2.0,
+            "density" : 10.0,
             "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
             "scatter" : [ 7.38, 5.47, 3.15 ],
             "emitt" : [ 0.0, 0.0, 0.0 ],
