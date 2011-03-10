@@ -39,6 +39,8 @@ public:
      double& y( void )       { return p_y; }
      double  z( void ) const { return p_z; }
      double& z( void )       { return p_z; }
+
+     double get( int i );
 	 void set(double x, double y, double z);
 	 void set(Vector& v);
 	 

@@ -14,8 +14,9 @@ public:
   Raycaster( Scene* scene );
   int find_intersect(Ray ray, Surface *surface);
   Color cast( int x, int y, int width, int height );
+  int single( int x, int y, int width, int height, Surface *surf, Ray *ray );
   Color handleIntersect( Ray ray, int depth );
-  Color sumLights( Surface surface, Ray ray );
+  Color sumLights( Surface surface, Ray ray, int specular, int ambient );
   Color initialCast( Ray ray, int depth );
   int raycast( 
             int start_x,
@@ -28,6 +29,13 @@ public:
             ImageWriter *writer);
   int recurse_intersect(Ray ray, Surface *surface, SceneObject *parent);
   int intersect(Ray ray, Surface *surface);
+
+  int surfelCast(
+            int width,
+            int height,
+            int step_x,
+            int step_y,
+            ImageWriter *writer);
 private:
   int mDepth;
   Scene *mScene;

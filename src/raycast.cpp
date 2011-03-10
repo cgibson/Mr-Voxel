@@ -216,7 +216,7 @@ int Raycaster::intersect(Ray ray, Surface *surface)
  * New Sum Lights for a given surface
  * ---------------------------------------------------------------------------*/
 
-Color Raycaster::sumLights( Surface surface, Ray ray ) {
+Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient ) {
     Color Lcolor; // temporary light color
     Color result; // resulting color to be returned
 
@@ -225,8 +225,11 @@ Color Raycaster::sumLights( Surface surface, Ray ray ) {
 
     Ray shadow_ray;
 
+    result = Color(0);
+
     // Initialize result to the ambient value
-    result = surface.color * surface.finish.ambient;
+    if(ambient)
+        result = result + surface.color * surface.finish.ambient;
 
     // Grab light sources
     LightSource** lights = mScene->getLightSources();
@@ -265,9 +268,10 @@ Color Raycaster::sumLights( Surface surface, Ray ray ) {
         }
 
 		result = result +
-		((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L))
-		+ ((Lcolor) * surface.finish.specular
-		* pow(max(0, H * surface.n), shininess));
+		((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L));
+                
+                if(specular)
+                    result = result + ((Lcolor) * surface.finish.specular * pow(max(0, H * surface.n), shininess));
     }
     
     return result;
@@ -308,7 +312,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
     Color color_refract;
 
     if(surface.type == SolidSurface) {
-        color = color + sumLights(surface, ray);
+        color = color + sumLights(surface, ray, 1, 1);
 
         int success;
         Vector Drefract;
@@ -389,7 +393,7 @@ Color Raycaster::cast( int x, int y, int width, int height )
   //cout << "US: " << us << "  VS: " << vs << endl;
   Ray ray = Ray();
 
-  
+
   if( mCastMode == ORTHOGRAPHIC ) {
     ray.start.set(camera->location);
     ray.start = ray.start + Vector(us, vs, 0);
@@ -405,7 +409,7 @@ Color Raycaster::cast( int x, int y, int width, int height )
     ray.direction.norm();
     ray.direction = ray.direction + Vector(us, vs, 0);
   }
-  
+
   Vector w = camera->look_at - camera->location;
   Vector u;
   Vector v;
@@ -413,35 +417,100 @@ Color Raycaster::cast( int x, int y, int width, int height )
   w = w * -1;
   camera->up.cross(w, &u);
   w.cross(u, &v);
-  
+
   MyMat m1 = MyMat(1, 0, 0, camera->location.x(),
                    0, 1, 0, camera->location.y(),
                    0, 0, 1, camera->location.z(),
                    0, 0, 0, 1);
-                   
+
   //cout << "Camera Loc: " << endl << m1 << endl;
-                   
+
   MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
                    u.y(), v.y(), w.y(), 0,
                    u.z(), v.z(), w.z(), 0,
                    0, 0, 0, 1);
-                   
+
   //cout << "UVW: " << endl << m2 << endl;
-                   
+
   MyMat m3 = m1.multRight(m2);
   //cout << "END: " << endl << m3 << endl;
-  
+
   ray.start = m3 * Vector4(ray.start, 1);
   ray.direction = m3 * Vector4(ray.direction, 0);
   ray.direction.norm();
-  
+
   //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
-  
+
   color = initialCast(ray, mDepth);
-  
+
 
   color.clamp(0, 1);
   return color;
+}
+
+/*
+ * Cast the given 'pixel' into the world
+ *----------------------------------------------------------------------------*/
+int Raycaster::single( int x, int y, int width, int height, Surface *surface, Ray *external_ray )
+{
+
+    int hit;
+
+  Camera *camera = mScene->getCamera();
+
+  double us = mLeft + ((mRight - mLeft)
+        * (double)((double)(x + 0.5f) / width));
+  double vs = mBottom + ((mTop - mBottom)
+        * (double)((double)(y + 0.5f) / height));
+  //cout << "US: " << us << "  VS: " << vs << endl;
+  Ray ray = Ray();
+
+ray.start.set(0, 0, 0);
+ray.start = ray.start + Vector(us, vs, 0);
+
+ray.direction = Vector(0,0,-1);
+ray.direction.norm();
+ray.direction = ray.direction + Vector(us, vs, 0);
+
+
+  Vector w = camera->look_at - camera->location;
+  Vector u;
+  Vector v;
+  w.norm();
+  w = w * -1;
+  camera->up.cross(w, &u);
+  w.cross(u, &v);
+
+  MyMat m1 = MyMat(1, 0, 0, camera->location.x(),
+                   0, 1, 0, camera->location.y(),
+                   0, 0, 1, camera->location.z(),
+                   0, 0, 0, 1);
+
+  //cout << "Camera Loc: " << endl << m1 << endl;
+
+  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+  //cout << "UVW: " << endl << m2 << endl;
+
+  MyMat m3 = m1.multRight(m2);
+  //cout << "END: " << endl << m3 << endl;
+
+  ray.start = m3 * Vector4(ray.start, 1);
+  ray.direction = m3 * Vector4(ray.direction, 0);
+  ray.direction.norm();
+
+  //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
+
+  Surface surf;
+
+  hit = intersect(ray, surface);
+
+  *external_ray = ray;
+
+  return hit;
 }
 
 /*
@@ -467,38 +536,38 @@ int Raycaster::raycast(
   double high = -1;
   int x, y;
   mDepth = depth;
-  
+
   Camera *camera = mScene->getCamera();
 
   //double ratio = height / (double)width;
 
   //mLeft = -camera->fov_ratio * ratio;
   //mRight = camera->fov_ratio * ratio;
-  
+
   mVolumeIntegrator = new VolumeIntegrator(mScene);
 
   for( x = start_x; x < end_x; x++ ) {
-  
+
     //boost::xtime xt;
     //boost::xtime_get(&xt, boost::TIME_UTC);
     //xt.nsec += 10000;
     this_thread::sleep(boost::posix_time::milliseconds(1));
-    
+
     for( y = start_y; y < end_y; y++ ) {
-    
+
       if(low == -1) {
           low = color.r();
           high = color.r();
       }
       color = cast(x, y, width, height);
-      
+
       writer->setPixel(x, y,
               color.r() * 255,
               color.g() * 255,
               color.b() * 255,
               (color.f() == 1.0) ? 255 : 255
       );
-      
+
       if(color.r() < low) low = color.r();
       if(color.r() > high) high = color.r();
       if(color.g() < low) low = color.g();
@@ -518,6 +587,60 @@ int Raycaster::raycast(
         if(!print_percent)
           print_percent = 1;
       }
+    }
+  }
+  return 0;
+}
+
+/*
+ * Default Raycast Constructor with given width, height and filename
+ *----------------------------------------------------------------------------*/
+int Raycaster::surfelCast(
+        int width,
+        int height,
+        int step_x,
+        int step_y,
+        ImageWriter *writer)
+{
+
+  //writer.fill( 0, 0, 0, 0 );
+  Color color;
+  int x, y;
+  
+  mVolumeIntegrator = new VolumeIntegrator(mScene);
+
+  Camera *camera = mScene->getCamera();
+
+  Surface surf;
+  Ray ray;
+
+  mScene->initCache(Vector(-10, -10, -10), Vector(10, 10, 10));
+
+  for( x = 0; x < width; x+=step_x ) {
+
+    for( y = 0; y < height; y+=step_y ) {
+
+      if(single(x, y, width, height, &surf, &ray)) {
+
+          color = sumLights(surf, ray, 0, 0);
+      }else{
+          color = Color(0,0,0);
+      }
+
+      
+      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 1.0)));
+
+      for(int i = 0; i < step_x; i++){
+          for(int j = 0; j < step_y; j++) {
+              writer->setPixel(x+i, y+j,
+                      color.r() * 255,
+                      color.g() * 255,
+                      color.b() * 255,
+                      (color.f() == 1.0) ? 255 : 255 );
+              }
+          }
+
+
     }
   }
   return 0;

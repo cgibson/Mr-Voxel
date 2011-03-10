@@ -1,12 +1,15 @@
 #ifndef _SCENE_H_
 #define _SCENE_H_
 
+#include <boost/shared_ptr.hpp>
 #include "../mrvoxel/VolumeRegion.h"
 #include "../util/util.h"
 #include "../util/MyMat.h"
 #include "modifier.h"
 #include "BBNode.h"
 #include "Geometry.h"
+#include "../light/LiNode.h"
+#include "../light/Surfel.h"
 
 using namespace std;
 
@@ -121,6 +124,10 @@ public:
   double getVolSampleStep(){ return mVolSampleStep; }
   double setVolSampleStep( double sampleStep ){ mVolSampleStep = sampleStep; }
 
+  LiNode* lightCache(){ return mLiCache; }
+  int addSurfel( shared_ptr<Surfel> obj ){ printf("ADDING %s\n", obj->position().str());  return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
+  LiNode* initCache(Vector min, Vector max){ mLiCache = new LiNode(min, max); }
+
 private:
 
   int recurse_intersect(Ray ray, Surface *surface, SceneObject *parent);
@@ -141,6 +148,7 @@ private:
   GeomObj** mObjects;
   VolumeRegion** mVolumes;
   Camera* mCamera;
+  LiNode *mLiCache;
 
   double mVolSampleStep;
 };

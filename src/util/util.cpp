@@ -50,6 +50,15 @@ Vector::Vector( void) {
     p_x = p_y = p_z = 0;
 }
 
+double
+Vector::get( int i ) {
+    switch(i) {
+        case 0: return p_x; break;
+        case 1: return p_y; break;
+        case 2: return p_z; break;
+    }
+}
+
 char* Vector::str( void ) {
     char *buffer = (char*)calloc(300, sizeof(char));
     sprintf(buffer, "<%.2f, %.2f, %.2f>", p_x, p_y, p_z);
