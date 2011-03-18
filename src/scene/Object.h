@@ -4,7 +4,7 @@
 #include "../util/util.h"
 #include "../util/rayutil.h"
 
-enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF};
+enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK};
 
 /*
  * Represents a generic scene object

@@ -55,6 +55,29 @@ protected:
   Vector _max;
 };
 
+
+
+/*
+ * Represents a box
+ *----------------------------------------------------------------------------*/
+class Disk : public GeomObj{
+public:
+  Disk( float height, float radius, float innerRadius, float tmax);
+  Disk(float radius, float innerRadius, float tmax, Ray orient);
+  virtual char* str( void );
+  int test_intersect( Ray ray, double *t, Vector *n);
+  Vector get_normal( Vector pt );
+  BBNode construct_bb( void );
+  virtual TYPE getType( void ){ return DISK; }
+
+
+protected:
+    float _height;
+    float _radius;
+    float _innerRadius;
+    float _phiMax;
+};
+
 #include "volume.h"
 /*
  * Represents a sphere

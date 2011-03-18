@@ -12,6 +12,7 @@
 class Raycaster {
 public:
   Raycaster( Scene* scene );
+  Raycaster( Scene* scene, Camera cam );
   int find_intersect(Ray ray, Surface *surface);
   Color cast( int x, int y, int width, int height );
   int single( int x, int y, int width, int height, Surface *surf, Ray *ray );
@@ -48,6 +49,7 @@ private:
   double mTop, mBottom;
   VolumeIntegrator *mVolumeIntegrator;
   Color background;
+  Camera _camera;
 };
 
 #endif

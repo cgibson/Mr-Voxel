@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Geometry.h"
 
 /*
@@ -317,6 +319,108 @@ char* Box::str( void )
   }
   return buffer;
 }
+
+
+Disk::Disk(float height, float radius, float innerRadius, float tmax)
+    :_height(height), _radius(radius), _innerRadius(innerRadius), _phiMax(tmax)
+{
+    // Calculate _phiMax in radians
+    float tmp = (tmax < 360.0 ? tmax : 360.0);
+    tmp = (tmp > 0.0 ? tmp : 0.0);
+    _phiMax = (tmp / 360.0) * 2 * PI;
+}
+
+Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
+    :_height(0), _radius(radius), _innerRadius(innerRadius), _phiMax(tmax)
+{
+    // Normalize direction
+    orient.direction.norm();
+
+    // Find U,V,W vectors
+    Vector w = orient.direction * -1;
+    Vector u, v;
+    Vector up = Vector(0,1,0);
+    up.cross(w, &u);
+    w.cross(u, &v);
+
+    // Generate matrices
+    MyMat m1 = MyMat(1, 0, 0, orient.start.x(),
+                   0, 1, 0, orient.start.y(),
+                   0, 0, 1, orient.start.z(),
+                   0, 0, 0, 1);
+
+    MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+    // Save transformation
+    matrix = m1.multRight(m2);
+}
+
+BBNode Disk::construct_bb() {
+    return BBNode(
+            Vector(-_radius, -_radius, _height),
+            Vector(_radius, _radius, _height)
+            );
+}
+
+int Disk::test_intersect(Ray ray, double* t, Vector* n) {
+
+    // If we are parallel, don't bother
+    if(fabs(ray.direction.z()) < 1e-7)
+        return false;
+
+    // Find the t and compare
+    float thit = (_height - ray.start.z()) / ray.direction.z();
+    if(thit < ray.mint || thit > ray.maxt)
+        return false;
+
+    // Find the intersection point
+    Vector phit = ray(thit);
+    float dist2 = phit.x() * phit.x() + phit.y() * phit.y();
+
+    // Check for inner/outer radius
+    if(dist2 > _radius * _radius || dist2 < _innerRadius * _innerRadius)
+        return false;
+
+    // Compare phi and phiMax
+    float phi = atan2(phit.y(), phit.x());
+    if(phi < 0) phi += 2.0 * PI;
+    if(phi > _phiMax)
+        return false;
+
+    *t = thit;
+    *n = get_normal(phit);
+
+    return true;
+}
+
+Vector Disk::get_normal(Vector pt) {
+    return Vector(0,0,1);
+}
+
+char* Disk::str( void )
+{
+  char *buffer = (char*)calloc(300, sizeof(char));
+  int count = 0;
+  sprintf(buffer, "[BOX]\n\tRadius: %f\n\tInnerRadius: %f",
+          _radius,
+          _innerRadius);
+
+  if(modifiers != NULL)
+  {
+    Modifier* current = *modifiers;
+
+    for(count = 0; count < modifier_count; count++)
+    {
+      strcat(buffer, "\n\t");
+      strcat(buffer, modifiers[count]->str());
+    }
+  }
+  return buffer;
+}
+
 
 /*
  * Default Triangle Constructor

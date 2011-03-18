@@ -175,10 +175,20 @@ int main(int argc, char* const argv[])
 
   printf("|0...............................................100|\n|");
 
-  Raycaster lightCast(scene);
+  // Hard coding light cast camera for now.
+  Camera lightCamera;
+  lightCamera.fov = (45. / 360.) * 2 * PI;
+  lightCamera.fov_ratio = sin(lightCamera.fov / 2.0);
+  lightCamera.location = Vector(0, 3, -10);
+  lightCamera.look_at = Vector(0, 3, 0);
+  lightCamera.right = Vector(1.33, 0, 0);
+  lightCamera.up = Vector(0,1,0);
 
-  //lightCast.surfelCast(width,height,16, 12, &writer);
+  Raycaster lightCast(scene, lightCamera);
 
+  lightCast.surfelCast(width,height,16, 12, &writer);
+
+  jobs = -1;
 
   while( end < jobs)
   {

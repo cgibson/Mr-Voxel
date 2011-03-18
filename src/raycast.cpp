@@ -20,15 +20,38 @@ double max(double a, double b)
 Raycaster::Raycaster( Scene* scene )
 {
   mCastMode = PERSPECTIVE;
-  Camera *camera = scene->getCamera();
-  Vector right = camera->right;
-  Vector up = camera->up;
+  _camera = *scene->getCamera();
+  Vector right = _camera.right;
+  Vector up = _camera.up;
   double ratio =  right.norm() / up.norm();
 
-  mLeft = -camera->fov_ratio * ratio;
-  mRight = camera->fov_ratio * ratio;
-  mTop = camera->fov_ratio;
-  mBottom = -camera->fov_ratio;
+  mLeft = -_camera.fov_ratio * ratio;
+  mRight = _camera.fov_ratio * ratio;
+  mTop = _camera.fov_ratio;
+  mBottom = -_camera.fov_ratio;
+
+  printf("left: %f, right: %f, up: %f, down: %f\n", mLeft,mRight,mTop,mBottom);
+
+  mNear = 0.5;
+  mScene = scene;
+  background = Color(0.0, 0.0, 0.0, 1.0);
+}
+
+/*
+ * Default Raycaster Constructor given the current scene with an overrided camera
+ *----------------------------------------------------------------------------*/
+Raycaster::Raycaster( Scene* scene, Camera cam )
+{
+  mCastMode = PERSPECTIVE;
+  _camera = cam;
+  Vector right = _camera.right;
+  Vector up = _camera.up;
+  double ratio =  right.norm() / up.norm();
+
+  mLeft = -_camera.fov_ratio * ratio;
+  mRight = _camera.fov_ratio * ratio;
+  mTop = _camera.fov_ratio;
+  mBottom = -_camera.fov_ratio;
 
   printf("left: %f, right: %f, up: %f, down: %f\n", mLeft,mRight,mTop,mBottom);
 
@@ -384,8 +407,6 @@ Color Raycaster::cast( int x, int y, int width, int height )
 {
   Color color;
 
-  Camera *camera = mScene->getCamera();
-
   double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
   double vs = mBottom + ((mTop - mBottom)
@@ -395,10 +416,10 @@ Color Raycaster::cast( int x, int y, int width, int height )
 
 
   if( mCastMode == ORTHOGRAPHIC ) {
-    ray.start.set(camera->location);
+    ray.start.set(_camera.location);
     ray.start = ray.start + Vector(us, vs, 0);
-    ray.direction.set(camera->location);
-    ray.direction = camera->look_at - camera->location;
+    ray.direction.set(_camera.location);
+    ray.direction = _camera.look_at - _camera.location;
     ray.direction.norm();
   }
   else if( mCastMode == PERSPECTIVE ) {
@@ -410,17 +431,17 @@ Color Raycaster::cast( int x, int y, int width, int height )
     ray.direction = ray.direction + Vector(us, vs, 0);
   }
 
-  Vector w = camera->look_at - camera->location;
+  Vector w = _camera.look_at - _camera.location;
   Vector u;
   Vector v;
   w.norm();
   w = w * -1;
-  camera->up.cross(w, &u);
+  _camera.up.cross(w, &u);
   w.cross(u, &v);
 
-  MyMat m1 = MyMat(1, 0, 0, camera->location.x(),
-                   0, 1, 0, camera->location.y(),
-                   0, 0, 1, camera->location.z(),
+  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
+                   0, 1, 0, _camera.location.y(),
+                   0, 0, 1, _camera.location.z(),
                    0, 0, 0, 1);
 
   //cout << "Camera Loc: " << endl << m1 << endl;
@@ -456,8 +477,6 @@ int Raycaster::single( int x, int y, int width, int height, Surface *surface, Ra
 
     int hit;
 
-  Camera *camera = mScene->getCamera();
-
   double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
   double vs = mBottom + ((mTop - mBottom)
@@ -473,17 +492,17 @@ ray.direction.norm();
 ray.direction = ray.direction + Vector(us, vs, 0);
 
 
-  Vector w = camera->look_at - camera->location;
+  Vector w = _camera.look_at - _camera.location;
   Vector u;
   Vector v;
   w.norm();
   w = w * -1;
-  camera->up.cross(w, &u);
+  _camera.up.cross(w, &u);
   w.cross(u, &v);
 
-  MyMat m1 = MyMat(1, 0, 0, camera->location.x(),
-                   0, 1, 0, camera->location.y(),
-                   0, 0, 1, camera->location.z(),
+  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
+                   0, 1, 0, _camera.location.y(),
+                   0, 0, 1, _camera.location.z(),
                    0, 0, 0, 1);
 
   //cout << "Camera Loc: " << endl << m1 << endl;
@@ -536,13 +555,6 @@ int Raycaster::raycast(
   double high = -1;
   int x, y;
   mDepth = depth;
-
-  Camera *camera = mScene->getCamera();
-
-  //double ratio = height / (double)width;
-
-  //mLeft = -camera->fov_ratio * ratio;
-  //mRight = camera->fov_ratio * ratio;
 
   mVolumeIntegrator = new VolumeIntegrator(mScene);
 
@@ -608,8 +620,6 @@ int Raycaster::surfelCast(
   int x, y;
   
   mVolumeIntegrator = new VolumeIntegrator(mScene);
-
-  Camera *camera = mScene->getCamera();
 
   Surface surf;
   Ray ray;
