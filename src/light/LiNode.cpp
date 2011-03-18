@@ -79,9 +79,25 @@ LiNode::subdivide() {
         // Re-add the surfel, allowing it to recurse into the children
         add(m_surfelData[i]);
     }
-
     // Clear all surfel data in this node
     return 0;
+}
+
+int
+LiNode::size_of() {
+    int size = 0;
+
+    if(hasChildren()) {
+        for(int i = 0; i < 8; i++) {
+            size += child(i)->size_of();
+        }
+            size += sizeof(m_children);
+            return size;
+    }else{
+        return sizeof(m_surfelData) + (sizeof(shared_ptr<Surfel>) + sizeof(Surfel)) * m_surfelCount;
+    }
+
+    return size;
 }
 
 LiNode::LiNode(Vector min, Vector max):OctreeNode(min,max), m_surfelCount(0) {

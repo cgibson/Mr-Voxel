@@ -78,6 +78,10 @@ public:
     // Clear all elements in the node and delete
     int deep_clear();
 
+    int count(){ return m_surfelCount; }
+
+    int size_of();
+
 protected:
     int m_surfelCount;
     shared_ptr<Surfel> *m_surfelData;

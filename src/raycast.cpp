@@ -628,7 +628,7 @@ int Raycaster::surfelCast(
       }
 
       
-      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 1.0)));
+      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.05)));
 
       for(int i = 0; i < step_x; i++){
           for(int j = 0; j < step_y; j++) {
@@ -643,5 +643,10 @@ int Raycaster::surfelCast(
 
     }
   }
+
+  printf("FINAL: %d\n", mScene->lightCache()->count());
+
+  printf("Size: %d\n", mScene->lightCache()->size_of());
+
   return 0;
 }

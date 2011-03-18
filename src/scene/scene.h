@@ -125,7 +125,7 @@ public:
   double setVolSampleStep( double sampleStep ){ mVolSampleStep = sampleStep; }
 
   LiNode* lightCache(){ return mLiCache; }
-  int addSurfel( shared_ptr<Surfel> obj ){ printf("ADDING %s\n", obj->position().str());  return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
+  int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
   LiNode* initCache(Vector min, Vector max){ mLiCache = new LiNode(min, max); }
 
 private:
