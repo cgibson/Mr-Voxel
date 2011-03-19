@@ -186,10 +186,11 @@ int main(int argc, char* const argv[])
 
   Raycaster lightCast(scene, lightCamera);
 
-  lightCast.surfelCast(width,height,16, 12, &writer);
+  lightCast.surfelCast(width,height,2, 2, &writer);
 
   jobs = -1;
 
+/*
   while( end < jobs)
   {
 	  start = end;
@@ -215,7 +216,7 @@ int main(int argc, char* const argv[])
 		//printf("Thread[%d] join\n", i);
 	  }
   }
- 
+ */
   /*
   for(int i = 0; i < threads-1; i++) {
   		rtrcs[i] = new raytracer( 0, i * height / threads, width,
