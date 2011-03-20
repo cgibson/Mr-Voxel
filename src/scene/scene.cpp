@@ -228,15 +228,9 @@ BBNode *recurseHierarchy(ObjectList A, AXIS axis)
  *----------------------------------------------------------------------------*/
 void Scene::generateBoxHierarchy( void )
 {
-  int i, tmp;
-  int cur_node = 0;
-  int best_node1, best_node2;
-  BBNode *best_node1_ptr, *best_node2_ptr;
-  double tmp_cost;
-  double best_cost;
+  int i;
   TYPE type;
   BBNode *node;
-  int tmp_node;
 
   ObjectList list;
   ObjectList list_vol;

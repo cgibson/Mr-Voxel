@@ -367,29 +367,35 @@ BBNode Disk::construct_bb() {
 
 int Disk::test_intersect(Ray ray, double* t, Vector* n) {
 
+    //printf("1");
     // If we are parallel, don't bother
     if(fabs(ray.direction.z()) < 1e-7)
         return false;
 
+    //printf("2");
     // Find the t and compare
     float thit = (_height - ray.start.z()) / ray.direction.z();
     if(thit < ray.mint || thit > ray.maxt)
         return false;
 
+    //printf("3");
     // Find the intersection point
     Vector phit = ray(thit);
     float dist2 = phit.x() * phit.x() + phit.y() * phit.y();
 
     // Check for inner/outer radius
-    if(dist2 > _radius * _radius || dist2 < _innerRadius * _innerRadius)
+    if(dist2 > _radius * _radius)// || dist2 < _innerRadius * _innerRadius)
         return false;
 
+    /*
     // Compare phi and phiMax
     float phi = atan2(phit.y(), phit.x());
     if(phi < 0) phi += 2.0 * PI;
     if(phi > _phiMax)
         return false;
 
+    printf("5");
+     * */
     *t = thit;
     *n = get_normal(phit);
 

@@ -30,8 +30,8 @@ public:
     virtual ~OctreeNode();
 
     // Retrieve min/max vector
-    Vector min(){ return m_min; }
-    Vector max(){ return m_max; }
+    Vector min(){ return _min; }
+    Vector max(){ return _max; }
 
     // Test intersect for given ray
     int test_intersect( Ray ray, double *t, Vector *n );
@@ -52,7 +52,7 @@ protected:
 
     OctreeNode* m_children[8];
 
-    Vector m_min, m_max;
+    Vector _min, _max;
 };
 
 class LiNode : public OctreeNode {
@@ -78,13 +78,15 @@ public:
     // Clear all elements in the node and delete
     int deep_clear();
 
-    int count(){ return m_surfelCount; }
+    int count();
 
     int size_of();
 
+    Color gather(Ray ray, double *t);
+
 protected:
-    int m_surfelCount;
-    shared_ptr<Surfel> *m_surfelData;
+    int _surfelCount;
+    shared_ptr<Surfel> *_surfelData;
 };
 
 #endif	/* OCTREE_H */

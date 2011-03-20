@@ -239,7 +239,7 @@ int Raycaster::intersect(Ray ray, Surface *surface)
  * New Sum Lights for a given surface
  * ---------------------------------------------------------------------------*/
 
-Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient ) {
+Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
     Color Lcolor; // temporary light color
     Color result; // resulting color to be returned
 
@@ -251,9 +251,38 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient 
     result = Color(0);
 
     // Initialize result to the ambient value
-    if(ambient)
-        result = result + surface.color * surface.finish.ambient;
 
+
+    if(gather) {
+        double tt;
+        Color amb;
+        Vector rnd;
+        rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+        Color ambs[5];
+        int count = 150;
+        double rndv;
+        for(int i = 0; i < count; i++) {
+            while(rnd.dot(surface.n) < 0){
+                rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+                rnd.norm();
+                //printf("%s -- %s -- %f\n", rnd.str(), surface.n.str(), rnd.dot(surface.n));
+            }
+            rndv = (rnd * V);
+            rndv = (rndv > 0.1 ? rndv : 0.1);
+            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (rnd * 0.3), rnd), &tt) * (1./(float)count) ;
+            rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+        }
+
+        //for(int i = 0; i < 5)
+
+
+
+        result = result + amb;
+
+    } else{
+        if(ambient)
+            result = result + surface.color * surface.finish.ambient;
+    }
     // Grab light sources
     LightSource** lights = mScene->getLightSources();
 
@@ -287,7 +316,7 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient 
 
         // Otherwise, integrate through all volumes
         }else{
-        	Tr = Tr * mVolumeIntegrator->Transmittance( shadow_ray );
+        	Tr = 1.0;//Tr * mVolumeIntegrator->Transmittance( shadow_ray );
         }
 
 		result = result +
@@ -320,7 +349,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
         Color vol_transmittance(1.);
         //vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
-        vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
+        //vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
 
         return (background * vol_transmittance) + vol_color;
     }
@@ -335,7 +364,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
     Color color_refract;
 
     if(surface.type == SolidSurface) {
-        color = color + sumLights(surface, ray, 1, 1);
+        color = color + sumLights(surface, ray, 1, 1, true);
 
         int success;
         Vector Drefract;
@@ -372,7 +401,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
         Color vol_transmittance(1.);
         //vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
-        vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
+        //vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
 
         //return color + reflect_color * reflection;
         if(!success && surface.finish.refraction ) {
@@ -461,6 +490,9 @@ Color Raycaster::cast( int x, int y, int width, int height )
   ray.direction.norm();
 
   //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
+
+  double t;
+  //color = mScene->lightCache()->gather(ray, &t);
 
   color = initialCast(ray, mDepth);
 
@@ -624,7 +656,7 @@ int Raycaster::surfelCast(
   Surface surf;
   Ray ray;
 
-  mScene->initCache(Vector(-10, -10, -10), Vector(10, 10, 10));
+  mScene->initCache(Vector(-15, -15, -15), Vector(15, 15, 15));
 
   for( x = 0; x < width; x+=step_x ) {
 
@@ -632,15 +664,17 @@ int Raycaster::surfelCast(
 
       if(single(x, y, width, height, &surf, &ray)) {
 
-          color = sumLights(surf, ray, 0, 0);
+          color = sumLights(surf, ray, 0, 0, false);
       }else{
           color = Color(0,0,0);
       }
 
-      
-      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.05)));
+      //printf("YAY: %s\n", ray(surf.t).str());
 
-      for(int i = 0; i < step_x; i++){
+      
+      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.01)));
+
+      /*for(int i = 0; i < step_x; i++){
           for(int j = 0; j < step_y; j++) {
               writer->setPixel(x+i, y+j,
                       color.r() * 255,
@@ -648,7 +682,7 @@ int Raycaster::surfelCast(
                       color.b() * 255,
                       (color.f() == 1.0) ? 255 : 255 );
               }
-          }
+          }*/
 
 
     }

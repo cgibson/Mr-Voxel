@@ -186,11 +186,10 @@ int main(int argc, char* const argv[])
 
   Raycaster lightCast(scene, lightCamera);
 
-  lightCast.surfelCast(width,height,2, 2, &writer);
+  lightCast.surfelCast(width,height,1, 1, &writer);
 
-  jobs = -1;
+  printf("Wrote in %d light cache values. %dx%d\n", scene->lightCache()->count(), width / 2, height / 2);
 
-/*
   while( end < jobs)
   {
 	  start = end;
@@ -216,23 +215,6 @@ int main(int argc, char* const argv[])
 		//printf("Thread[%d] join\n", i);
 	  }
   }
- */
-  /*
-  for(int i = 0; i < threads-1; i++) {
-  		rtrcs[i] = new raytracer( 0, i * height / threads, width,
-  				(i + 1) * height / threads, width, height, depth, &writer, i );
-  		thrds[i] = thread{*rtrcs[i]};
-  		printf("Thread created\n");
-  	  }
-
-  	  (*rtrcs[threads-1])();
-
-  	  for(int i = 0; i < threads; i++) {
-  		//printf("Thread[%d] prepare\n", i);
-  		//thrds[i]->interrupt();
-  		thrds[i].join();
-  		printf("Thread[%d] join\n", i);
-  	  }*/
   
   printf("|\n");
   

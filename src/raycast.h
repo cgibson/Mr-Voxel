@@ -17,7 +17,7 @@ public:
   Color cast( int x, int y, int width, int height );
   int single( int x, int y, int width, int height, Surface *surf, Ray *ray );
   Color handleIntersect( Ray ray, int depth );
-  Color sumLights( Surface surface, Ray ray, int specular, int ambient );
+  Color sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather );
   Color initialCast( Ray ray, int depth );
   int raycast( 
             int start_x,

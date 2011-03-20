@@ -1,5 +1,5 @@
 {
-    "render_size" : [ 640, 480 ],
+    "render_size" : [ 800, 600 ],
     
     "volSampleStep" : 0.01,
     
@@ -24,13 +24,13 @@
             "color" : [ 1.5, 1.5, 1.5 ]
         }
     ],
-    
+
     // All of the spheres in the scene
     "spheres" : [
         {
             "center" : [ 1.25, 1.25, 0.0 ],
             "radius" : 1.25,
-            
+
             "pigment" : [ 0.2, 0.2, 0.2 ],
             "finish" : {
                 "ambient" : 0.05,
@@ -38,6 +38,21 @@
                 "specular" : 0.8,
                 "roughness" : 0.004,
                 "reflection" : 0.7,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            }
+        },
+        {
+            "center" : [ -1.25, 1.25, 0.0 ],
+            "radius" : 1.0,
+
+            "pigment" : [ 0.8, 0.8, 0.8 ],
+            "finish" : {
+                "ambient" : 0.05,
+                "diffuse" : 0.5,
+                "specular" : 0.1,
+                "roughness" : 0.02,
+                "reflection" : 0.0,
                 "refraction" : 0.0,
                 "ior" : 1.0
             }

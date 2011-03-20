@@ -13,7 +13,7 @@
  *----------------------------------------------------------------------------*/
 class Ray {
 public:
-  Ray( void ) {};
+  Ray( void ): mint(0), maxt(INFINITY) {};
   Ray( Vector s, Vector d, double t0 = 0, double t1 = INFINITY ):start(s), direction(d), mint(t0), maxt(t1) {};
   Vector start;
   Vector direction;
