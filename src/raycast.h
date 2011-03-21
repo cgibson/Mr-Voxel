@@ -15,7 +15,8 @@ public:
   Raycaster( Scene* scene, Camera cam );
   int find_intersect(Ray ray, Surface *surface);
   Color cast( int x, int y, int width, int height );
-  int single( int x, int y, int width, int height, Surface *surf, Ray *ray );
+  void cam2World( int x, int y, int width, int height, Ray *ray );
+  int iterate( Ray *ray, Surface *surface);
   Color handleIntersect( Ray ray, int depth );
   Color sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather );
   Color initialCast( Ray ray, int depth );
@@ -50,6 +51,7 @@ private:
   VolumeIntegrator *mVolumeIntegrator;
   Color background;
   Camera _camera;
+  MyMat _matrix;
 };
 
 #endif

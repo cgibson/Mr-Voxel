@@ -336,17 +336,26 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
     // Normalize direction
     orient.direction.norm();
 
-    // Find U,V,W vectors
-    Vector w = orient.direction * -1;
-    Vector u, v;
-    Vector up = Vector(0,1,0);
-    up.cross(w, &u);
-    w.cross(u, &v);
+    Vector u,v,w;
 
+    // Find U,V,W vectors
+    if(fabs(orient.direction.y()) >= 0.9995) {
+        //printf("Test\n");
+        w = orient.direction;
+        u = Vector(1,0,0);
+        v = Vector(0,0,1);
+    }else{
+        w = orient.direction * -1;
+        Vector up = Vector(0,1,0);
+        up.cross(w, &u);
+        u.norm();
+        w.cross(u, &v);
+        v.norm();
+    }
     // Generate matrices
-    MyMat m1 = MyMat(1, 0, 0, orient.start.x(),
-                   0, 1, 0, orient.start.y(),
-                   0, 0, 1, orient.start.z(),
+    MyMat m1 = MyMat(1, 0, 0, -orient.start.x(),
+                   0, 1, 0, -orient.start.y(),
+                   0, 0, 1, -orient.start.z(),
                    0, 0, 0, 1);
 
     MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
@@ -355,7 +364,7 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
                    0, 0, 0, 1);
 
     // Save transformation
-    matrix = m1.multRight(m2);
+    matrix = m2.multRight(m1);
 }
 
 BBNode Disk::construct_bb() {

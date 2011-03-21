@@ -14,6 +14,8 @@ Surfel::Surfel(Vector position, Vector normal, Color diffuse, float area)
 Surfel::Surfel(const Surfel& orig) {
     m_normal = orig.m_normal;
     m_diffuse = orig.m_diffuse;
+    m_pos = orig.m_pos;
+    m_area = orig.m_area;
 }
 
 Surfel::~Surfel() {

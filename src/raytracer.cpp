@@ -186,9 +186,7 @@ int main(int argc, char* const argv[])
 
   Raycaster lightCast(scene, lightCamera);
 
-  lightCast.surfelCast(width,height,1, 1, &writer);
-
-  printf("Wrote in %d light cache values. %dx%d\n", scene->lightCache()->count(), width / 2, height / 2);
+  lightCast.surfelCast(width,height, 3, 3, &writer);
 
   while( end < jobs)
   {

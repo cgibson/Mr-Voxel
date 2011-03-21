@@ -84,6 +84,27 @@ LiNode::gather( Ray ray, double *t ) {
     Color tmp;
     Vector n;
 
+/*
+    Disk disk = Disk(1.0, 0.0, 2 * PI, Ray(Vector(1,2,0), Vector(0.0,0.0,-0.5)));//(*_surfelData)->normal()));
+    //Sphere sphere;
+    //sphere.center = (*_surfelData)->position();
+    //sphere.radius = (*_surfelData)->area();
+    //if(sphere.test_intersect(ray, &thit, &n)) {
+        //printf("WHAT\n");
+    Ray tmpRay;
+    tmpRay.start = disk.matrix * Vector4(ray.start, 1);
+    tmpRay.direction = disk.matrix * Vector4(ray.direction, 0);
+    tmpRay.direction.norm();
+    if(disk.test_intersect(tmpRay, &thit, &n)) {
+        if(thit < tmin) {
+            tmin = thit;
+            closest = (*_surfelData)->diffuse();
+        }
+    }
+
+    return closest;
+*/
+
     //printf("GATHERING STAGE BEGIN\n");
 
     if(!OctreeNode::test_intersect( ray, &thit, &n )){
@@ -103,15 +124,26 @@ LiNode::gather( Ray ray, double *t ) {
             }
         }
     }else{
+        if((_min.x() < ray.start.x() && _max.x() > ray.start.x()) &&
+           (_min.y() < ray.start.y() && _max.y() > ray.start.y()) &&
+           (_min.z() < ray.start.z() && _max.z() > ray.start.z())) {
+           *t = INFINITY;
+           return Color(0);
+        }
         //if(_surfelCount == 0) return Color(0,0,0.5);
         //printf("Testing all Disks (%d)!\n", _surfelCount);
         for(int i = 0; i < _surfelCount; i++) {
-            //Disk disk = Disk(/*(*_surfelData)->area()*/ 1.0, 0, 2 * PI, Ray((*_surfelData)->position(), (*_surfelData)->normal()));
-            Sphere sphere;
-            sphere.center = (*_surfelData)->position();
-            sphere.radius = 0.1;
-            if(sphere.test_intersect(ray, &thit, &n)) {
+            Disk disk = Disk((*_surfelData)->area(), 0, 2 * PI, Ray((*_surfelData)->position(), (*_surfelData)->normal()));
+            //Sphere sphere;
+            //sphere.center = (*_surfelData)->position();
+            //sphere.radius = (*_surfelData)->area();
+            //if(sphere.test_intersect(ray, &thit, &n)) {
                 //printf("WHAT\n");
+            Ray tmpRay;
+            tmpRay.start = disk.matrix * Vector4(ray.start, 1);
+            tmpRay.direction = disk.matrix * Vector4(ray.direction, 0);
+            tmpRay.direction.norm();
+            if(disk.test_intersect(tmpRay, &thit, &n)) {
                 if(thit < tmin) {
                     tmin = thit;
                     closest = (*_surfelData)->diffuse();
@@ -130,7 +162,17 @@ LiNode::subdivide() {
 
     //printf("Subdividing %s - %s\n", m_min.str(), m_max.str());
     Vector size = (_max - _min) * 0.5;
-    assert(size.length() > 0.0000001);
+
+    if(size.length() < 0.00000001) {
+        printf("SIZE: %d\n", _surfelCount);
+        for(int i = 0; i < _surfelCount; i++) {
+            Surfel surf = *_surfelData[i];
+            printf("\t%s\n", surf.position().str());
+        }
+        printf("ERROR\n\tMIN: %s\n\tMAX: %s\n", _min.str(), _max.str());
+        exit(1);
+    }
+    assert(size.length() > 0.00000001);
     Vector min, max;
     int x,y,z;
 
@@ -212,7 +254,7 @@ int
 LiNode::add(shared_ptr<Surfel> obj) {
 
         //printf("Adding to NODE: %s - %s\n", m_min.str(), m_max.str());
-    
+
     if(!inside(obj))
         return 0;
     

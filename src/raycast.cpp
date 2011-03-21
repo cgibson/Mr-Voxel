@@ -35,6 +35,32 @@ Raycaster::Raycaster( Scene* scene )
   mNear = 0.5;
   mScene = scene;
   background = Color(0.0, 0.0, 0.0, 1.0);
+
+
+  Vector w = _camera.look_at - _camera.location;
+  Vector u;
+  Vector v;
+  w.norm();
+  w = w * -1;
+  _camera.up.cross(w, &u);
+  w.cross(u, &v);
+
+  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
+                   0, 1, 0, _camera.location.y(),
+                   0, 0, 1, _camera.location.z(),
+                   0, 0, 0, 1);
+
+  //cout << "Camera Loc: " << endl << m1 << endl;
+
+  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+  //cout << "UVW: " << endl << m2 << endl;
+
+  _matrix = m1.multRight(m2);
+  //cout << "END: " << endl << m3 << endl;
 }
 
 /*
@@ -58,6 +84,32 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
   mNear = 0.5;
   mScene = scene;
   background = Color(0.0, 0.0, 0.0, 1.0);
+
+
+  Vector w = _camera.look_at - _camera.location;
+  Vector u;
+  Vector v;
+  w.norm();
+  w = w * -1;
+  _camera.up.cross(w, &u);
+  w.cross(u, &v);
+
+  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
+                   0, 1, 0, _camera.location.y(),
+                   0, 0, 1, _camera.location.z(),
+                   0, 0, 0, 1);
+
+  //cout << "Camera Loc: " << endl << m1 << endl;
+
+  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+  //cout << "UVW: " << endl << m2 << endl;
+
+  _matrix = m1.multRight(m2);
+  //cout << "END: " << endl << m3 << endl;
 }
 
 /*
@@ -259,17 +311,17 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
         Vector rnd;
         rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
         Color ambs[5];
-        int count = 150;
-        double rndv;
+        int count = 50;
+        double rndn;
         for(int i = 0; i < count; i++) {
             while(rnd.dot(surface.n) < 0){
                 rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
                 rnd.norm();
                 //printf("%s -- %s -- %f\n", rnd.str(), surface.n.str(), rnd.dot(surface.n));
             }
-            rndv = (rnd * V);
-            rndv = (rndv > 0.1 ? rndv : 0.1);
-            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (rnd * 0.3), rnd), &tt) * (1./(float)count) ;
+            rndn = (rnd * surface.n);
+            rndn = (rndn > 0.1 ? rndn : 0.1);
+            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (rnd * 0.3), rnd), &tt) * rndn;
             rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
         }
 
@@ -277,7 +329,7 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 
 
 
-        result = result + amb;
+        result = result + amb * surface.finish.ambient * surface.color * (20. / count);
 
     } else{
         if(ambient)
@@ -322,8 +374,8 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 		result = result +
 		((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L));
                 
-                if(specular)
-                    result = result + ((Lcolor) * surface.finish.specular * pow(max(0, H * surface.n), shininess));
+                if(specular && !Tr.isBlack())
+                    result = result + ((Lcolor) * surface.finish.specular * Tr * pow(max(0, H * surface.n), shininess));
     }
     
     return result;
@@ -441,52 +493,19 @@ Color Raycaster::cast( int x, int y, int width, int height )
   double vs = mBottom + ((mTop - mBottom)
         * (double)((double)(y + 0.5f) / height));
   //cout << "US: " << us << "  VS: " << vs << endl;
-  Ray ray = Ray();
+
+  Ray ray;
+
+ray.start.set(0, 0, 0);
+ray.start = ray.start + Vector(us, vs, 0);
+
+ray.direction = Vector(0,0,-1);
+ray.direction.norm();
+ray.direction = ray.direction + Vector(us, vs, 0);
 
 
-  if( mCastMode == ORTHOGRAPHIC ) {
-    ray.start.set(_camera.location);
-    ray.start = ray.start + Vector(us, vs, 0);
-    ray.direction.set(_camera.location);
-    ray.direction = _camera.look_at - _camera.location;
-    ray.direction.norm();
-  }
-  else if( mCastMode == PERSPECTIVE ) {
-    ray.start.set(0, 0, 0);
-    ray.start = ray.start + Vector(us, vs, 0);
-
-    ray.direction = Vector(0,0,-1);
-    ray.direction.norm();
-    ray.direction = ray.direction + Vector(us, vs, 0);
-  }
-
-  Vector w = _camera.look_at - _camera.location;
-  Vector u;
-  Vector v;
-  w.norm();
-  w = w * -1;
-  _camera.up.cross(w, &u);
-  w.cross(u, &v);
-
-  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
-                   0, 1, 0, _camera.location.y(),
-                   0, 0, 1, _camera.location.z(),
-                   0, 0, 0, 1);
-
-  //cout << "Camera Loc: " << endl << m1 << endl;
-
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
-                   u.y(), v.y(), w.y(), 0,
-                   u.z(), v.z(), w.z(), 0,
-                   0, 0, 0, 1);
-
-  //cout << "UVW: " << endl << m2 << endl;
-
-  MyMat m3 = m1.multRight(m2);
-  //cout << "END: " << endl << m3 << endl;
-
-  ray.start = m3 * Vector4(ray.start, 1);
-  ray.direction = m3 * Vector4(ray.direction, 0);
+  ray.start = _matrix * Vector4(ray.start, 1);
+  ray.direction = _matrix * Vector4(ray.direction, 0);
   ray.direction.norm();
 
   //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
@@ -501,13 +520,20 @@ Color Raycaster::cast( int x, int y, int width, int height )
   return color;
 }
 
+int Raycaster::iterate( Ray *ray, Surface *surface) {
+    if(intersect(*ray, surface)) {
+        (*ray).start = (*ray)(surface->t);
+        return 1;
+    }
+
+    return 0;
+}
+
 /*
  * Cast the given 'pixel' into the world
  *----------------------------------------------------------------------------*/
-int Raycaster::single( int x, int y, int width, int height, Surface *surface, Ray *external_ray )
+void Raycaster::cam2World( int x, int y, int width, int height, Ray *external_ray )
 {
-
-    int hit;
 
   double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
@@ -523,45 +549,11 @@ ray.direction = Vector(0,0,-1);
 ray.direction.norm();
 ray.direction = ray.direction + Vector(us, vs, 0);
 
-
-  Vector w = _camera.look_at - _camera.location;
-  Vector u;
-  Vector v;
-  w.norm();
-  w = w * -1;
-  _camera.up.cross(w, &u);
-  w.cross(u, &v);
-
-  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
-                   0, 1, 0, _camera.location.y(),
-                   0, 0, 1, _camera.location.z(),
-                   0, 0, 0, 1);
-
-  //cout << "Camera Loc: " << endl << m1 << endl;
-
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
-                   u.y(), v.y(), w.y(), 0,
-                   u.z(), v.z(), w.z(), 0,
-                   0, 0, 0, 1);
-
-  //cout << "UVW: " << endl << m2 << endl;
-
-  MyMat m3 = m1.multRight(m2);
-  //cout << "END: " << endl << m3 << endl;
-
-  ray.start = m3 * Vector4(ray.start, 1);
-  ray.direction = m3 * Vector4(ray.direction, 0);
+  ray.start = _matrix * Vector4(ray.start, 1);
+  ray.direction = _matrix * Vector4(ray.direction, 0);
   ray.direction.norm();
 
-  //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
-
-  Surface surf;
-
-  hit = intersect(ray, surface);
-
   *external_ray = ray;
-
-  return hit;
 }
 
 /*
@@ -662,17 +654,22 @@ int Raycaster::surfelCast(
 
     for( y = 0; y < height; y+=step_y ) {
 
-      if(single(x, y, width, height, &surf, &ray)) {
+      cam2World(x, y, width, height, &ray);
+      
+      color = 0;
+
+      while(intersect(ray, &surf)) {
 
           color = sumLights(surf, ray, 0, 0, false);
-      }else{
-          color = Color(0,0,0);
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.225)));
+          ray.start = ray(surf.t + 0.1);
+          
       }
 
       //printf("YAY: %s\n", ray(surf.t).str());
 
       
-      mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.01)));
+      
 
       /*for(int i = 0; i < step_x; i++){
           for(int j = 0; j < step_y; j++) {
