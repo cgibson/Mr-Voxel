@@ -7,6 +7,7 @@
 
 #include "LiNode.h"
 #include "../scene/Geometry.h"
+#include "Surfel.h"
 
 OctreeNode::OctreeNode( Vector min, Vector max ): _min(min), _max(max) {
 
@@ -124,6 +125,7 @@ LiNode::gather( Ray ray, double *t ) {
             }
         }
     }else{
+        /**/
         if((_min.x() < ray.start.x() && _max.x() > ray.start.x()) &&
            (_min.y() < ray.start.y() && _max.y() > ray.start.y()) &&
            (_min.z() < ray.start.z() && _max.z() > ray.start.z())) {
@@ -133,22 +135,26 @@ LiNode::gather( Ray ray, double *t ) {
         //if(_surfelCount == 0) return Color(0,0,0.5);
         //printf("Testing all Disks (%d)!\n", _surfelCount);
         for(int i = 0; i < _surfelCount; i++) {
-            Disk disk = Disk((*_surfelData)->area(), 0, 2 * PI, Ray((*_surfelData)->position(), (*_surfelData)->normal()));
+            //Disk disk = Disk((*_surfelData)->area(), 0, 2 * PI, Ray((*_surfelData)->position(), (*_surfelData)->normal()));
             //Sphere sphere;
             //sphere.center = (*_surfelData)->position();
             //sphere.radius = (*_surfelData)->area();
             //if(sphere.test_intersect(ray, &thit, &n)) {
                 //printf("WHAT\n");
             Ray tmpRay;
-            tmpRay.start = disk.matrix * Vector4(ray.start, 1);
-            tmpRay.direction = disk.matrix * Vector4(ray.direction, 0);
+            tmpRay.start = (*_surfelData)->matrix * Vector4(ray.start, 1);
+            tmpRay.direction = (*_surfelData)->matrix * Vector4(ray.direction, 0);
             tmpRay.direction.norm();
-            if(disk.test_intersect(tmpRay, &thit, &n)) {
-                if(thit < tmin) {
-                    tmin = thit;
-                    closest = (*_surfelData)->diffuse();
+
+            // Would be usefull if we wanted to suck at cheating
+            //if((*_surfelData)->normal() * (ray.direction * -1) > 0) {
+                if((*_surfelData)->test_intersect(tmpRay, &thit, &n)) {
+                    if(thit < tmin) {
+                        tmin = thit;
+                        closest = (*_surfelData)->diffuse();
+                    }
                 }
-            }
+            //}
         }
     }
 

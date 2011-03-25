@@ -334,24 +334,78 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
     :_height(0), _radius(radius), _innerRadius(innerRadius), _phiMax(tmax)
 {
     // Normalize direction
-    orient.direction.norm();
+    //orient.direction.norm();
 
+    /*
+    Vector a;
+    float theta;
+    Vector up = Vector(0,0,-1);
+
+    if(fabs(orient.direction.z()) <= -0.9995 && false) {
+        a = Vector(0,1,0);
+    }else{
+        up.cross(orient.direction, &a);
+    }
+    theta = (float)acos((double)orient.direction.dot(Vector(0,0,-1)));
+
+    a.norm();
+
+    float s = sin(theta);
+    float c = cos(theta);
+
+    MyMat m;
+
+    m[0][0] = a.x() * a.x() + (1. - a.x() * a.x()) * c;
+    m[0][1] = a.x() * a.y() + (1. - c) - a.z() * s;
+    m[0][2] = a.x() * a.z() + (1. - c) + a.y() * s;
+    m[0][3] = 0;
+    
+    m[1][0] = a.x() * a.y() + (1. - c) + a.z() * s;
+    m[1][1] = a.y() * a.y() + (1. - a.y() * a.y()) * c;
+    m[1][2] = a.y() * a.z() + (1. - c) - a.x() * s;
+    m[1][3] = 0;
+    
+    m[2][0] = a.x() * a.z() + (1. - c) - a.y() * s;
+    m[2][1] = a.y() * a.z() + (1. - c) + a.x() * s;
+    m[2][2] = a.z() * a.z() + (1. - a.z() * a.z()) * c;
+    m[2][3] = 0;
+    
+    m[3][0] = 0;
+    m[3][1] = 0;
+    m[3][2] = 0;
+    m[3][3] = 1;
+
+    MyMat m1 = MyMat(1, 0, 0, -orient.start.x(),
+                   0, 1, 0, -orient.start.y(),
+                   0, 0, 1, -orient.start.z(),
+                   0, 0, 0, 1);
+
+    matrix = m.multRight(m1);
+
+//*/
+ /*
+
+    orient.direction = Vector(0.5, 0.5, 0);
+
+    orient.direction.norm();
+    //printf("LOOKAT:\n\tPOS: %s\n\tDIR: %s\n", orient.start.str(), orient.direction.str());
     Vector u,v,w;
 
     // Find U,V,W vectors
     if(fabs(orient.direction.y()) >= 0.9995) {
         //printf("Test\n");
-        w = orient.direction;
+        w = Vector(0,1,0);//orient.direction;
         u = Vector(1,0,0);
         v = Vector(0,0,1);
     }else{
-        w = orient.direction * -1;
+        w = orient.direction;
         Vector up = Vector(0,1,0);
         up.cross(w, &u);
         u.norm();
         w.cross(u, &v);
-        v.norm();
     }
+   // printf("\tU(x): %s\n\tV(y): %s\n\tW(z): %s\n\n", u.str(), v.str(), w.str());
+
     // Generate matrices
     MyMat m1 = MyMat(1, 0, 0, -orient.start.x(),
                    0, 1, 0, -orient.start.y(),
@@ -365,6 +419,42 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
 
     // Save transformation
     matrix = m2.multRight(m1);
+ //* */
+
+    Vector up = Vector(0,1,0);
+    Vector w = orient.direction;
+    Vector u;
+    Vector v;
+    w.norm();
+    w = w * -1;
+
+    if(w.y() >= 0.9995 || w.y() <= -0.995) {
+        u = Vector(1,0,0);
+        v = Vector(0,0,1);
+    }else{
+        up.cross(w, &u);
+        u.norm();
+        w.cross(u, &v);
+    }
+
+  MyMat m1 = MyMat(1, 0, 0, orient.start.x(),
+                   0, 1, 0, orient.start.y(),
+                   0, 0, 1, orient.start.z(),
+                   0, 0, 0, 1);
+
+  //cout << "Camera Loc: " << endl << m1 << endl;
+
+  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+  //cout << "UVW: " << endl << m2 << endl;
+
+  matrix = m1.multRight(m2);
+
+  matrix = matrix.inverse();
+
 }
 
 BBNode Disk::construct_bb() {
@@ -412,7 +502,7 @@ int Disk::test_intersect(Ray ray, double* t, Vector* n) {
 }
 
 Vector Disk::get_normal(Vector pt) {
-    return Vector(0,0,1);
+    return matrix.trans() * Vector4(0,0,1,0);
 }
 
 char* Disk::str( void )

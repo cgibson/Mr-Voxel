@@ -4,6 +4,7 @@
 #include "scene/scene.h"
 #include "util/image.h"
 #include "integrator/integrator.h"
+#include "sample/Sampler.h"
 
 #define ORTHOGRAPHIC 0
 #define PERSPECTIVE 1

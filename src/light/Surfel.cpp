@@ -8,14 +8,22 @@
 #include "Surfel.h"
 
 Surfel::Surfel(Vector position, Vector normal, Color diffuse, float area)
-        : m_pos(position), m_normal(normal), m_diffuse(diffuse), m_area(area) {
+        : Disk(area, 0, 2 * PI,  Ray(position, normal)),
+          _pos(position), _normal(normal), _diffuse(diffuse) {
 }
-
-Surfel::Surfel(const Surfel& orig) {
-    m_normal = orig.m_normal;
-    m_diffuse = orig.m_diffuse;
-    m_pos = orig.m_pos;
-    m_area = orig.m_area;
+/**/
+Surfel::Surfel(const Surfel& orig)
+    : Disk(orig) {
+    _normal = orig._normal;
+    _diffuse = orig._diffuse;
+    _pos = orig._pos;
+    _radius = orig._radius;
+    _innerRadius = orig._innerRadius;
+    _phiMax = orig._phiMax;
+    _height = orig._height;
+    finish = orig.finish;
+    matrix = orig.matrix;
+    pigment = orig.pigment;
 }
 
 Surfel::~Surfel() {

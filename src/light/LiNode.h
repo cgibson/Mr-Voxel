@@ -12,10 +12,11 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "../scene/Object.h"
-#include "Surfel.h"
 
 using std::vector;
 using boost::shared_ptr;
+
+class Surfel;
 
 #define MAX_SURFEL_COUNT 16
 

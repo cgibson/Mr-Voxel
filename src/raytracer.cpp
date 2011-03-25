@@ -186,7 +186,7 @@ int main(int argc, char* const argv[])
 
   Raycaster lightCast(scene, lightCamera);
 
-  lightCast.surfelCast(width,height, 3, 3, &writer);
+  lightCast.surfelCast(320,240, 1, 1, &writer);
 
   while( end < jobs)
   {

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "raycast.h"
 
+using sample::HemisphereSampler;
+
 namespace this_thread = boost::this_thread;
 
 #define DEBUG 1
@@ -298,6 +300,11 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
     Vector D = ray.direction;
     Vector V = D * -1;
 
+    // Invert backwards normals
+    if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(V) < 0) {
+        surface.n = surface.n * -1;
+    }
+
     Ray shadow_ray;
 
     result = Color(0);
@@ -308,12 +315,27 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
     if(gather) {
         double tt;
         Color amb;
-        Vector rnd;
-        rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
-        Color ambs[5];
-        int count = 50;
+
+        Vector rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+
+        //const HemisphereSampler sampler = HemisphereSampler(surface.n, 3, 3);
+
         double rndn;
+        Vector sample;
+
+        /*
+        while(sampler.getSample(&sample)) {
+        //*/
+        
+        //*/
+        int count = 9;
         for(int i = 0; i < count; i++) {
+
+            /*
+            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (sample * 0.01), sample), &tt) * rndn;
+            */
+
+            
             while(rnd.dot(surface.n) < 0){
                 rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
                 rnd.norm();
@@ -321,8 +343,11 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
             }
             rndn = (rnd * surface.n);
             rndn = (rndn > 0.1 ? rndn : 0.1);
-            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (rnd * 0.3), rnd), &tt) * rndn;
+
+            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (rnd * 0.1), rnd, 0.01, INFINITY), &tt) * rndn;
             rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+            rnd.norm();
+            //**/
         }
 
         //for(int i = 0; i < 5)
@@ -374,7 +399,7 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 		result = result +
 		((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L));
                 
-                if(specular && !Tr.isBlack())
+                if(specular && !Tr.isBlack() && L.dot(surface.n) > 0)
                     result = result + ((Lcolor) * surface.finish.specular * Tr * pow(max(0, H * surface.n), shininess));
     }
     
@@ -661,7 +686,7 @@ int Raycaster::surfelCast(
       while(intersect(ray, &surf)) {
 
           color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.225)));
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.20)));
           ray.start = ray(surf.t + 0.1);
           
       }

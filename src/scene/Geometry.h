@@ -5,6 +5,7 @@
 #include "BBNode.h"
 #include "modifier.h"
 #include "../util/MyMat.h"
+#include <glm/glm.hpp>
 
 
 /*
