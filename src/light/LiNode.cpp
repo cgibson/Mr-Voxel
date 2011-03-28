@@ -147,14 +147,14 @@ LiNode::gather( Ray ray, double *t ) {
             tmpRay.direction.norm();
 
             // Would be usefull if we wanted to suck at cheating
-            //if((*_surfelData)->normal() * (ray.direction * -1) > 0) {
+            if((*_surfelData)->normal() * (ray.direction * -1) > 0) {
                 if((*_surfelData)->test_intersect(tmpRay, &thit, &n)) {
                     if(thit < tmin) {
                         tmin = thit;
                         closest = (*_surfelData)->diffuse();
                     }
                 }
-            //}
+            }
         }
     }
 

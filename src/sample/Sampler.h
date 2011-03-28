@@ -9,6 +9,10 @@
 #define	SAMPLER_H
 
 #include "../util/rayutil.h"
+#include "../util/MyMat.h"
+#include <vector>
+
+using std::vector;
 
 namespace sample {
 
@@ -34,6 +38,7 @@ namespace sample {
         int _max_ts;
         int _us, _ts;
         Vector _normal;
+        MyMat _matrix;
     };
 
 }

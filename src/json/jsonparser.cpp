@@ -10,7 +10,7 @@ Parser::Parser()
   error = false;
 }
 
-Scene *Parser::parse_file(char *filename, Dimension *size)
+Scene *Parser::parse_file(string filename)
 {
   printf("O NOES\n");
   return NULL;
@@ -67,7 +67,7 @@ Scene * initialize_initial_scene()
  
 }
 
-Scene *JSONParser::parse_file(char *config, Dimension *size)
+Scene *JSONParser::parse_file(string filename)
 {
   Scene * scene = new Scene(); //initialize_initial_scene();
  
@@ -76,8 +76,8 @@ Scene *JSONParser::parse_file(char *config, Dimension *size)
   
   string profile_json;
   
-  if(config != NULL)
-    profile_json = readJsonFile(config);
+  if(!filename.empty())
+    profile_json = readJsonFile(filename);
   else
     profile_json = slurp(cin);
   
@@ -90,7 +90,7 @@ Scene *JSONParser::parse_file(char *config, Dimension *size)
       return NULL;
   }
   
-  *size = parseDimension(root["render_size"]);
+  //*size = parseDimension(root["render_size"]);
  
   parseScene(root, scene);
  

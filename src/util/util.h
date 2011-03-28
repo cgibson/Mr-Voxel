@@ -10,19 +10,6 @@ int test_intersect_1d(double p, double d,
                       double min, double max,
                       double *result_near, double *result_far);
 
-class Dimension {
-public:
-  Dimension(): m_x(0), m_y(0){}
-  Dimension(int x, int y): m_x(x), m_y(y){}
-
-  int x(){ return m_x;}
-  int y(){ return m_y;}
-  void setX(int x){ m_x = x;}
-  void setY(int y){ m_y = y;}
-private:
-  double m_x, m_y;
-};
-
 /* A vector class for 3D Vectors */
 class Vector{
 public:

@@ -5,12 +5,12 @@
 /*
  * Base ImageWriter constructor
  *----------------------------------------------------------------------------*/
-ImageWriter::ImageWriter( int width, int height )
+ImageWriter::ImageWriter( Dimension size )
 {
-  mWidth = width;
-  mHeight = height;
+  mWidth = size.width;
+  mHeight = size.height;
   // allocate all image data
-  mData = (char*)calloc(width * height * 4, sizeof(char));
+  mData = (char*)calloc(size.width * size.height * 4, sizeof(char));
 }
 
 /*
@@ -105,17 +105,17 @@ void ImageWriter::modPixel( int x, int y, float m, float c )
 /*
  * Write the given image data to a given file name
  *----------------------------------------------------------------------------*/
-void ImageWriter::write( char *filename )
+void ImageWriter::write( string filename )
 {
   FILE *fp;
   int offset;
 
   // attempt to open the file
-  fp = fopen(filename, "w");
+  fp = fopen(filename.c_str(), "w");
 
   // if the file does not example
   if(fp == NULL) {
-      printf("Error: failed to create image %s\n", filename);
+      printf("Error: failed to create image %s\n", filename.c_str());
       exit(-1);
   }
 

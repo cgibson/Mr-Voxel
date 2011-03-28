@@ -5,6 +5,7 @@
 #include "util/image.h"
 #include "integrator/integrator.h"
 #include "sample/Sampler.h"
+//#include "light/brdf.h"
 
 #define ORTHOGRAPHIC 0
 #define PERSPECTIVE 1

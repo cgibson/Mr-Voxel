@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "raycast.h"
 
+//using namespace light;
 using sample::HemisphereSampler;
 
 namespace this_thread = boost::this_thread;
@@ -312,30 +313,34 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
     // Initialize result to the ambient value
 
 
-    if(gather) {
+    if(gather && false) {
         double tt;
         Color amb;
 
-        Vector rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
+        //Vector rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
 
-        //const HemisphereSampler sampler = HemisphereSampler(surface.n, 3, 3);
+        int u = 16;
+        int t = 16;
+        HemisphereSampler sampler = HemisphereSampler(surface.n, u, t);
 
         double rndn;
-        Vector sample;
+        Vector smpl;
 
-        /*
-        while(sampler.getSample(&sample)) {
+        //*
+        while(sampler.getSample(&smpl)) {
         //*/
-        
-        //*/
+            //printf("SAMPLE: %s\n\tNORMAL: %s\n", smpl.str(), surface.n.str());
+        /*/
         int count = 9;
         for(int i = 0; i < count; i++) {
+        */
+            //*
+            rndn = (smpl * surface.n);
+            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (smpl * 0.0), smpl), &tt) * rndn;
+            //printf("AMBIENT: %s\n", amb.str());
+            //*/
 
-            /*
-            amb = amb + mScene->lightCache()->gather(Ray(ray(surface.t) + (sample * 0.01), sample), &tt) * rndn;
-            */
-
-            
+        /*
             while(rnd.dot(surface.n) < 0){
                 rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
                 rnd.norm();
@@ -354,8 +359,8 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 
 
 
-        result = result + amb * surface.finish.ambient * surface.color * (20. / count);
-
+        result = result + amb * surface.finish.ambient * surface.color * (20. / (u*t));
+        //printf("FINISHED\n");
     } else{
         if(ambient)
             result = result + surface.color * surface.finish.ambient;
@@ -395,6 +400,8 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
         }else{
         	Tr = 1.0;//Tr * mVolumeIntegrator->Transmittance( shadow_ray );
         }
+
+            //result = result + brdf::shadeDiffuse(surface, ray.direction * -1, Tr);
 
 		result = result +
 		((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L));
@@ -532,8 +539,6 @@ ray.direction = ray.direction + Vector(us, vs, 0);
   ray.start = _matrix * Vector4(ray.start, 1);
   ray.direction = _matrix * Vector4(ray.direction, 0);
   ray.direction.norm();
-
-  //cout << "RAY: " << ray.start.str() << " " << ray.direction.str() << endl;
 
   double t;
   //color = mScene->lightCache()->gather(ray, &t);
@@ -686,26 +691,10 @@ int Raycaster::surfelCast(
       while(intersect(ray, &surf)) {
 
           color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.20)));
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.15)));
           ray.start = ray(surf.t + 0.1);
           
       }
-
-      //printf("YAY: %s\n", ray(surf.t).str());
-
-      
-      
-
-      /*for(int i = 0; i < step_x; i++){
-          for(int j = 0; j < step_y; j++) {
-              writer->setPixel(x+i, y+j,
-                      color.r() * 255,
-                      color.g() * 255,
-                      color.b() * 255,
-                      (color.f() == 1.0) ? 255 : 255 );
-              }
-          }*/
-
 
     }
   }

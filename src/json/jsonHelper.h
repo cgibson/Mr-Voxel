@@ -42,9 +42,8 @@ static string readJsonFile( string path )
 Dimension parseDimension(const Json::Value val)
 {
   int index = 0;
-  int x = val[index].asInt();
-  int y = val[index + 1].asInt();
-  return Dimension(x, y);
+  Dimension ret = {val[index].asInt(), val[index + 1].asInt()};
+  return ret;
 }
 
 Vector parseVector(const Json::Value val)

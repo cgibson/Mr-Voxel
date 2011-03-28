@@ -14,10 +14,11 @@
 #include "raycast.h"
 #include "util/image.h"
 #include "json/jsonparser.h"
+#include "system/config.h"
 
 using namespace std;
 using namespace boost;
-
+using namespace sys;
 
 Raycaster *raycaster;
 
@@ -62,83 +63,15 @@ struct raytracer
 };
 
 
-int main(int argc, char* const argv[])
+int main(int argc, char* argv[])
 {
 
   Parser *parser = new JSONParser();
   Scene *scene;
 
-  int width = -1;
-  int height = -1;
-  char *filename = NULL;
-  int current;
-  int depth = 5;
-  bool single_thread = false;
+  config::parse(argv, argc);
 
-  current = 1;
-  while(current < argc) {
-    if( strcmp(argv[current], "-I") == 0 ) {
-      current++;
-      //DON'T EVER EVER DO THIS FOR THE LOVE OF GOD
-      //Remember to add the '+1' to allow for the null byte
-      //filename = (char*)malloc( (strlen(argv[current]) + 1) * sizeof(char) );
-      //sprintf(filename, "%s", argv[current]);
-
-      filename = argv[current];
-      current++;
-    }
-    else if( strcmp(argv[current], "-W") == 0 ) {
-      current++;
-      sscanf(argv[current], "%d", &width);
-      current++;
-    }
-    else if( strcmp(argv[current], "-H") == 0 ) {
-      current++;
-      sscanf(argv[current], "%d", &height);
-      current++;
-    }
-    else if( strcmp(argv[current], "-D") == 0 ) {
-      current++;
-      sscanf(argv[current], "%d", &depth);
-      current++;
-    }
-    else if( strcmp(argv[current], "-s") == 0 ) {
-      single_thread = true;
-      current++;
-    }
-    else {
-      cout << argv[current] << endl;
-      printf("Usage: lab2 -I[filename] -Wwidth -Hheight\n");
-      exit(1);
-    }
-  }
-  
-  Dimension size;
-  
-  scene = parser->parse_file(filename, &size);
-  
-  if( (width <= 0) || (height <= 0) ) {
-    width = size.x();
-    height = size.y();
-  }
-
-  char *outfile;
-
-  if(filename != NULL) {
-    char *tmp = strtok(filename, ".");
-    outfile = (char*)malloc(sizeof(char) * (strlen(tmp) + 5));
-    
-    if(outfile == NULL) {
-      perror("Error: improper filename input");
-      exit(-1);
-    }
-    sprintf(outfile, "%s.tga", tmp);
-    
-  }
-  else {
-    outfile = (char*)malloc(sizeof(char) * 30);
-    sprintf(outfile, "tmp_render.tga");
-  }
+  scene = parser->parse_file(config::in_file);
 
   if( parser->succeeded() ) {
     printf("Scene was compiled correctly.\n");
@@ -147,25 +80,18 @@ int main(int argc, char* const argv[])
     printf("Was not able to compile scene.  Errors exist.\n");
     return -1;
   }
+
   scene->generateBoxHierarchy();
   
-  ImageWriter writer = ImageWriter( width, height );
+  ImageWriter writer = ImageWriter( config::image_resolution );
   
   raycaster = new Raycaster( scene );
   
-  int cores;
-  int corethreadcount;
-  int jobs;
+  int cores = config::core_count;
+  int corethreadcount = config::core_thread_count;
+  int jobs = config::thread_jobs;
+  Dimension img_size = config::image_resolution;
 
-  if(single_thread) {
-	  cores = 1;
-	  corethreadcount = 1;
-	  jobs = cores*corethreadcount*1;
-  } else {
-	  cores = 4;
-	  corethreadcount = 5;
-	  jobs = cores*corethreadcount*2;
-  }
   raytracer *rtrcs[jobs];
   thread thrds[jobs];
   
@@ -186,7 +112,7 @@ int main(int argc, char* const argv[])
 
   Raycaster lightCast(scene, lightCamera);
 
-  lightCast.surfelCast(320,240, 1, 1, &writer);
+  lightCast.surfelCast(1024,768, 1, 1, &writer);
 
   while( end < jobs)
   {
@@ -197,13 +123,13 @@ int main(int argc, char* const argv[])
 
 	  for(int i = start; i < end-1; i++) {
 		//printf("CREATED JOB [%d]\n", i);
-		rtrcs[i] = new raytracer( 0, i * height / jobs, width,
-				(i + 1) * height / jobs, width, height, depth, &writer, i );
+		rtrcs[i] = new raytracer( 0, i * img_size.height / jobs, img_size.width,
+				(i + 1) * img_size.height / jobs, img_size.width, img_size.height, config::render_depth, &writer, i );
 		thrds[i] = thread{*rtrcs[i]};
 	  }
 
-		rtrcs[end-1] = new raytracer( 0, (end-1) * height / jobs, width,
-				(end) * height / jobs, width, height, depth, &writer, end-1 );
+		rtrcs[end-1] = new raytracer( 0, (end-1) * img_size.height / jobs, img_size.width,
+				(end) * img_size.height / jobs, img_size.width, img_size.height, config::render_depth, &writer, end-1 );
 	  (*rtrcs[end-1])();
 
 	  for(int i = start; i < end-1; i++) {
@@ -217,5 +143,5 @@ int main(int argc, char* const argv[])
   printf("|\n");
   
   //rtrc1();
-  writer.write(outfile);
+  writer.write(config::out_file);
 }

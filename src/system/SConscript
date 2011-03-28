@@ -1,0 +1,11 @@
+Import("env")
+
+env.Append(CPPPATH=['../../include'])
+
+sources = Glob('*.cpp')
+objects = []
+
+for srcs in sources:
+	objects = objects + env.Object(srcs)
+
+Return('objects')

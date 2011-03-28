@@ -26,6 +26,8 @@ objects = objects + env.SConscript('src/mrvoxel/SConscript')
 objects = objects + env.SConscript('src/integrator/SConscript')
 objects = objects + env.SConscript('src/ocean/SConscript')
 objects = objects + env.SConscript('src/light/SConscript')
+objects = objects + env.SConscript('src/sample/SConscript')
+objects = objects + env.SConscript('src/system/SConscript')
 
 if conf.CheckDeclaration("__i386__"):
 	objects = objects + ['lib/x86/libjson_linux-gcc-4.4.1_libmt.a'];
