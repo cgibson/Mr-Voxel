@@ -81,6 +81,8 @@ int main(int argc, char* argv[])
   }
 
   config::scenePtr->generateBoxHierarchy();
+
+  config::volume_integrator = new VolumeIntegrator(config::scenePtr);
   
   ImageWriter writer = ImageWriter( config::image_resolution );
   

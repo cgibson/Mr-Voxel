@@ -3,7 +3,6 @@
 
 #include "scene/scene.h"
 #include "util/image.h"
-#include "integrator/integrator.h"
 #include "sample/Sampler.h"
 #include "system/config.h"
 //#include "light/brdf.h"
@@ -48,7 +47,6 @@ private:
   double mNear;
   double mLeft, mRight;
   double mTop, mBottom;
-  VolumeIntegrator *mVolumeIntegrator;
   Color background;
   Camera _camera;
   MyMat _matrix;

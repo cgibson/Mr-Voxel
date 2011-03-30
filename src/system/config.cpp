@@ -85,6 +85,7 @@ namespace config {
 
     // Scene information
     Scene *scenePtr = NULL;
+    VolumeIntegrator *volume_integrator = NULL;
 
     // Multi-threading
     bool multi_threading = true;

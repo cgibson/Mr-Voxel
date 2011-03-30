@@ -1,0 +1,98 @@
+
+<html> 
+ 
+<head> 
+<title>Light Caching Using Surfels</title> 
+<style> 
+ 
+body{
+  background-color: black;
+  color: white;
+  font-family: arial;
+}
+ 
+.wrapper{
+  width: 700px;
+  text-align: left;
+}
+ 
+a{
+  color: #93b1ff;
+}
+ 
+</style> 
+</head> 
+ 
+<body> 
+ 
+<div align=center> 
+<div class="wrapper"> 
+ 
+<center> 
+<h1>Light Caching Using Surfels</h1> 
+Chris Gibson<br> 
+CSC 572 - Dr. Zoe Wood<br> 
+<img src="img/title.png"/> 
+</center> 
+ 
+<br> 
+<h2>Description</h2> 
+<p>The focus on this project was to create a light cache that I can construct, sample and visualize.  I plan to use the subsequent code in my thesis research.  I chose to follow Eric Tabellion's lead and focus on using view-Dependant samples to generate fast and efficient light cache in order to generate fast samples of ambient light.  The major paper that I researched for this project was "Point-Based Approximate Color Bleeding" and came from Pixar.</p> 
+ 
+<h2>Details</h2> 
+<h3>Sampling Surfels</h3> 
+<p>Similar to the Pixar paper, I chose to ray-trace into my scene from a viewport capable of seeing most of the scene and sampling wherever the rays strike surfaces.  I chose to relate the area of each surfel based on the size of the sample-set, allowing them to get smaller as more surfels appear in the scene.</p> 
+
+<p>Each surfel contains a number of elements of data required in order to later gather the data properly.  A radius is required to show its area of effect, as is a normal in order to properly sample the sample from different angles.  Finally, the diffuse value of that point must be taken using typical direct-lighting in order to properly figure out the color contribution.</p>
+ 
+<center> 
+<img src="img/lightView.png"/><br> 
+<span style="font-size: 10pt;">Samples rendered from the perspective of the "light" camera.</span> 
+</center> 
+ 
+<h3>Spatial Data Structure</h3> 
+<p>An octree was chosen to manage the input data, mostly because Octrees give us the ability to sample at different resolutions.  For this implementation, and considering the time available for this project, I chose to sample at the highest resolution, not taking advantage of the benefits of having a multi-resolution cache.  The cache was filled as the samples were traced, each leaf node only holding 16 surfels at a time.  Therefore, whenever more surfels enters a leaf node than it can handle, it will subdivide into 8 new leaf nodes.</p> 
+ 
+<center> 
+<img src="img/cache.png"/><br> 
+<span style="font-size: 10pt;">This is the scene rendered from one perspective, but the samples rendered from another.  The surfels have been reduced in size in order to set them apart from each other for clarity, they would not normally be drawn this way in the gather stage.</span> 
+</center> 
+ 
+<h3>The "Gather" Stage</h3> 
+<p>After the scene has been sampled, we ray-trace again, but this time at the camera's perspective.  We gather the lighting contribution which then applies to the final pixel.  Due to time constraints, a simpler (and less efficient) monte-carlo sampling technique was used.</p> 
+
+<center> 
+<img src="img/ambient.png"/><br> 
+<span style="font-size: 10pt;">Here is the low-sampled ambient term for a scene.  This is applied to the direct lighting render.</span> 
+</center> 
+ 
+<h2>Problems Encountered</h2> 
+<p>The cache had a few holes, both in the implementation and the results themselves.  If you look at any of the generated images, you'll notice strange circular inconsistencies in the image.  These were caused by holes in the cache, or incorrect Octree intersections.  These happened too late in the development process, and will obviously be ironed out later.</p> 
+  
+<center> 
+<img src="img/bad.png"/><br> 
+<span style="font-size: 10pt;">Here you can see low sampling of the light cache reveals the holes, where rays escape and don't contribute to the end ambient term.</span> 
+</center> 
+
+<h2>Media</h2> 
+The following examples were generated using monte-carlo samples of the light cache.  Please note that, due to problems with filling the scene seamlessly with the cache samples, holes in the scene and missing samples leave artifacts.
+ 
+<center> 
+<img src="img/results_1.png"/><br> 
+</center>
+ 
+<center> 
+<img src="img/results_2.png"/><br> 
+</center>
+ 
+<h2>References</h2> 
+<ul> 
+<li>Point-Based Approximate Color Bleeding - Per H. Christensen</li>
+<li><a href="http://graphics.stanford.edu/data/voldata/">Stanford volume data archive</a></li> <i>(for some sample tests that were not used in the final version)</i>
+</ul> 
+ 
+</div> 
+</div> 
+ 
+</body> 
+</html> 

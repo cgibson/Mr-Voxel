@@ -367,6 +367,34 @@ char* Camera::str( void )
   return buffer;
 }
 
+MyMat
+Camera::perspectiveMatrix() {
+    
+  Vector w = look_at - location;
+  Vector u;
+  Vector v;
+  w.norm();
+  w = w * -1;
+  up.cross(w, &u);
+  w.cross(u, &v);
+
+  MyMat m1 = MyMat(1, 0, 0, location.x(),
+                   0, 1, 0, location.y(),
+                   0, 0, 1, location.z(),
+                   0, 0, 0, 1);
+
+  //cout << "Camera Loc: " << endl << m1 << endl;
+
+  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+                   u.y(), v.y(), w.y(), 0,
+                   u.z(), v.z(), w.z(), 0,
+                   0, 0, 0, 1);
+
+  //cout << "UVW: " << endl << m2 << endl;
+
+  return m1.multRight(m2);
+}
+
 /*
  * Light source constructor
  *----------------------------------------------------------------------------*/

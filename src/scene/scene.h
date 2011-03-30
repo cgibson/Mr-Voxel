@@ -19,6 +19,7 @@ class Camera : public Object{
 public:
   Camera( void );
   virtual char* str( void );
+  MyMat perspectiveMatrix();
 
   Vector location;
   Vector up;

@@ -78,7 +78,7 @@ namespace light{
 
             // Otherwise, integrate through all volumes
             }else{
-                Tr = 1.0;//Tr * mVolumeIntegrator->Transmittance( shadow_ray );
+                Tr = Tr * config::volume_integrator->Transmittance( shadow_ray );
             }
 
             result = result + light::brdf(V, L, surf, light, Tr, specular);

@@ -1,0 +1,87 @@
+{
+    "render_size" : [ 640, 480 ],
+    
+    "volSampleStep" : 0.01,
+    
+    "camera" : {
+        //"eye" :     [  0.00,  3.00, -10.00 ],
+        "up" :      [  0.00,  1.00,  0.00 ],
+        "right" :   [  1.33,  0.00,  0.00 ],
+        //"look_at" : [  0.00,  3.00,  0.00 ],
+	"fov" : 45,
+
+        "eye" :     [  %XPOS%,  %YPOS%, %ZPOS% ],
+        "look_at" : [  0.00,  1.00,  0.00 ]
+    },
+        
+    // All planes in the scene
+    "planes" : [
+
+    ],
+        
+    // All lights in the scene
+    "lights" : [
+        {
+            //"location" : [ -4.0, -7.0, 10.0 ],
+            "location" : [ 0.0, 5.5, 0.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ]
+        }
+    ],
+
+    // All of the boxes in the scene
+    "volumes" : [
+        {
+            "type" : "ocean",
+            "min" : [-1.25,  0.0, -1.25 ],
+            "max" : [ 1.25,  2.5,  1.25 ],
+            "size" : 256,
+
+            "file" : "output/HV_Grid_Undulating_Oxy_01.txt",
+            "iso_min" : 0000,
+            "iso_max" : 60000,
+
+            "volume_resolution" : [256,256,256],
+
+            "density" : 1.0,
+            "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
+            "scatter" : [ 7.38, 5.47, 3.15 ],
+            "emitt" : [ 0.0, 0.0, 0.0 ],
+
+            "greenstein" : 2.0,
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "modifiers" : [
+            ]
+        }
+    ],
+
+    // All of the boxes in the scene
+    "polygons" : [
+        {
+
+        "vertices" : [
+            [-30.0,  0.0, -30.0],
+            [-30.0,  0.0,  30.0],
+            [ 30.0,  0.0,  30.0],
+            [ 30.0,  0.0, -30.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.02,
+                "diffuse" : 0.1,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.2,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        }
+
+    ]
+    
+}

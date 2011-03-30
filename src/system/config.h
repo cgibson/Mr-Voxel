@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include "../integrator/integrator.h"
 
 using std::string;
 
@@ -46,6 +47,7 @@ namespace config {
 
     // Scene information
     extern Scene *scenePtr;
+    extern VolumeIntegrator *volume_integrator;
 
     // Multi-threading
     extern bool multi_threading;

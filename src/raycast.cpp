@@ -30,37 +30,12 @@ Raycaster::Raycaster( Scene* scene )
   mTop = _camera.fov_ratio;
   mBottom = -_camera.fov_ratio;
 
-  printf("left: %f, right: %f, up: %f, down: %f\n", mLeft,mRight,mTop,mBottom);
-
   mNear = 0.5;
   mScene = scene;
   background = Color(0.0, 0.0, 0.0, 1.0);
 
 
-  Vector w = _camera.look_at - _camera.location;
-  Vector u;
-  Vector v;
-  w.norm();
-  w = w * -1;
-  _camera.up.cross(w, &u);
-  w.cross(u, &v);
-
-  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
-                   0, 1, 0, _camera.location.y(),
-                   0, 0, 1, _camera.location.z(),
-                   0, 0, 0, 1);
-
-  //cout << "Camera Loc: " << endl << m1 << endl;
-
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
-                   u.y(), v.y(), w.y(), 0,
-                   u.z(), v.z(), w.z(), 0,
-                   0, 0, 0, 1);
-
-  //cout << "UVW: " << endl << m2 << endl;
-
-  _matrix = m1.multRight(m2);
-  //cout << "END: " << endl << m3 << endl;
+  _matrix = _camera.perspectiveMatrix();
 }
 
 /*
@@ -79,37 +54,12 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
   mTop = _camera.fov_ratio;
   mBottom = -_camera.fov_ratio;
 
-  printf("left: %f, right: %f, up: %f, down: %f\n", mLeft,mRight,mTop,mBottom);
-
   mNear = 0.5;
   mScene = scene;
   background = Color(0.0, 0.0, 0.0, 1.0);
 
+  _matrix = _camera.perspectiveMatrix();
 
-  Vector w = _camera.look_at - _camera.location;
-  Vector u;
-  Vector v;
-  w.norm();
-  w = w * -1;
-  _camera.up.cross(w, &u);
-  w.cross(u, &v);
-
-  MyMat m1 = MyMat(1, 0, 0, _camera.location.x(),
-                   0, 1, 0, _camera.location.y(),
-                   0, 0, 1, _camera.location.z(),
-                   0, 0, 0, 1);
-
-  //cout << "Camera Loc: " << endl << m1 << endl;
-
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
-                   u.y(), v.y(), w.y(), 0,
-                   u.z(), v.z(), w.z(), 0,
-                   0, 0, 0, 1);
-
-  //cout << "UVW: " << endl << m2 << endl;
-
-  _matrix = m1.multRight(m2);
-  //cout << "END: " << endl << m3 << endl;
 }
 
 /*
@@ -119,19 +69,17 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
 Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
     Color result; // resulting color to be returned
 
-    Vector D = ray.direction;
-    Vector V = D * -1;
+    Vector V = ray.direction * -1;
 
     // Invert backwards normals
     if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(V) < 0) {
         surface.n = surface.n * -1;
     }
 
-    result = Color(0);
-
     // Gather indirect light
     result = light::shadeIndirect(surface, gather, ambient);
 
+    // Determine diffuse light
     result = result + light::shadeDiffuse(V, surface, specular);
     
     return result;
@@ -155,9 +103,9 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
     if( !mScene->intersect(ray, &surface) ) {
         Color vol_color(0.);
         Color vol_transmittance(1.);
-        //vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
+        vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
-        //vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
+        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
 
         return (background * vol_transmittance) + vol_color;
     }
@@ -207,9 +155,9 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 
         Color vol_color(0.);
         Color vol_transmittance(1.);
-        //vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
+        vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
-        //vol_color = mVolumeIntegrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
+        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
 
         //return color + reflect_color * reflection;
         if(!success && surface.finish.refraction ) {
@@ -337,8 +285,6 @@ int Raycaster::raycast(
   int x, y;
   mDepth = depth;
 
-  mVolumeIntegrator = new VolumeIntegrator(mScene);
-
   for( x = start_x; x < end_x; x++ ) {
 
     //boost::xtime xt;
@@ -399,8 +345,6 @@ int Raycaster::surfelCast(
   //writer.fill( 0, 0, 0, 0 );
   Color color;
   int x, y;
-  
-  mVolumeIntegrator = new VolumeIntegrator(mScene);
 
   Surface surf;
   Ray ray;
