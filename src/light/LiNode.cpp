@@ -9,7 +9,9 @@
 #include "../scene/Geometry.h"
 #include "Surfel.h"
 
-OctreeNode::OctreeNode( Vector min, Vector max ): _min(min), _max(max) {
+#include "../system/config.h"
+
+OctreeNode::OctreeNode( Vec3 min, Vec3 max ): _min(min), _max(max) {
 
     // Clear all children
     for(int i = 0; i < 8; i++)
@@ -39,7 +41,7 @@ OctreeNode::cascadeDelete() {
 }
 
 int
-OctreeNode::test_intersect( Ray ray, double *t, Vector *n ) {
+OctreeNode::test_intersect( Ray ray, double *t, Vec3 *n ) {
 
     BBNode node = BBNode(_min, _max);
 
@@ -81,37 +83,16 @@ Color
 LiNode::gather( Ray ray, double *t ) {
     double tmin = INFINITY;
     double thit;
-    Color closest;
+    Color closest = config::background;
     Color tmp;
-    Vector n;
-
-/*
-    Disk disk = Disk(1.0, 0.0, 2 * PI, Ray(Vector(1,2,0), Vector(0.0,0.0,-0.5)));//(*_surfelData)->normal()));
-    //Sphere sphere;
-    //sphere.center = (*_surfelData)->position();
-    //sphere.radius = (*_surfelData)->area();
-    //if(sphere.test_intersect(ray, &thit, &n)) {
-        //printf("WHAT\n");
-    Ray tmpRay;
-    tmpRay.start = disk.matrix * Vector4(ray.start, 1);
-    tmpRay.direction = disk.matrix * Vector4(ray.direction, 0);
-    tmpRay.direction.norm();
-    if(disk.test_intersect(tmpRay, &thit, &n)) {
-        if(thit < tmin) {
-            tmin = thit;
-            closest = (*_surfelData)->diffuse();
-        }
-    }
-
-    return closest;
-*/
+    Vec3 n;
 
     //printf("GATHERING STAGE BEGIN\n");
 
     if(!OctreeNode::test_intersect( ray, &thit, &n )){
         //printf("O NOES... NO INTERSECT!\n");
         *t = INFINITY;
-        return Color(0);
+        return config::background;
     }
 
     //printf("WE CAN HAS INTERSECT!\n");
@@ -130,7 +111,7 @@ LiNode::gather( Ray ray, double *t ) {
            (_min.y() < ray.start.y() && _max.y() > ray.start.y()) &&
            (_min.z() < ray.start.z() && _max.z() > ray.start.z())) {
            *t = INFINITY;
-           return Color(0);
+           return config::background;
         }
         //if(_surfelCount == 0) return Color(0,0,0.5);
         //printf("Testing all Disks (%d)!\n", _surfelCount);
@@ -142,8 +123,8 @@ LiNode::gather( Ray ray, double *t ) {
             //if(sphere.test_intersect(ray, &thit, &n)) {
                 //printf("WHAT\n");
             Ray tmpRay;
-            tmpRay.start = (*_surfelData)->matrix * Vector4(ray.start, 1);
-            tmpRay.direction = (*_surfelData)->matrix * Vector4(ray.direction, 0);
+            tmpRay.start = (*_surfelData)->matrix * Vec4(ray.start, 1);
+            tmpRay.direction = (*_surfelData)->matrix * Vec4(ray.direction, 0);
             tmpRay.direction.norm();
 
             // Would be usefull if we wanted to suck at cheating
@@ -167,7 +148,7 @@ int
 LiNode::subdivide() {
 
     //printf("Subdividing %s - %s\n", m_min.str(), m_max.str());
-    Vector size = (_max - _min) * 0.5;
+    Vec3 size = (_max - _min) * 0.5;
 
     if(size.length() < 0.00000001) {
         printf("SIZE: %d\n", _surfelCount);
@@ -179,7 +160,7 @@ LiNode::subdivide() {
         exit(1);
     }
     assert(size.length() > 0.00000001);
-    Vector min, max;
+    Vec3 min, max;
     int x,y,z;
 
     // Loop over children
@@ -190,7 +171,7 @@ LiNode::subdivide() {
         z = (i/4);
 
         // Define minimum by which quadrant it is in
-        min = Vector(_min.x() + (size.x() * x),
+        min = Vec3(_min.x() + (size.x() * x),
                      _min.y() + (size.y() * y),
                      _min.z() + (size.z() * z));
 
@@ -247,7 +228,7 @@ LiNode::count() {
     }
 }
 
-LiNode::LiNode(Vector min, Vector max):OctreeNode(min,max), _surfelCount(0) {
+LiNode::LiNode(Vec3 min, Vec3 max):OctreeNode(min,max), _surfelCount(0) {
     
     // Allocate data enough for the maximum amount of surfels
     _surfelData = new shared_ptr<Surfel>[MAX_SURFEL_COUNT];
@@ -304,7 +285,7 @@ bool
 LiNode::inside(shared_ptr<Surfel> obj) {
     float dmin = 0;
 
-    Vector sphere_pos = obj->position();
+    Vec3 sphere_pos = obj->position();
 
     if(sphere_pos.x() > _min.x() && sphere_pos.x() < _max.x() &&
             sphere_pos.y() > _min.y() && sphere_pos.y() < _max.y() &&

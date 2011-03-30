@@ -14,19 +14,19 @@
 
 class Surfel : public Disk{
 public:
-    Surfel(Vector position, Vector normal, Color diffuse, float area);
+    Surfel(Vec3 position, Vec3 normal, Color diffuse, float area);
     Surfel(const Surfel& orig);
     virtual ~Surfel();
 
-    Vector position(){ return _pos; }
-    Vector normal(){ return _normal; }
+    Vec3 position(){ return _pos; }
+    Vec3 normal(){ return _normal; }
     Color diffuse(){ return _diffuse; }
     float area(){ return _radius; }
     
 private:
 
-    Vector _pos;       // Surface position
-    Vector _normal;    // Surface normal
+    Vec3 _pos;       // Surface position
+    Vec3 _normal;    // Surface normal
     Color _diffuse;    // Direct lighting data
 };
 

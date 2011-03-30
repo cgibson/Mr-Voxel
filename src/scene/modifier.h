@@ -13,7 +13,7 @@ class Modifier{
 public:
   Modifier( void );
   virtual char* str( void );
-  virtual MyMat matrix();
+  virtual Matrix matrix();
 private:
 };
 
@@ -23,11 +23,11 @@ private:
 class Rotation : public Modifier{
 public:
   Rotation( void );
-  Rotation( Vector rot ): rotation(rot){}
+  Rotation( Vec3 rot ): rotation(rot){}
   virtual char* str( void );
-  virtual MyMat matrix();
+  virtual Matrix matrix();
 
-  Vector rotation;
+  Vec3 rotation;
 };
 
 /*
@@ -36,11 +36,11 @@ public:
 class Translation : public Modifier{
 public:
   Translation( void );
-  Translation( Vector trans ): translation(trans){}
+  Translation( Vec3 trans ): translation(trans){}
   virtual char* str( void );
-  virtual MyMat matrix();
+  virtual Matrix matrix();
 
-  Vector translation;
+  Vec3 translation;
 };
 
 /*
@@ -49,11 +49,11 @@ public:
 class Scale : public Modifier{
 public:
   Scale( void );
-  Scale( Vector sc): scale(sc){}
+  Scale( Vec3 sc): scale(sc){}
   virtual char* str( void );
-  virtual MyMat matrix();
+  virtual Matrix matrix();
 
-  Vector scale;
+  Vec3 scale;
 };
 
 /*

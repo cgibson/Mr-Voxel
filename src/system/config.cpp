@@ -1,5 +1,6 @@
 #include "config.h"
 
+
 namespace sys {
 namespace config {
 
@@ -67,6 +68,7 @@ namespace config {
     int render_depth = 3;
     bool reflection = true;
     bool refraction = true;
+    Color background = 0.;
 
     // Render targets
     render_target_t render_target = TARGET_FULL;

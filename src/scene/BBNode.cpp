@@ -67,7 +67,7 @@ BBNode::BBNode( SceneObject *o1, SceneObject *o2 )
 /*
  * Default BBNode Constructor with minimum and maximum points defined
  *----------------------------------------------------------------------------*/
-BBNode::BBNode( Vector minimum, Vector maximum )
+BBNode::BBNode( Vec3 minimum, Vec3 maximum )
 {
   min = minimum;
   max = maximum;
@@ -110,7 +110,7 @@ double BBNode::cost( void )
  * Test BBNODE intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int BBNode::test_intersect( Ray ray, double *t, Vector *n )
+int BBNode::test_intersect( Ray ray, double *t, Vec3 *n )
 {
   double near = -1000; double far = 1000;
   double near_tmp, far_tmp;
@@ -144,7 +144,7 @@ int BBNode::test_intersect( Ray ray, double *t, Vector *n )
   return true;
 }
 
-int BBNode::inside( Vector point )
+int BBNode::inside( Vec3 point )
 {
   double p[3] = {point.x(), point.y(), point.z()};
   double tmin[3] = {min.x(), min.y(), min.z()};
@@ -164,7 +164,7 @@ int BBNode::inside( Vector point )
  * Test BBNODE intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int BBNode::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
+int BBNode::test_intersect( Ray ray, double *t1, double *t2, Vec3 *n )
 {
   double near = -1000; double far = 1000;
   double near_tmp, far_tmp;
@@ -195,7 +195,6 @@ int BBNode::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
   if(near > far) return false;
   if(far < 0) return false;
 
-  Vector point;
   if(near < 0.0)
   {
     *t1 = 0.0;
@@ -212,29 +211,29 @@ int BBNode::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
 /*
  * Construct a bounding box with the given matrix applied
  *----------------------------------------------------------------------------*/
-BBNode BBNode::construct( MyMat matrix )
+BBNode BBNode::construct( Matrix matrix )
 {
   matrix = matrix.inverse();
-  Vector corner[8] = {
-                      Vector(min.x(), min.y(), min.z()),
-                      Vector(min.x(), min.y(), max.z()),
-                      Vector(min.x(), max.y(), min.z()),
-                      Vector(min.x(), max.y(), max.z()),
+  Vec3 corner[8] = {
+                      Vec3(min.x(), min.y(), min.z()),
+                      Vec3(min.x(), min.y(), max.z()),
+                      Vec3(min.x(), max.y(), min.z()),
+                      Vec3(min.x(), max.y(), max.z()),
 
-                      Vector(max.x(), min.y(), min.z()),
-                      Vector(max.x(), min.y(), max.z()),
-                      Vector(max.x(), max.y(), min.z()),
-                      Vector(max.x(), max.y(), max.z())
+                      Vec3(max.x(), min.y(), min.z()),
+                      Vec3(max.x(), min.y(), max.z()),
+                      Vec3(max.x(), max.y(), min.z()),
+                      Vec3(max.x(), max.y(), max.z())
                      };
   int i;
 
-  Vector tmp;
-  Vector pmin = Vector(1000, 1000, 1000);
-  Vector pmax = pmin * -1;
+  Vec3 tmp;
+  Vec3 pmin = Vec3(1000, 1000, 1000);
+  Vec3 pmax = pmin * -1;
 
   for(i = 0; i < 8; i++)
   {
-    tmp = matrix * Vector4(corner[i], 1);
+    tmp = matrix * Vec4(corner[i], 1);
     if(tmp.x() < pmin.x()) pmin.x(tmp.x());
     if(tmp.y() < pmin.y()) pmin.y(tmp.y());
     if(tmp.z() < pmin.z()) pmin.z(tmp.z());
@@ -329,7 +328,7 @@ BBNode GeomObj::construct_bb( void )
 /*
  * Return the center of the bounding box
  *----------------------------------------------------------------------------*/
-Vector BBNode::getCenter()
+Vec3 BBNode::getCenter()
 {
   return (min + max) / 2.0f;
 }
@@ -375,12 +374,12 @@ bool child_intersect(Ray ray, Surface *surface, SceneObject* object) {
     bool hit;
     double epsilon = 0.001f;
     double t = 0;
-    Vector n;
+    Vec3 n;
     
     // create a temporary ray to avoid clipping issues
     GeomObj *obj = (GeomObj*)object;
-    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
+    tmp_ray.start = obj->matrix * Vec4(ray.start, 1);
+    tmp_ray.direction = obj->matrix * Vec4(ray.direction, 0);
 
     // test the scene object's intersect
     hit = obj->test_intersect(tmp_ray, &t, &n);
@@ -389,7 +388,7 @@ bool child_intersect(Ray ray, Surface *surface, SceneObject* object) {
     if(hit && (t > epsilon)) {
 
         surface->t = t;
-        surface->n = obj->matrix.trans() * Vector4(n,1);
+        surface->n = obj->matrix.trans() * Vec4(n,1);
         surface->n.norm();
         surface->p = ray.start + (ray.direction * t);
         surface->finish = obj->finish;
@@ -406,7 +405,7 @@ BBNode::intersect(Ray ray, Surface* surface) {
 
     Surface col_l, col_r;
     double t = 0;
-    Vector n;
+    Vec3 n;
     int hit;
     int hit_l = false;
     int hit_r = false;

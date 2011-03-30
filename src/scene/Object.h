@@ -1,7 +1,7 @@
 #ifndef OBJECT_H_
 #define OBJECT_H_
 
-#include "../util/util.h"
+#include "../util/MyMat.h"
 #include "../util/rayutil.h"
 
 enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK};
@@ -20,7 +20,7 @@ private:
 class SceneObject : public Object{
 public:
   SceneObject( void );
-  virtual int test_intersect( Ray ray, double *t, Vector *n )
+  virtual int test_intersect( Ray ray, double *t, Vec3 *n )
     { return false; }
   virtual TYPE getType( void ){ return UNDEF; }
 };

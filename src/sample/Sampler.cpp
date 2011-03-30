@@ -16,7 +16,7 @@ namespace sample{
     }
 
     // From http://www.rorydriscoll.com/2009/01/07/better-sampling/
-    Vector sampleToHCoord(float us, float ts) {
+    Vec3 sampleToHCoord(float us, float ts) {
 
         const float r = sqrt(us);
         const float theta = 2 * PI * ts;
@@ -24,14 +24,14 @@ namespace sample{
         const float x = r * cos(theta);
         const float y = r * sin(theta);
 
-        return Vector(x, y, sqrt(1.0f - us));
+        return Vec3(x, y, sqrt(1.0f - us));
 
     }
 
 
 
     // From http://www.rorydriscoll.com/2009/01/07/better-sampling/
-    Vector sampleToHCoordX(float us, float ts) {
+    Vec3 sampleToHCoordX(float us, float ts) {
 
         const float r = sin(us * PI / 2.);
         const float theta = 2 * PI * ts;
@@ -39,23 +39,23 @@ namespace sample{
         const float x = r * cos(theta);
         const float y = r * sin(theta);
 
-        return Vector(x, y, sin((PI / 2.) - (us * PI / 2.)));
+        return Vec3(x, y, sin((PI / 2.) - (us * PI / 2.)));
 
     }
 
-    HemisphereSampler::HemisphereSampler(Vector normal, int us, int ts)
+    HemisphereSampler::HemisphereSampler(Vec3 normal, int us, int ts)
         : _max_us(us), _max_ts(ts), _us(0), _ts(0), _normal(normal) {
 
-        Vector up = Vector(0,1,0);
-        Vector w = normal;
-        Vector u;
-        Vector v;
+        Vec3 up = Vec3(0,1,0);
+        Vec3 w = normal;
+        Vec3 u;
+        Vec3 v;
         w.norm();
         //w = w * -1;
 
         if(w.y() >= 0.9995 || w.y() <= -0.995) {
-        u = Vector(1,0,0);
-        v = Vector(0,0,1);
+        u = Vec3(1,0,0);
+        v = Vec3(0,0,1);
         }else{
         up.cross(w, &u);
         u.norm();
@@ -76,7 +76,7 @@ namespace sample{
     }
 
     bool
-    HemisphereSampler::getSample(Vector* sample) {
+    HemisphereSampler::getSample(Vec3* sample) {
         // End of the line
         if(_ts == _max_ts){ /*printf("DONE\n");*/return false;}
 
@@ -84,9 +84,9 @@ namespace sample{
         const float jitter_us = (drand48() - 0.f) * (1. / _max_us);
         const float jitter_ts = (drand48() - 0.f) * (1. / _max_ts);
 
-        const Vector tmpSample = sampleToHCoord((_us / (float)_max_us) + jitter_us, (_ts / (float)_max_ts) + jitter_ts);
+        const Vec3 tmpSample = sampleToHCoord((_us / (float)_max_us) + jitter_us, (_ts / (float)_max_ts) + jitter_ts);
 
-        *sample = _matrix * Vector4(tmpSample,0);
+        *sample = _matrix * Vec4(tmpSample,0);
         sample->norm();
 
         //printf("\tsampling %d %d\n", _us, _ts);

@@ -10,92 +10,92 @@ int test_intersect_1d(double p, double d,
                       double min, double max,
                       double *result_near, double *result_far);
 
-/* A vector class for 3D Vectors */
-class Vector{
+/* A Vector3D class for 3D Vector3Ds */
+class Vector3D{
 public:
-	Vector( void );           // default constructor
-	Vector( Vector* );       //alternative constructors 
-    Vector( const double x, const double y, const double z )
+	Vector3D( void );           // default constructor
+	Vector3D( Vector3D* );       //alternative constructors
+    Vector3D( const float x, const float y, const float z )
 		 : p_x( x ), p_y( y ), p_z( z ) {}
-	~Vector( void );          // *always* have a destructor
+	~Vector3D( void );          // *always* have a destructor
 
      /*assesors*/
-     double  x( void ) const { return p_x; }
-     double& x( void )       { return p_x; }
-     double  y( void ) const { return p_y; }
-     double& y( void )       { return p_y; }
-     double  z( void ) const { return p_z; }
-     double& z( void )       { return p_z; }
+     float  x( void ) const { return p_x; }
+     float& x( void )       { return p_x; }
+     float  y( void ) const { return p_y; }
+     float& y( void )       { return p_y; }
+     float  z( void ) const { return p_z; }
+     float& z( void )       { return p_z; }
 
-     double get( int i );
-	 void set(double x, double y, double z);
-	 void set(Vector& v);
+     float get( int i );
+	 void set(float x, float y, float z);
+	 void set(Vector3D& v);
 	 
-	 void x( double x ){ p_x = x;}
-	 void y( double y ){ p_y = y;}
-	 void z( double z ){ p_z = z;}
+	 void x( float x ){ p_x = x;}
+	 void y( float y ){ p_y = y;}
+	 void z( float z ){ p_z = z;}
 
      /*operator overload for math simplicity */ 
-     Vector operator=( const Vector& );
+     Vector3D operator=( const Vector3D& );
 
-     Vector operator+( const Vector& v )
-       { return Vector( p_x + v.p_x, p_y + v.p_y, p_z + v.p_z); }
+     Vector3D operator+( const Vector3D& v )
+       { return Vector3D( p_x + v.p_x, p_y + v.p_y, p_z + v.p_z); }
      
-	 Vector operator-( const Vector& v )
-       { return Vector( p_x - v.p_x, p_y - v.p_y, p_z - v.p_z); }
+	 Vector3D operator-( const Vector3D& v )
+       { return Vector3D( p_x - v.p_x, p_y - v.p_y, p_z - v.p_z); }
      
-	 double operator*( const Vector& v )
+	 float operator*( const Vector3D& v )
        { return ( p_x*v.p_x + p_y*v.p_y + p_z*v.p_z); }
 	
-	 Vector operator*(const double f) 
-       { return Vector( p_x*f , p_y*f , p_z*f); }
+	 Vector3D operator*(const float f)
+       { return Vector3D( p_x*f , p_y*f , p_z*f); }
 	
-	 Vector operator/(const double f) 
-       { return Vector( p_x/f , p_y/f , p_z/f); }
+	 Vector3D operator/(const float f)
+       { return Vector3D( p_x/f , p_y/f , p_z/f); }
     
     /*useful to be able to print out using stream operators*/
-    friend ostream& operator<<( ostream&, const Vector& );
-    friend istream& operator>>( istream&, Vector& );
+    friend ostream& operator<<( ostream&, const Vector3D& );
+    friend istream& operator>>( istream&, Vector3D& );
 
-	void cross(const Vector in, Vector *out);
-	double dot(const Vector v2);
-	double norm();
-	double length();
+	void cross(const Vector3D in, Vector3D *out);
+	float dot(const Vector3D v2);
+	float norm();
+	float length();
     char* str();
-    Vector reflect(Vector n);
-    Vector refract(Vector n, double n1, double n2, int *success);
+    Vector3D reflect(Vector3D n);
+    Vector3D refract(Vector3D n, float n1, float n2, int *success);
 
 private:
-     double p_x, p_y, p_z;
+     float p_x, p_y, p_z;
 };
 
-class Vector4{
+class Vector4D{
 public:
-    Vector4( void );           // default constructor
-    Vector4( Vector4* );
-     Vector4( const double x, const double y, const double z , const double t)
+    Vector4D( void );           // default constructor
+    Vector4D( Vector4D* );
+     Vector4D( const float x, const float y, const float z , const float t)
          : p_x( x ), p_y( y ), p_z( z ), inter( t) {}
-    ~Vector4( void );          // *always* have a destructor
-    Vector4( const Vector v, const double t);
+    ~Vector4D( void );          // *always* have a destructor
+    Vector4D( const Vector3D v, const float t);
 
      /*assesors*/
-     double  x( void ) const { return p_x; }
-     double& x( void )       { return p_x; }
-     double  y( void ) const { return p_y; }
-     double& y( void )       { return p_y; }
-     double  z( void ) const { return p_z; }
-     double& z( void )       { return p_z; }
-     double  t( void ) const { return inter; }
-     double& t( void )       { return inter; }
+     float  x( void ) const { return p_x; }
+     float& x( void )       { return p_x; }
+     float  y( void ) const { return p_y; }
+     float& y( void )       { return p_y; }
+     float  z( void ) const { return p_z; }
+     float& z( void )       { return p_z; }
+     float  t( void ) const { return inter; }
+     float& t( void )       { return inter; }
 
-     void set(double x, double y, double z, double t);
+     void set(float x, float y, float z, float t);
     
     /*useful to be able to print out using stream operators*/
-     friend ostream& operator<<( ostream&, const Vector4& );
+     friend ostream& operator<<( ostream&, const Vector4D& );
 
      char* str();
 private:
-     double p_x, p_y, p_z, inter;
+     float p_x, p_y, p_z, inter;
 };
 
 #endif

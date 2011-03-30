@@ -3,8 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "../mrvoxel/VolumeRegion.h"
-#include "../util/util.h"
-#include "../util/MyMat.h"
+#include "../types.h"
 #include "modifier.h"
 #include "BBNode.h"
 #include "Geometry.h"
@@ -19,12 +18,12 @@ class Camera : public Object{
 public:
   Camera( void );
   virtual char* str( void );
-  MyMat perspectiveMatrix();
+  Matrix perspectiveMatrix();
 
-  Vector location;
-  Vector up;
-  Vector right;
-  Vector look_at;
+  Vec3 location;
+  Vec3 up;
+  Vec3 right;
+  Vec3 look_at;
   double fov;
   double fov_ratio;
 
@@ -39,7 +38,7 @@ public:
   LightSource( void );
   virtual char* str( void );
   
-  Vector position;
+  Vec3 position;
   Color color;
 
 private:
@@ -75,16 +74,16 @@ enum SurfaceType{ SolidSurface, VolumeSurface };
  *----------------------------------------------------------------------------*/
 class Surface {
 public:
-  Vector p;
+  Vec3 p;
   double t;
-  Vector n;
+  Vec3 n;
   Finish finish;
   Color color;
   SurfaceType type;
   GeomObj *objPtr;
   
   Surface();
-  Surface(Vector point, double distance, Vector normal, Finish fin, Color col);
+  Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col);
   bool isHit( void ){ return hit; }
 private:
   bool hit;
@@ -125,7 +124,7 @@ public:
 
   LiNode* lightCache(){ return mLiCache; }
   int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
-  LiNode* initCache(Vector min, Vector max){ mLiCache = new LiNode(min, max); }
+  LiNode* initCache(Vec3 min, Vec3 max){ mLiCache = new LiNode(min, max); }
 
   bool intersect(Ray ray, Surface *surface);
 

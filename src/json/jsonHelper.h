@@ -46,10 +46,10 @@ Dimension parseDimension(const Json::Value val)
   return ret;
 }
 
-Vector parseVector(const Json::Value val)
+Vec3 parseVec3(const Json::Value val)
 {
   int index = 0;
-  return Vector(
+  return Vec3(
              val[index].asDouble(),
              val[index+1].asDouble(),
              val[index+2].asDouble()
@@ -78,10 +78,10 @@ bool parseCamera(Json::Value val, Scene *scene)
 {
   Camera *camera = new Camera();
   
-  camera->location = parseVector(val["eye"]);
-  camera->up = parseVector(val["up"]);
-  camera->right = parseVector(val["right"]);
-  camera->look_at = parseVector(val["look_at"]);
+  camera->location = parseVec3(val["eye"]);
+  camera->up = parseVec3(val["up"]);
+  camera->right = parseVec3(val["right"]);
+  camera->look_at = parseVec3(val["look_at"]);
   camera->fov = val["fov"].asDouble();
   // translation into radians:
 
@@ -119,11 +119,11 @@ Finish parseFinish(Json::Value val)
 Modifier* parseModifier(Json::Value val)
 {
   if(val["translate"].size() > 0)
-    return new Translation(parseVector(val["translate"]));
+    return new Translation(parseVec3(val["translate"]));
   if(val["scale"].size() > 0)
-    return new Scale(parseVector(val["scale"]));
+    return new Scale(parseVec3(val["scale"]));
   if(val["rotate"].size() > 0)
-    return new Rotation(parseVector(val["rotate"]));
+    return new Rotation(parseVec3(val["rotate"]));
 }
 
 void parseModifiers(Json::Value modifiers, GeomObj* object)
@@ -144,7 +144,7 @@ void parseModifiers(Json::Value modifiers, GeomObj* object)
 Sphere *parseSphere(Json::Value val)
 {
   Sphere *sphere = new Sphere();
-  sphere->center = parseVector(val["center"]);
+  sphere->center = parseVec3(val["center"]);
   sphere->radius = val["radius"].asDouble();
   sphere->pigment.rgbf = parseColor(val["pigment"]);
   sphere->finish = parseFinish(val["finish"]);
@@ -155,8 +155,8 @@ Sphere *parseSphere(Json::Value val)
 Box *parseBox(Json::Value val)
 {
   Box *box = new Box();
-  box->min(parseVector(val["min"]));
-  box->max(parseVector(val["max"]));
+  box->min(parseVec3(val["min"]));
+  box->max(parseVec3(val["max"]));
   box->pigment.rgbf = parseColor(val["pigment"]);
   box->finish = parseFinish(val["finish"]);
   parseModifiers(val["modifiers"], (GeomObj*)box);
@@ -173,20 +173,20 @@ vector<GeomObj*> parsePolygon(Json::Value val)
         exit(1);
     }
 
-    std::vector<Vector> vertices;
+    std::vector<Vec3> vertices;
 
     Color color = parseColor(val["pigment"]);
     Finish finish = parseFinish(val["finish"]);
 
     int i = 0;
 
-    vertices.push_back(parseVector(vlist[i])); i++;
-    vertices.push_back(parseVector(vlist[i])); i++;
+    vertices.push_back(parseVec3(vlist[i])); i++;
+    vertices.push_back(parseVec3(vlist[i])); i++;
 
     Triangle *tri;
 
     for(i = 2; i < vlist.size(); i++) {
-        vertices.push_back(parseVector(vlist[i]));
+        vertices.push_back(parseVec3(vlist[i]));
         tri = new Triangle(vertices[0], vertices[i-1], vertices[i]);
         parseModifiers(val["modifiers"], (GeomObj*)tri);
         tri->pigment.rgbf = color;
@@ -199,7 +199,7 @@ vector<GeomObj*> parsePolygon(Json::Value val)
 Plane *parsePlane(Json::Value val)
 {
   Plane *plane = new Plane();
-  plane->normal = parseVector(val["normal"]);
+  plane->normal = parseVec3(val["normal"]);
   plane->distance = val["distance"].asDouble();
   plane->pigment.rgbf = parseColor(val["pigment"]);
   plane->finish = parseFinish(val["finish"]);
@@ -291,8 +291,8 @@ void loadVolumeData(Json::Value val, Volume *volume, int size)
 
 VolumeRegion *parseVolume(Json::Value val)
 {
-  Vector min = parseVector(val["min"]);
-  Vector max = parseVector(val["max"]);
+  Vec3 min = parseVec3(val["min"]);
+  Vec3 max = parseVec3(val["max"]);
   int size = val["size"].asInt();
 
   VolumeRegion *region;
@@ -309,8 +309,8 @@ VolumeRegion *parseVolume(Json::Value val)
       double greenstein = val["greenstein"].asDouble();
 
       string file = val["file"].asString();
-      Vector file_res = parseVector(val["file_resolution"]);
-      Vector vol_res = parseVector(val["volume_resolution"]);
+      Vec3 file_res = parseVec3(val["file_resolution"]);
+      Vec3 vol_res = parseVec3(val["volume_resolution"]);
 
       int iso_min = val["iso_min"].asInt();
       int iso_max = val["iso_max"].asInt();
@@ -329,7 +329,7 @@ VolumeRegion *parseVolume(Json::Value val)
       double greenstein = val["greenstein"].asDouble();
 
       string file = val["file"].asString();
-      Vector vol_res = parseVector(val["volume_resolution"]);
+      Vec3 vol_res = parseVec3(val["volume_resolution"]);
 
       int iso_min = val["iso_min"].asInt();
       int iso_max = val["iso_max"].asInt();
@@ -370,7 +370,7 @@ VolumeRegion *parseVolume(Json::Value val)
 LightSource *parseLight(Json::Value val)
 {
   LightSource *light = new LightSource();
-  light->position = parseVector(val["location"]);
+  light->position = parseVec3(val["location"]);
   light->color = parseColor(val["color"]);
   return light;
 }

@@ -14,7 +14,7 @@ GeomObj::GeomObj( void )
  *----------------------------------------------------------------------------*/
 void GeomObj::generateMatrix()
 {
-  MyMat tmp = MyMat();
+  Matrix tmp = Matrix();
   int i;
   for(i = modifier_count - 1; i >= 0; i--)
   {
@@ -26,7 +26,7 @@ void GeomObj::generateMatrix()
 /*
  * Normal for given geometric object
  *----------------------------------------------------------------------------*/
-Vector GeomObj::get_normal( Vector pt )
+Vec3 GeomObj::get_normal( Vec3 pt )
 {
 
   return NULL;
@@ -45,7 +45,7 @@ char* GeomObj::str( void )
 /*
  * Test the intersect with a default geometric object
  *----------------------------------------------------------------------------*/
-int GeomObj::test_intersect( Ray ray, double *t, Vector *n  )
+int GeomObj::test_intersect( Ray ray, double *t, Vec3 *n  )
 {
   return false;
 }
@@ -61,15 +61,15 @@ Sphere::Sphere( void )
  * Test sphere intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Sphere::test_intersect( Ray ray, double *t, Vector *n )
+int Sphere::test_intersect( Ray ray, double *t, Vec3 *n )
 {
-  Vector d = Vector(ray.direction);
-  Vector p = Vector(ray.start);
+  Vec3 d = Vec3(ray.direction);
+  Vec3 p = Vec3(ray.start);
 
   //d.norm();
   double epsilon = 0.0001f;
   double a = d * d;
-  Vector tmp = p - center;
+  Vec3 tmp = p - center;
   double b = 2 * (d * tmp);
   double c = (tmp * tmp) - (radius * radius);
   double discriminent = (b * b) - (4 * a * c);
@@ -103,9 +103,9 @@ int Sphere::test_intersect( Ray ray, double *t, Vector *n )
 /*
  * Return the normal of the sphere
  *----------------------------------------------------------------------------*/
-Vector Sphere::get_normal( Vector pt )
+Vec3 Sphere::get_normal( Vec3 pt )
 {
-  Vector tmp = pt - center;
+  Vec3 tmp = pt - center;
   tmp.norm();
   return tmp;
 }
@@ -115,8 +115,8 @@ Vector Sphere::get_normal( Vector pt )
  *----------------------------------------------------------------------------*/
 BBNode Sphere::construct_bb( void )
 {
-  BBNode node = BBNode(Vector(center.x() - radius, center.y() - radius, center.z() - radius),
-                Vector(center.x() + radius, center.y() + radius, center.z() + radius));
+  BBNode node = BBNode(Vec3(center.x() - radius, center.y() - radius, center.z() - radius),
+                Vec3(center.x() + radius, center.y() + radius, center.z() + radius));
 
   return node.construct(matrix);
 }
@@ -155,12 +155,12 @@ Cone::Cone( void )
  * Test cone intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Cone::test_intersect( Ray ray, double *t, Vector *n )
+int Cone::test_intersect( Ray ray, double *t, Vec3 *n )
 {
   return false;
 }
 
-Vector Cone::get_normal( Vector pt )
+Vec3 Cone::get_normal( Vec3 pt )
 {
   return NULL;
 }
@@ -199,7 +199,7 @@ Box::Box( void )
 /*
  * Default Box Constructor with minimum and maximum points defined
  *----------------------------------------------------------------------------*/
-Box::Box( Vector minimum, Vector maximum )
+Box::Box( Vec3 minimum, Vec3 maximum )
 {
   _min = minimum;
   _max = maximum;
@@ -209,7 +209,7 @@ Box::Box( Vector minimum, Vector maximum )
  * Test box intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Box::test_intersect( Ray ray, double *t, Vector *n )
+int Box::test_intersect( Ray ray, double *t, Vec3 *n )
 {
   double near = -1000; double far = 1000;
   double near_tmp, far_tmp;
@@ -218,9 +218,9 @@ int Box::test_intersect( Ray ray, double *t, Vector *n )
   double d[3] = {ray.direction.x(), ray.direction.y(), ray.direction.z()};
   double tmin[3] = {_min.x(), _min.y(), _min.z()};
   double tmax[3] = {_max.x(), _max.y(), _max.z()};
-  Vector tnorm[3] = {Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)};
-  Vector near_n, far_n;
-  Vector center = (_min + _max) / 2.0;
+  Vec3 tnorm[3] = {Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(0, 0, 1)};
+  Vec3 near_n, far_n;
+  Vec3 center = (_min + _max) / 2.0;
   int r, i;
 
   for(i = 0; i < 3; i++)
@@ -246,16 +246,16 @@ int Box::test_intersect( Ray ray, double *t, Vector *n )
   if(near > far) return false;
   if(far < 0) return false;
 
-  Vector point;
-  Vector mult;
+  Vec3 point;
+  Vec3 mult;
   if(near < 0.0)
   {
     point = ray.start + (ray.direction * far);
-    mult = Vector((point.x() < center.x()) ? -1 : 1,
+    mult = Vec3((point.x() < center.x()) ? -1 : 1,
                   (point.y() < center.y()) ? -1 : 1,
                   (point.z() < center.z()) ? -1 : 1
                  );
-    *n = Vector(far_n.x() * mult.x(),
+    *n = Vec3(far_n.x() * mult.x(),
                 far_n.y() * mult.y(),
                 far_n.z() * mult.z());
     *t = far;
@@ -263,16 +263,16 @@ int Box::test_intersect( Ray ray, double *t, Vector *n )
   else
   {
     point = ray.start + (ray.direction * near);
-    mult = Vector((point.x() < center.x()) ? -1 : 1,
+    mult = Vec3((point.x() < center.x()) ? -1 : 1,
                  (point.y() < center.y()) ? -1 : 1,
                  (point.z() < center.z()) ? -1 : 1
                  );
-    *n = Vector(near_n.x() * mult.x(),
+    *n = Vec3(near_n.x() * mult.x(),
                 near_n.y() * mult.y(),
                 near_n.z() * mult.z());
     *t = near;
   }
-  //Vector mult = Vector(1,1,1);
+  //Vec3 mult = Vec3(1,1,1);
 
 
   return true;
@@ -281,9 +281,9 @@ int Box::test_intersect( Ray ray, double *t, Vector *n )
 /*
  * Return the normal for the given box.  Not used
  *----------------------------------------------------------------------------*/
-Vector Box::get_normal( Vector pt )
+Vec3 Box::get_normal( Vec3 pt )
 {
-  return Vector(0,1,0);
+  return Vec3(0,1,0);
 }
 
 /*
@@ -337,23 +337,23 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
     //orient.direction.norm();
 
     /*
-    Vector a;
+    Vec3 a;
     float theta;
-    Vector up = Vector(0,0,-1);
+    Vec3 up = Vec3(0,0,-1);
 
     if(fabs(orient.direction.z()) <= -0.9995 && false) {
-        a = Vector(0,1,0);
+        a = Vec3(0,1,0);
     }else{
         up.cross(orient.direction, &a);
     }
-    theta = (float)acos((double)orient.direction.dot(Vector(0,0,-1)));
+    theta = (float)acos((double)orient.direction.dot(Vec3(0,0,-1)));
 
     a.norm();
 
     float s = sin(theta);
     float c = cos(theta);
 
-    MyMat m;
+    Matrix m;
 
     m[0][0] = a.x() * a.x() + (1. - a.x() * a.x()) * c;
     m[0][1] = a.x() * a.y() + (1. - c) - a.z() * s;
@@ -375,7 +375,7 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
     m[3][2] = 0;
     m[3][3] = 1;
 
-    MyMat m1 = MyMat(1, 0, 0, -orient.start.x(),
+    Matrix m1 = Matrix(1, 0, 0, -orient.start.x(),
                    0, 1, 0, -orient.start.y(),
                    0, 0, 1, -orient.start.z(),
                    0, 0, 0, 1);
@@ -385,21 +385,21 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
 //*/
  /*
 
-    orient.direction = Vector(0.5, 0.5, 0);
+    orient.direction = Vec3(0.5, 0.5, 0);
 
     orient.direction.norm();
     //printf("LOOKAT:\n\tPOS: %s\n\tDIR: %s\n", orient.start.str(), orient.direction.str());
-    Vector u,v,w;
+    Vec3 u,v,w;
 
     // Find U,V,W vectors
     if(fabs(orient.direction.y()) >= 0.9995) {
         //printf("Test\n");
-        w = Vector(0,1,0);//orient.direction;
-        u = Vector(1,0,0);
-        v = Vector(0,0,1);
+        w = Vec3(0,1,0);//orient.direction;
+        u = Vec3(1,0,0);
+        v = Vec3(0,0,1);
     }else{
         w = orient.direction;
-        Vector up = Vector(0,1,0);
+        Vec3 up = Vec3(0,1,0);
         up.cross(w, &u);
         u.norm();
         w.cross(u, &v);
@@ -407,12 +407,12 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
    // printf("\tU(x): %s\n\tV(y): %s\n\tW(z): %s\n\n", u.str(), v.str(), w.str());
 
     // Generate matrices
-    MyMat m1 = MyMat(1, 0, 0, -orient.start.x(),
+    Matrix m1 = Matrix(1, 0, 0, -orient.start.x(),
                    0, 1, 0, -orient.start.y(),
                    0, 0, 1, -orient.start.z(),
                    0, 0, 0, 1);
 
-    MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+    Matrix m2 = Matrix(u.x(), v.x(), w.x(), 0,
                    u.y(), v.y(), w.y(), 0,
                    u.z(), v.z(), w.z(), 0,
                    0, 0, 0, 1);
@@ -421,30 +421,30 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
     matrix = m2.multRight(m1);
  //* */
 
-    Vector up = Vector(0,1,0);
-    Vector w = orient.direction;
-    Vector u;
-    Vector v;
+    Vec3 up = Vec3(0,1,0);
+    Vec3 w = orient.direction;
+    Vec3 u;
+    Vec3 v;
     w.norm();
     w = w * -1;
 
     if(w.y() >= 0.9995 || w.y() <= -0.995) {
-        u = Vector(1,0,0);
-        v = Vector(0,0,1);
+        u = Vec3(1,0,0);
+        v = Vec3(0,0,1);
     }else{
         up.cross(w, &u);
         u.norm();
         w.cross(u, &v);
     }
 
-  MyMat m1 = MyMat(1, 0, 0, orient.start.x(),
+  Matrix m1 = Matrix(1, 0, 0, orient.start.x(),
                    0, 1, 0, orient.start.y(),
                    0, 0, 1, orient.start.z(),
                    0, 0, 0, 1);
 
   //cout << "Camera Loc: " << endl << m1 << endl;
 
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
+  Matrix m2 = Matrix(u.x(), v.x(), w.x(), 0,
                    u.y(), v.y(), w.y(), 0,
                    u.z(), v.z(), w.z(), 0,
                    0, 0, 0, 1);
@@ -459,12 +459,12 @@ Disk::Disk(float radius, float innerRadius, float tmax, Ray orient)
 
 BBNode Disk::construct_bb() {
     return BBNode(
-            Vector(-_radius, -_radius, _height),
-            Vector(_radius, _radius, _height)
+            Vec3(-_radius, -_radius, _height),
+            Vec3(_radius, _radius, _height)
             );
 }
 
-int Disk::test_intersect(Ray ray, double* t, Vector* n) {
+int Disk::test_intersect(Ray ray, double* t, Vec3* n) {
 
     //printf("1");
     // If we are parallel, don't bother
@@ -479,7 +479,7 @@ int Disk::test_intersect(Ray ray, double* t, Vector* n) {
 
     //printf("3");
     // Find the intersection point
-    Vector phit = ray(thit);
+    Vec3 phit = ray(thit);
     float dist2 = phit.x() * phit.x() + phit.y() * phit.y();
 
     // Check for inner/outer radius
@@ -501,8 +501,8 @@ int Disk::test_intersect(Ray ray, double* t, Vector* n) {
     return true;
 }
 
-Vector Disk::get_normal(Vector pt) {
-    return matrix.trans() * Vector4(0,0,1,0);
+Vec3 Disk::get_normal(Vec3 pt) {
+    return matrix.trans() * Vec4(0,0,1,0);
 }
 
 char* Disk::str( void )
@@ -538,7 +538,7 @@ Triangle::Triangle( void )
 /*
  * Default Triangle Constructor
  *----------------------------------------------------------------------------*/
-Triangle::Triangle( Vector c1, Vector c2, Vector c3 )
+Triangle::Triangle( Vec3 c1, Vec3 c2, Vec3 c3 )
        :corner1(c1),
         corner2(c2),
         corner3(c3)
@@ -549,10 +549,10 @@ Triangle::Triangle( Vector c1, Vector c2, Vector c3 )
  * Test triangle intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Triangle::test_intersect( Ray ray, double *t, Vector *n  )
+int Triangle::test_intersect( Ray ray, double *t, Vec3 *n  )
 {
-  Vector dir = ray.direction;
-  Vector p0 = ray.start;
+  Vec3 dir = ray.direction;
+  Vec3 p0 = ray.start;
   //dir.norm();
 
   double a = corner1.x() - corner2.x();
@@ -602,13 +602,13 @@ int Triangle::test_intersect( Ray ray, double *t, Vector *n  )
 /*
  * Get the normal for the given triangle
  *----------------------------------------------------------------------------*/
-Vector Triangle::get_normal( Vector pt )
+Vec3 Triangle::get_normal( Vec3 pt )
 {
-  Vector a = corner2 - corner1;
-  Vector b = corner3 - corner1;
+  Vec3 a = corner2 - corner1;
+  Vec3 b = corner3 - corner1;
   a.norm();
   b.norm();
-  Vector n = Vector(0,0,0);
+  Vec3 n = Vec3(0,0,0);
   a.cross(b, &n);
   n.norm();
   return n;
@@ -619,17 +619,17 @@ Vector Triangle::get_normal( Vector pt )
  *----------------------------------------------------------------------------*/
 BBNode Triangle::construct_bb( void )
 {
-  Vector pmin = Vector(1000, 1000, 1000);
-  Vector pmax = Vector(-1000, -1000, -1000);
-  Vector tmp;
-  Vector c[3] = {corner1, corner2, corner3};
+  Vec3 pmin = Vec3(1000, 1000, 1000);
+  Vec3 pmax = Vec3(-1000, -1000, -1000);
+  Vec3 tmp;
+  Vec3 c[3] = {corner1, corner2, corner3};
   int i;
 
-  MyMat matInv = matrix.inverse();
+  Matrix matInv = matrix.inverse();
 
   for(int i = 0; i < 3; i++)
   {
-    tmp = matInv * Vector4(c[i], 1);
+    tmp = matInv * Vec4(c[i], 1);
     if(tmp.x() < pmin.x()) pmin.x(tmp.x());
     if(tmp.y() < pmin.y()) pmin.y(tmp.y());
     if(tmp.z() < pmin.z()) pmin.z(tmp.z());
@@ -676,26 +676,26 @@ Plane::Plane( void )
  * Test plane intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Plane::test_intersect( Ray ray, double *t, Vector *n  )
+int Plane::test_intersect( Ray ray, double *t, Vec3 *n  )
 {
   if(normal.y() != 0)
   {
     double y = distance / normal.y(); // if x and z are set to zero, y = D / B
-    Vector tmp = Vector(0, y, 0);
+    Vec3 tmp = Vec3(0, y, 0);
 
     *t = ((tmp - ray.start) * normal) / (ray.direction * normal);
     *n = get_normal(ray.start + ray.direction * (*t));
     return *t > 0;
   }else if(normal.z() != 0){
     double z = distance / normal.z(); // if x and y are set to zero, y = D / B
-    Vector tmp = Vector(0, 0, z);
+    Vec3 tmp = Vec3(0, 0, z);
 
     *t = ((tmp - ray.start) * normal) / (ray.direction * normal);
     *n = get_normal(ray.start + ray.direction * (*t));
     return *t > 0;
   }else{
     double x = distance / normal.x(); // if x and y are set to zero, y = D / B
-    Vector tmp = new Vector(x, 0, 0);
+    Vec3 tmp = new Vec3(x, 0, 0);
 
     *t = ((tmp - ray.start) * normal) / (ray.direction * normal);
     *n = get_normal(ray.start + ray.direction * (*t));
@@ -706,7 +706,7 @@ int Plane::test_intersect( Ray ray, double *t, Vector *n  )
 /*
  * Return the normal of the plane
  *----------------------------------------------------------------------------*/
-Vector Plane::get_normal( Vector pt )
+Vec3 Plane::get_normal( Vec3 pt )
 {
   return normal;
 }

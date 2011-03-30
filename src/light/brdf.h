@@ -19,14 +19,14 @@ using namespace sys;
 
 namespace light{
 
-    extern Color brdf(Vector &V,
-                      Vector &L,
+    extern Color brdf(Vec3 &V,
+                      Vec3 &L,
                       Surface &surf,
                       LightSource *light,
                       Color &lightTr,
                       bool specular);
 
-    extern Color shadeDiffuse(Vector &V, Surface &surf, bool specular);
+    extern Color shadeDiffuse(Vec3 &V, Surface &surf, bool specular);
     extern Color shadeIndirect(Surface &surface, bool gather, bool ambient);
 }
 

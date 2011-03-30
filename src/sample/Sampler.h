@@ -28,16 +28,16 @@ namespace sample {
     };
 
 
-    class HemisphereSampler : public Sampler<Vector> {
+    class HemisphereSampler : public Sampler<Vec3> {
     public:
-        HemisphereSampler(Vector normal, int us, int ts);
-        bool getSample(Vector* sample);
+        HemisphereSampler(Vec3 normal, int us, int ts);
+        bool getSample(Vec3* sample);
 
     protected:
         int _max_us;
         int _max_ts;
         int _us, _ts;
-        Vector _normal;
+        Vec3 _normal;
         MyMat _matrix;
     };
 

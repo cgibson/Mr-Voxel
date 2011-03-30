@@ -13,6 +13,9 @@
 #include <boost/shared_ptr.hpp>
 #include "../scene/Object.h"
 
+namespace sys{};
+
+using namespace sys;
 using std::vector;
 using boost::shared_ptr;
 
@@ -22,7 +25,7 @@ class Surfel;
 
 class OctreeNode : public SceneObject {
 public:
-    OctreeNode( Vector min, Vector max );
+    OctreeNode( Vec3 min, Vec3 max );
 
     // Nodes should NEVER be passed by reference.  only by pointer
     OctreeNode(const OctreeNode& orig);
@@ -31,11 +34,11 @@ public:
     virtual ~OctreeNode();
 
     // Retrieve min/max vector
-    Vector min(){ return _min; }
-    Vector max(){ return _max; }
+    Vec3 min(){ return _min; }
+    Vec3 max(){ return _max; }
 
     // Test intersect for given ray
-    int test_intersect( Ray ray, double *t, Vector *n );
+    int test_intersect( Ray ray, double *t, Vec3 *n );
 
     // Return if node has children
     bool hasChildren(){ return m_children[0] != NULL;}
@@ -53,13 +56,13 @@ protected:
 
     OctreeNode* m_children[8];
 
-    Vector _min, _max;
+    Vec3 _min, _max;
 };
 
 class LiNode : public OctreeNode {
 
 public:
-    LiNode(Vector min, Vector max);
+    LiNode(Vec3 min, Vec3 max);
 
     // Returns indexed child
     LiNode* child(int index){ return (index >= 0 && index < 8) ? (LiNode*)m_children[index] : NULL;}

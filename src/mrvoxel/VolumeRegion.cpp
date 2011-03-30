@@ -1,16 +1,16 @@
 #include "VolumeRegion.h"
 int wtfcount=0;
 
-int VolumeRegion::test_intersect( Ray ray, double *t, Vector *n ) {
+int VolumeRegion::test_intersect( Ray ray, double *t, Vec3 *n ) {
     printf("WARNING:  Intersect not used in volumes.\n");
     return false;
 }
 
-VolumeRegion::VolumeRegion(Vector min, Vector max):mBounds(min, max) {
+VolumeRegion::VolumeRegion(Vec3 min, Vec3 max):mBounds(min, max) {
 
 }
 
-float PhaseHG(Vector w, Vector wp, float g) {
+float PhaseHG(Vec3 w, Vec3 wp, float g) {
 
 	//printf("Phase teim: %s %s %f\n", w.str(), wp.str(), g);
     float costheta = w.dot(wp);
@@ -26,7 +26,7 @@ Spectrum DensityRegion::tau( Ray ray, double stepSize, double offset) {
 	Spectrum tau(0.);
 
 	double t0, t1;
-	Vector n;
+	Vec3 n;
 	
 	if(ray.direction.length() == 0) return 0.f;
 

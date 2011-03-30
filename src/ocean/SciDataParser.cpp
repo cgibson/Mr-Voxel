@@ -20,8 +20,8 @@ SciDataParser::parseFile(std::string const &data) {
    tok = strtok(dataBuf, "\n");
 
    // instantiate beginning min/max values
-   m_minLoc = Vector(DBL_MAX,DBL_MAX,DBL_MAX);
-   m_maxLoc = Vector(-DBL_MAX,-DBL_MAX,-DBL_MAX);
+   m_minLoc = Vec3(DBL_MAX,DBL_MAX,DBL_MAX);
+   m_maxLoc = Vec3(-DBL_MAX,-DBL_MAX,-DBL_MAX);
    m_minO2 = DBL_MAX;
    m_maxO2 = -DBL_MAX;
 

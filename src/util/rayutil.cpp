@@ -1,9 +1,9 @@
 #include "rayutil.h"
 
 /*
- * Color to string function
+ * RGBColor to string function
  *----------------------------------------------------------------------------*/
-char* Color::str( void ) {
+char* RGBColor::str( void ) {
   char *buffer = (char*)calloc(300, sizeof(char));
   sprintf(buffer, "<%.2f, %.2f, %.2f, %.2f>", p_r, p_g, p_b, p_f);
   return buffer;
@@ -12,7 +12,7 @@ char* Color::str( void ) {
 /*
  * Clamp all values to upper/lower doubleing point values
  *----------------------------------------------------------------------------*/
-void Color::clamp( double lower, double upper )
+void RGBColor::clamp( double lower, double upper )
 {
   if(p_r < 0.0) p_r = 0.0;
   else if(p_r > 1.0) p_r = 1.0;
@@ -27,7 +27,7 @@ void Color::clamp( double lower, double upper )
 /*
  * Generates integer array of RGB values (all between 0-255)
  *----------------------------------------------------------------------------*/
-int *Color::rgbArray( void )
+int *RGBColor::rgbArray( void )
 {
   int *array = (int*)malloc(sizeof(int) * 3);
   array[0] = (int)(p_r * 255);

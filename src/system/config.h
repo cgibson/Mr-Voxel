@@ -9,11 +9,12 @@
 #define	CONFIG_H
 
 #include "../types.h"
-#include "../scene/scene.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+
 #include "../integrator/integrator.h"
+#include "../scene/scene.h"
 
 using std::string;
 
@@ -29,6 +30,7 @@ namespace config {
     extern int render_depth;
     extern bool reflection;
     extern bool refraction;
+    extern Color background;
 
     // Render target
     extern render_target_t render_target;

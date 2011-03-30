@@ -1,7 +1,7 @@
 #include "BrickDensity.h"
 
 BrickDensityRegion::BrickDensityRegion(
-		Vector min, Vector max, Spectrum absorbtion,Spectrum scatter,
+		Vec3 min, Vec3 max, Spectrum absorbtion,Spectrum scatter,
 		double greenstein, Spectrum emitt, double density
 		):DensityRegion( min,max,absorbtion,scatter,greenstein,emitt ),m_density_mult(density) {
 
@@ -53,12 +53,12 @@ void BrickDensityRegion::add(int i, int j, int k, float val) {
     tmp->add(0, val);
 }
 
-void BrickDensityRegion::loadCT(string file, Vector file_res, Vector vol_res) {
+void BrickDensityRegion::loadCT(string file, Vec3 file_res, Vec3 vol_res) {
     loadCT(file, file_res, vol_res, 0, USHRT_MAX);
 
 }
 
-void BrickDensityRegion::loadCT(string file, Vector file_res, Vector vol_res, int iso_min, int iso_max) {
+void BrickDensityRegion::loadCT(string file, Vec3 file_res, Vec3 vol_res, int iso_min, int iso_max) {
 
 	 m_brickData = BrickGrid(vol_res.x(),vol_res.y(),vol_res.z());
 
@@ -83,7 +83,7 @@ void BrickDensityRegion::loadCT(string file, Vector file_res, Vector vol_res, in
 
 }
 
-void BrickDensityRegion::loadOceanData(string file, Vector vol_res, int iso_min, int iso_max) {
+void BrickDensityRegion::loadOceanData(string file, Vec3 vol_res, int iso_min, int iso_max) {
 
      m_brickData = BrickGrid(vol_res.x(),vol_res.y(),vol_res.z());
 
@@ -93,9 +93,9 @@ void BrickDensityRegion::loadOceanData(string file, Vector vol_res, int iso_min,
 
      vector<SciData> data = parser.getData();
      
-     Vector minLoc = parser.getMinLoc();
-     Vector maxLoc = parser.getMaxLoc();
-     Vector locDiff = maxLoc - minLoc;
+     Vec3 minLoc = parser.getMinLoc();
+     Vec3 maxLoc = parser.getMaxLoc();
+     Vec3 locDiff = maxLoc - minLoc;
 
      printf("MIN: <%f, %f, %f>\n", minLoc.x(), minLoc.y(), minLoc.z());
 
@@ -107,7 +107,7 @@ void BrickDensityRegion::loadOceanData(string file, Vector vol_res, int iso_min,
 
      printf("MIN: %f, MAX: %f\n", minO2, maxO2);
 
-     Vector tmpLoc;
+     Vec3 tmpLoc;
      double tmpO2;
      SciData dPoint;
 
@@ -242,13 +242,13 @@ float BrickDensityRegion::interpolate(float x, float y, float z, VoxVal val) {
     return final;
 }
 
-double BrickDensityRegion::density(Vector v) {
+double BrickDensityRegion::density(Vec3 v) {
 
 	if(!mBounds.inside(v))
 		return 0.0;
 
-	Vector loc = v - mBounds.min;
-	Vector dim = mBounds.max - mBounds.min;
+	Vec3 loc = v - mBounds.min;
+	Vec3 dim = mBounds.max - mBounds.min;
 
     // find exact floating-point position inside of grid
 	float off_x = (loc.x() / dim.x()) * m_brickData.size_x();
@@ -275,7 +275,7 @@ unsigned short BrickDensityRegion::twoByte2ShortX(char *ptr)
   return r;
 }
 
-void BrickDensityRegion::loadVolSlice(std::string file, Vector file_res, Vector vol_res, int y_val, int iso_min, int iso_max) {
+void BrickDensityRegion::loadVolSlice(std::string file, Vec3 file_res, Vec3 vol_res, int y_val, int iso_min, int iso_max) {
   int size_squared = (int)(file_res.x() * file_res.z());
 
   //cout << "READING: " << file << endl;

@@ -7,7 +7,7 @@ int vol::recurse_vol_search( SceneObject* root, Ray ray, float t_max, std::vecto
 	Ray tmp_ray;
 	double t = 0;
 	double t2 = 0;
-	Vector n;
+	Vec3 n;
 	int hit;
 	int hit_l = false;
 	int hit_r = false;
@@ -40,8 +40,8 @@ int vol::recurse_vol_search( SceneObject* root, Ray ray, float t_max, std::vecto
 	} else {
 
 	    Volume *obj = (Volume*)root;
-	    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-	    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
+	    tmp_ray.start = obj->matrix * Vec4(ray.start, 1);
+	    tmp_ray.direction = obj->matrix * Vec4(ray.direction, 0);
 
 		hit = obj->test_intersect(tmp_ray, &t, &t2, &n);
 
@@ -96,13 +96,13 @@ VNode::VNode( NodeType type )
   _type = type;
 }
 
-/*VNode::VNode( NodeType type )//, Vector min, Vector max )
+/*VNode::VNode( NodeType type )//, Vec3 min, Vec3 max )
   //: Box(min, max)
 {
   _type = type;
 }*/
 
-/*VBranch::VBranch()//Vector min, Vector max)
+/*VBranch::VBranch()//Vec3 min, Vec3 max)
   : VNode(BranchNode)//, min, max)
 {
   for ( int i = 0; i < 2; ++i ) {
@@ -182,7 +182,7 @@ Volume::Volume( void )
 /*
  * Default Volume Constructor with minimum and maximum points defined
  *----------------------------------------------------------------------------*/
-Volume::Volume( Vector min, Vector max, int size )
+Volume::Volume( Vec3 min, Vec3 max, int size )
   //: Box(min, max)
   : _root(NULL)
   , Box(min, max)
@@ -261,7 +261,7 @@ char* Volume::str( void )
 }
 
 
-int Volume::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
+int Volume::test_intersect( Ray ray, double *t1, double *t2, Vec3 *n )
 {
 	  double near = -1000; double far = 1000;
 	  double near_tmp, far_tmp;
@@ -270,9 +270,9 @@ int Volume::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
 	  double d[3] = {ray.direction.x(), ray.direction.y(), ray.direction.z()};
 	  double tmin[3] = {_min.x(), _min.y(), _min.z()};
 	  double tmax[3] = {_max.x(), _max.y(), _max.z()};
-	  Vector tnorm[3] = {Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)};
-	  Vector near_n, far_n;
-	  Vector center = (_min + _max) / 2.0;
+	  Vec3 tnorm[3] = {Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(0, 0, 1)};
+	  Vec3 near_n, far_n;
+	  Vec3 center = (_min + _max) / 2.0;
 	  int r, i;
 
 	  for(i = 0; i < 3; i++)
@@ -298,16 +298,16 @@ int Volume::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
 	  if(near > far) return false;
 	  if(far < 0) return false;
 
-	  Vector point;
-	  Vector mult;
+	  Vec3 point;
+	  Vec3 mult;
 	  if(near < 0.0)
 	  {
 	    point = ray.start + (ray.direction * far);
-	    mult = Vector((point.x() < center.x()) ? -1 : 1,
+	    mult = Vec3((point.x() < center.x()) ? -1 : 1,
 	                  (point.y() < center.y()) ? -1 : 1,
 	                  (point.z() < center.z()) ? -1 : 1
 	                 );
-	    *n = Vector(far_n.x() * mult.x(),
+	    *n = Vec3(far_n.x() * mult.x(),
 	                far_n.y() * mult.y(),
 	                far_n.z() * mult.z());
 	    *t1 = 0.0;
@@ -316,24 +316,24 @@ int Volume::test_intersect( Ray ray, double *t1, double *t2, Vector *n )
 	  else
 	  {
 	    point = ray.start + (ray.direction * near);
-	    mult = Vector((point.x() < center.x()) ? -1 : 1,
+	    mult = Vec3((point.x() < center.x()) ? -1 : 1,
 	                 (point.y() < center.y()) ? -1 : 1,
 	                 (point.z() < center.z()) ? -1 : 1
 	                 );
-	    *n = Vector(near_n.x() * mult.x(),
+	    *n = Vec3(near_n.x() * mult.x(),
 	                near_n.y() * mult.y(),
 	                near_n.z() * mult.z());
 	    *t1 = near;
 	    *t2 = far;
 	  }
-	  //Vector mult = Vector(1,1,1);
+	  //Vec3 mult = Vec3(1,1,1);
 
 
 	  return true;
 }
 
 
-int Volume::test_intersect( Ray ray, double *t, Vector *n )
+int Volume::test_intersect( Ray ray, double *t, Vec3 *n )
 {
   //printf("testing... %d %s\n", _size, (_root==NULL ? "it's null" : "it's not null"));
   if(!_root || (_size < 2))

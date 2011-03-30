@@ -30,7 +30,7 @@ namespace vol
 class VNode {// : public Box{
 public:
   NodeType type();
-  //VNode( NodeType type);//, Vector min, Vector max );
+  //VNode( NodeType type);//, Vec3 min, Vec3 max );
   VNode( NodeType type );
   ~VNode() {};
 
@@ -40,11 +40,11 @@ private:
 
 class VBranch : public VNode{
 public:
-  //VBranch(Vector min, Vector max);
+  //VBranch(Vec3 min, Vec3 max);
   VBranch();
   ~VBranch();
 
-  int test_intersect( Ray ray, double *t, Vector *n);
+  int test_intersect( Ray ray, double *t, Vec3 *n);
 
   void setNode(int i, int j, int k, VNode* node);
 
@@ -58,8 +58,8 @@ private:
 
 class VLeaf : public VNode{
 public:
-  //VLeaf(Vector min, Vector max);
-  //VLeaf(Vector min, Vector max, double value);
+  //VLeaf(Vec3 min, Vec3 max);
+  //VLeaf(Vec3 min, Vec3 max, double value);
   VLeaf(t_val value);
   ~VLeaf() {};
 
@@ -75,13 +75,13 @@ private:
 class Volume : public Box{
 public:
   Volume( void );
-  Volume( Vector min, Vector max, int size);
+  Volume( Vec3 min, Vec3 max, int size);
   ~Volume();
   virtual char* str( void );
   virtual TYPE getType( void ){ return VOLUME; }
 
-  virtual int test_intersect( Ray ray, double *t, Vector *n);
-  int test_intersect( Ray ray, double *t1, double *t2, Vector *n);
+  virtual int test_intersect( Ray ray, double *t, Vec3 *n);
+  int test_intersect( Ray ray, double *t1, double *t2, Vec3 *n);
   double test_opacity( Ray ray );
 
 

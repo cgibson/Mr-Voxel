@@ -11,9 +11,9 @@ Modifier::Modifier( void )
 /*
  * Return matrix for default modifier (base matrix)
  *----------------------------------------------------------------------------*/
-MyMat Modifier::matrix()
+Matrix Modifier::matrix()
 {
-  return MyMat();
+  return Matrix();
 }
 
 /*
@@ -83,9 +83,9 @@ Translation::Translation( void )
 /*
  * Return the matrix for the translation modifier
  *----------------------------------------------------------------------------*/
-MyMat Translation::matrix()
+Matrix Translation::matrix()
 {
-  return MyMat(1, 0, 0, translation.x(),
+  return Matrix(1, 0, 0, translation.x(),
                0, 1, 0, translation.y(),
                0, 0, 1, translation.z(),
                0, 0, 0, 1);
@@ -112,26 +112,26 @@ Rotation::Rotation( void )
 /*
  * Return the rotation matrix
  *----------------------------------------------------------------------------*/
-MyMat Rotation::matrix()
+Matrix Rotation::matrix()
 {
   double theta;
   if(rotation.z() != 0)
   {
     theta = (rotation.z() / 360.0) * 2 * PI;
-    return MyMat(cos(theta), -sin(theta), 0, 0,
+    return Matrix(cos(theta), -sin(theta), 0, 0,
                  sin(theta), cos(theta), 0, 0,
                  0, 0, 1, 0,
                  0, 0, 0, 1);
   }else if(rotation.y() != 0)
   {
     theta = (rotation.y() / 360.0) * 2 * PI;
-    return MyMat(cos(theta), 0, sin(theta), 0,
+    return Matrix(cos(theta), 0, sin(theta), 0,
                  0, 1, 0, 0,
                  -sin(theta), 0, cos(theta), 0,
                  0, 0, 0, 1);
   }else{
     theta = (rotation.x() / 360.0) * 2 * PI;
-    return MyMat(1, 0, 0, 0,
+    return Matrix(1, 0, 0, 0,
                  0, cos(theta), -sin(theta), 0,
                  0, sin(theta), cos(theta), 0,
                  0, 0, 0, 1);
@@ -159,9 +159,9 @@ Scale::Scale( void )
 /*
  * Return the scale matrix
  *----------------------------------------------------------------------------*/
-MyMat Scale::matrix()
+Matrix Scale::matrix()
 {
-  return MyMat((double)scale.x(), 0.0, 0.0, 0.0,
+  return Matrix((double)scale.x(), 0.0, 0.0, 0.0,
                0.0, (double)scale.y(), 0.0, 0.0,
                0.0, 0.0, (double)scale.z(), 0.0,
                0.0, 0.0, 0.0, 1.0);

@@ -25,7 +25,7 @@ namespace light{
             HemisphereSampler sampler = HemisphereSampler(surface.n, config::hemisphere_u, config::hemisphere_t);
 
             double rndn;
-            Vector smpl;
+            Vec3 smpl;
 
             // Gather samples until the sampler runs out
             while(sampler.getSample(&smpl)) {
@@ -45,7 +45,7 @@ namespace light{
         return result;
     }
 
-    Color shadeDiffuse(Vector &V, Surface &surf, bool specular = true) {
+    Color shadeDiffuse(Vec3 &V, Surface &surf, bool specular = true) {
 
         Color result = 0.;
         
@@ -61,7 +61,7 @@ namespace light{
             LightSource *light = lights[i];
 
             // Light position, relative to surface
-            Vector L = light->position - surf.p;
+            Vec3 L = light->position - surf.p;
             double l_dist = L.norm();
 
             // Generate shadow ray
@@ -88,9 +88,9 @@ namespace light{
         
     }
 
-    Color brdf(Vector &V, Vector &L, Surface &surf, LightSource *light, Color &lightTr, bool specular = true) {
+    Color brdf(Vec3 &V, Vec3 &L, Surface &surf, LightSource *light, Color &lightTr, bool specular = true) {
         
-        Vector H = V + L;
+        Vec3 H = V + L;
         H.norm();
 
         // invert shininess so it makes sense

@@ -2,9 +2,6 @@
 #define BBNODE_H_
 
 #include "Object.h"
-#include "../util/util.h"
-#include "../util/MyMat.h"
-#include "../util/rayutil.h"
 
 class Surface;
 
@@ -16,17 +13,17 @@ public:
   BBNode( void );
   BBNode( SceneObject *o );
   BBNode( SceneObject *o1, SceneObject *o2 );
-  BBNode( Vector minimum, Vector maximum );
-  virtual int test_intersect( Ray ray, double *t, Vector *n );
-  virtual int test_intersect( Ray ray, double *t1, double *t2, Vector *n );
-  BBNode construct( MyMat matrix );
-  int inside( Vector );
+  BBNode( Vec3 minimum, Vec3 maximum );
+  virtual int test_intersect( Ray ray, double *t, Vec3 *n );
+  virtual int test_intersect( Ray ray, double *t1, double *t2, Vec3 *n );
+  BBNode construct( Matrix matrix );
+  int inside( Vec3 );
   virtual char* str( void );
   char* recurse_str( void );
   virtual TYPE getType( void ){ return NODE; }
   double cost();
   BBNode combine( BBNode node );
-  Vector getCenter();
+  Vec3 getCenter();
 
   bool intersect(Ray ray, Surface* surface);
 
@@ -39,8 +36,8 @@ public:
     return child_l != NULL;
   }
 
-  Vector min;
-  Vector max;
+  Vec3 min;
+  Vec3 max;
   SceneObject *child_l, *child_r;
 
 };

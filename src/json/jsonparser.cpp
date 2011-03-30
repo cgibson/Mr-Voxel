@@ -28,19 +28,19 @@ Scene * initialize_initial_scene()
   
   // camera
   Camera *camera = new Camera();
-  camera->location = Vector(0,5,14);
-  camera->look_at = Vector(0,0,0);
-  camera->right = Vector(1.3333,0,0);
-  camera->up = Vector(0,1,0);
+  camera->location = Vec3(0,5,14);
+  camera->look_at = Vec3(0,0,0);
+  camera->right = Vec3(1.3333,0,0);
+  camera->up = Vec3(0,1,0);
   scene->setCamera(camera);
   
   LightSource *light = new LightSource();
-  light->position = Vector(0, 20, 0);
+  light->position = Vec3(0, 20, 0);
   light->color = Color(1.5, 1.5, 1.5);
   scene->addLightSource(light);
   
   Sphere *sphere = new Sphere();
-  sphere->center = Vector(0,0,0);
+  sphere->center = Vec3(0,0,0);
   sphere->radius = 2;
   sphere->pigment.rgbf = Color(0.2, 0.2, 1.0);
   sphere->finish.ambient = 0.2;
@@ -53,7 +53,7 @@ Scene * initialize_initial_scene()
   scene->addObject((GeomObj*)sphere);
   
   Plane *plane = new Plane();
-  plane->normal = Vector(0,1,0);
+  plane->normal = Vec3(0,1,0);
   plane->distance = -3;
   plane->pigment.rgbf = Color(1.0, 1.0, 1.0);
   plane->finish.ambient = 0.2;

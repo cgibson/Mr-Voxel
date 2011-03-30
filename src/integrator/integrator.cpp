@@ -15,7 +15,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
     VolumeRegion **volumes = mScene->getVolumes();
 
     double t1, t0 = 0;
-    Vector n;
+    Vec3 n;
     Surface surface;
     if(!volumes[0]->bounds().test_intersect(ray, &t0, &t1, &n)) return 0;
 
@@ -47,9 +47,9 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 
     LightSource** lights = mScene->getLightSources();
 
-    Vector p = ray(t0);
-    Vector pPrev;
-    Vector w = ray.direction * -1;
+    Vec3 p = ray(t0);
+    Vec3 pPrev;
+    Vec3 w = ray.direction * -1;
 
     Spectrum Tr(1.);
     for( int i = 0; i < numSamples; ++i, t0 += step )
@@ -80,7 +80,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
             //printf("Lighting?\n");
             LightSource *light = lights[0];
 
-            Vector wL = light->position - p;
+            Vec3 wL = light->position - p;
 
 
             wL.norm();

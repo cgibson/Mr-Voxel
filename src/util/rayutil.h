@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "util.h"
+#include "../types.h"
 
 #define PI 3.14159265
 
@@ -14,25 +14,25 @@
 class Ray {
 public:
   Ray( void ): mint(0), maxt(INFINITY) {};
-  Ray( Vector s, Vector d, double t0 = 0, double t1 = INFINITY ):start(s), direction(d), mint(t0), maxt(t1) {};
-  Vector start;
-  Vector direction;
+  Ray( Vec3 s, Vec3 d, double t0 = 0, double t1 = INFINITY ):start(s), direction(d), mint(t0), maxt(t1) {};
+  Vec3 start;
+  Vec3 direction;
   
   double mint, maxt;
   
 
-  Vector operator() ( double t ){ return start + (direction * t); }
+  Vec3 operator() ( double t ){ return start + (direction * t); }
 };
 
 /*
- * Represents a color value
+ * Represents a RGBColor value
  *----------------------------------------------------------------------------*/
-class Color {
+class RGBColor {
 public:
-  Color( void ):p_r(0),p_g(0),p_b(0),p_f(0.f){};
-  Color( double v ):p_r(v),p_g(v),p_b(v),p_f(0.f){};
-  Color( double r, double g, double b ):p_r(r),p_g(g),p_b(b),p_f(0.f){};
-  Color( double r, double g, double b, double f ):p_r(r),p_g(g),p_b(b),p_f(f){};
+  RGBColor( void ):p_r(0),p_g(0),p_b(0),p_f(0.f){};
+  RGBColor( double v ):p_r(v),p_g(v),p_b(v),p_f(0.f){};
+  RGBColor( double r, double g, double b ):p_r(r),p_g(g),p_b(b),p_f(0.f){};
+  RGBColor( double r, double g, double b, double f ):p_r(r),p_g(g),p_b(b),p_f(f){};
 
   char *str( void );
 
@@ -56,21 +56,21 @@ public:
   
   bool isBlack(){ return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
 
-  Color operator+( const Color& c )
-    { return Color( p_r + c.p_r, p_g + c.p_g, p_b + c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
-  Color operator-( const Color& c )
-    { return Color( p_r - c.p_r, p_g - c.p_g, p_b - c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
-  Color operator*( const Color& c )
-    { return Color( p_r * c.p_r, p_g * c.p_g, p_b * c.p_b, p_f * c.p_f); }
-  Color operator/( const Color& c )
-    { return Color( p_r / c.p_r, p_g / c.p_g, p_b / c.p_b, p_f / c.p_f); }
-  Color operator*( const double f )
-    { return Color( p_r * f, p_g * f, p_b * f, p_f); }
-  Color operator/( const double f )
-    { return Color( p_r / f, p_g / f, p_b / f, p_f); }
+  RGBColor operator+( const RGBColor& c )
+    { return RGBColor( p_r + c.p_r, p_g + c.p_g, p_b + c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
+  RGBColor operator-( const RGBColor& c )
+    { return RGBColor( p_r - c.p_r, p_g - c.p_g, p_b - c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
+  RGBColor operator*( const RGBColor& c )
+    { return RGBColor( p_r * c.p_r, p_g * c.p_g, p_b * c.p_b, p_f * c.p_f); }
+  RGBColor operator/( const RGBColor& c )
+    { return RGBColor( p_r / c.p_r, p_g / c.p_g, p_b / c.p_b, p_f / c.p_f); }
+  RGBColor operator*( const double f )
+    { return RGBColor( p_r * f, p_g * f, p_b * f, p_f); }
+  RGBColor operator/( const double f )
+    { return RGBColor( p_r / f, p_g / f, p_b / f, p_f); }
 
-  friend Color Exp(const Color &c) {
-     return Color(expf(c.r()), exp(c.g()), exp(c.b()));
+  friend RGBColor Exp(const RGBColor &c) {
+     return RGBColor(expf(c.r()), exp(c.g()), exp(c.b()));
   }
     
 

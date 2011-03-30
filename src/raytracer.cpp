@@ -106,10 +106,10 @@ int main(int argc, char* argv[])
   Camera lightCamera;
   lightCamera.fov = (45. / 360.) * 2 * PI;
   lightCamera.fov_ratio = sin(lightCamera.fov / 2.0);
-  lightCamera.location = Vector(0, 3, -10);
-  lightCamera.look_at = Vector(0, 3, 0);
-  lightCamera.right = Vector(1.33, 0, 0);
-  lightCamera.up = Vector(0,1,0);
+  lightCamera.location = Vec3(0, 3, -10);
+  lightCamera.look_at = Vec3(0, 3, 0);
+  lightCamera.right = Vec3(1.33, 0, 0);
+  lightCamera.up = Vec3(0,1,0);
 
   Raycaster lightCast(config::scenePtr, lightCamera);
 

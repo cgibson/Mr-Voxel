@@ -9,7 +9,7 @@ using namespace std;
  * Collision data constructor including offending object, intersect point, 
  * distance and normal of face
  *----------------------------------------------------------------------------*/
-Surface::Surface(Vector point, double distance, Vector normal, Finish fin, Color col)
+Surface::Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col)
 {
   p = point;
   t = distance;
@@ -26,9 +26,9 @@ Surface::Surface(Vector point, double distance, Vector normal, Finish fin, Color
 Surface::Surface()
 {
   hit = false;
-  p = Vector(0,0,0);
+  p = Vec3(0,0,0);
   t = -1;
-  n = Vector(0,1,0);
+  n = Vec3(0,1,0);
   objPtr = NULL;
 }
 
@@ -70,7 +70,7 @@ void split(ObjectList A, ObjectList *l1, ObjectList *l2, AXIS axis)
 {
   int i;
   int rotate = 0;
-  Vector cur_center, list_center;
+  Vec3 cur_center, list_center;
   BBNode node = A.construct_bb();
   list_center = node.getCenter();
 
@@ -367,28 +367,28 @@ char* Camera::str( void )
   return buffer;
 }
 
-MyMat
+Matrix
 Camera::perspectiveMatrix() {
     
-  Vector w = look_at - location;
-  Vector u;
-  Vector v;
+  Vec3 w = look_at - location;
+  Vec3 u;
+  Vec3 v;
   w.norm();
   w = w * -1;
   up.cross(w, &u);
   w.cross(u, &v);
 
-  MyMat m1 = MyMat(1, 0, 0, location.x(),
-                   0, 1, 0, location.y(),
-                   0, 0, 1, location.z(),
-                   0, 0, 0, 1);
+  Matrix m1 = Matrix(1, 0, 0, location.x(),
+                     0, 1, 0, location.y(),
+                     0, 0, 1, location.z(),
+                     0, 0, 0, 1);
 
   //cout << "Camera Loc: " << endl << m1 << endl;
 
-  MyMat m2 = MyMat(u.x(), v.x(), w.x(), 0,
-                   u.y(), v.y(), w.y(), 0,
-                   u.z(), v.z(), w.z(), 0,
-                   0, 0, 0, 1);
+  Matrix m2 = Matrix(u.x(), v.x(), w.x(), 0,
+                     u.y(), v.y(), w.y(), 0,
+                     u.z(), v.z(), w.z(), 0,
+                     0, 0, 0, 1);
 
   //cout << "UVW: " << endl << m2 << endl;
 

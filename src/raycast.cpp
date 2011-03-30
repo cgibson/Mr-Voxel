@@ -21,8 +21,8 @@ Raycaster::Raycaster( Scene* scene )
 {
   mCastMode = PERSPECTIVE;
   _camera = *scene->getCamera();
-  Vector right = _camera.right;
-  Vector up = _camera.up;
+  Vec3 right = _camera.right;
+  Vec3 up = _camera.up;
   double ratio =  right.norm() / up.norm();
 
   mLeft = -_camera.fov_ratio * ratio;
@@ -32,7 +32,7 @@ Raycaster::Raycaster( Scene* scene )
 
   mNear = 0.5;
   mScene = scene;
-  background = Color(0.0, 0.0, 0.0, 1.0);
+  config::background = Color(0.0, 0.0, 0.0, 1.0);
 
 
   _matrix = _camera.perspectiveMatrix();
@@ -45,8 +45,8 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
 {
   mCastMode = PERSPECTIVE;
   _camera = cam;
-  Vector right = _camera.right;
-  Vector up = _camera.up;
+  Vec3 right = _camera.right;
+  Vec3 up = _camera.up;
   double ratio =  right.norm() / up.norm();
 
   mLeft = -_camera.fov_ratio * ratio;
@@ -56,7 +56,7 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
 
   mNear = 0.5;
   mScene = scene;
-  background = Color(0.0, 0.0, 0.0, 1.0);
+  config::background = Color(0.0, 0.0, 0.0, 1.0);
 
   _matrix = _camera.perspectiveMatrix();
 
@@ -69,7 +69,7 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
 Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
     Color result; // resulting color to be returned
 
-    Vector V = ray.direction * -1;
+    Vec3 V = ray.direction * -1;
 
     // Invert backwards normals
     if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(V) < 0) {
@@ -96,7 +96,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 
     if(depth <= 0) {
 
-        return background;
+        return config::background;
     }
 
     // Check for intersect.  Throw away ray if no intersect
@@ -107,13 +107,13 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 
         vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
 
-        return (background * vol_transmittance) + vol_color;
+        return (config::background * vol_transmittance) + vol_color;
     }
 
-    Vector D = ray.direction;
-    Vector N = surface.n;
-    Vector R = ray.direction.reflect(N);
-    Vector P = surface.p;
+    Vec3 D = ray.direction;
+    Vec3 N = surface.n;
+    Vec3 R = ray.direction.reflect(N);
+    Vec3 P = surface.p;
     Ray ray_reflect = Ray(P, R);
 
     Color color_reflect;
@@ -123,7 +123,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
         color = color + sumLights(surface, ray, 1, 1, true);
 
         int success;
-        Vector Drefract;
+        Vec3 Drefract;
         // if the object is translucent
         if( surface.finish.refraction && (surface.color.f() > 0.0)) {
             //if the normals are pointing out
@@ -179,7 +179,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 Color Raycaster::initialCast( Ray ray, int depth )
 {
     if(depth <= 0)
-        return background;
+        return config::background;
 
     // Shoot the ray, which starts in spaaaaace!
     return handleIntersect( ray, depth );
@@ -201,15 +201,15 @@ Color Raycaster::cast( int x, int y, int width, int height )
   Ray ray;
 
 ray.start.set(0, 0, 0);
-ray.start = ray.start + Vector(us, vs, 0);
+ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vector(0,0,-1);
+ray.direction = Vec3(0,0,-1);
 ray.direction.norm();
-ray.direction = ray.direction + Vector(us, vs, 0);
+ray.direction = ray.direction + Vec3(us, vs, 0);
 
 
-  ray.start = _matrix * Vector4(ray.start, 1);
-  ray.direction = _matrix * Vector4(ray.direction, 0);
+  ray.start = _matrix * Vec4(ray.start, 1);
+  ray.direction = _matrix * Vec4(ray.direction, 0);
   ray.direction.norm();
 
   double t;
@@ -248,14 +248,14 @@ void Raycaster::cam2World( int x, int y, int width, int height, Ray *external_ra
   Ray ray = Ray();
 
 ray.start.set(0, 0, 0);
-ray.start = ray.start + Vector(us, vs, 0);
+ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vector(0,0,-1);
+ray.direction = Vec3(0,0,-1);
 ray.direction.norm();
-ray.direction = ray.direction + Vector(us, vs, 0);
+ray.direction = ray.direction + Vec3(us, vs, 0);
 
-  ray.start = _matrix * Vector4(ray.start, 1);
-  ray.direction = _matrix * Vector4(ray.direction, 0);
+  ray.start = _matrix * Vec4(ray.start, 1);
+  ray.direction = _matrix * Vec4(ray.direction, 0);
   ray.direction.norm();
 
   *external_ray = ray;
@@ -349,7 +349,7 @@ int Raycaster::surfelCast(
   Surface surf;
   Ray ray;
 
-  mScene->initCache(Vector(-15, -15, -15), Vector(15, 15, 15));
+  mScene->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
   for( x = 0; x < width; x+=step_x ) {
 

@@ -2,7 +2,7 @@
 #define _MATRIX_H_
 
 #include <iostream>
-#include "util.h"
+#include "../types.h"
 using namespace std;
 
 /* helper type */
@@ -27,8 +27,8 @@ public:
     const double * operator [](int i) const;
     
     
-    Vector operator*( const Vector4& v )
-      { return Vector(m_Elem[0][0] * v.x() + m_Elem[0][1] * v.y() + m_Elem[0][2] * v.z() + m_Elem[0][3] * v.t(),
+    Vec3 operator*( const Vec4& v )
+      { return Vec3(m_Elem[0][0] * v.x() + m_Elem[0][1] * v.y() + m_Elem[0][2] * v.z() + m_Elem[0][3] * v.t(),
                      m_Elem[1][0] * v.x() + m_Elem[1][1] * v.y() + m_Elem[1][2] * v.z() + m_Elem[1][3] * v.t(),
                      m_Elem[2][0] * v.x() + m_Elem[2][1] * v.y() + m_Elem[2][2] * v.z() + m_Elem[2][3] * v.t()
                );

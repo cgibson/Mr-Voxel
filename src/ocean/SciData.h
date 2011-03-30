@@ -13,7 +13,7 @@
 #include <exception>
 
 #include "../util/util.h"
-
+#include "../types.h"
 
 /* Some error definitions */
 const int BAD_ARGUMENT_EXCEPTION = 1;
@@ -25,12 +25,12 @@ public:
    SciData(double x, double y, double z, double o2conc):m_o2conc(o2conc),m_loc(x,y,z){}
    ~SciData() {}
    void setLocation(double x, double y, double z);
-   Vector getLocation() const {return m_loc;}
+   Vec3 getLocation() const {return m_loc;}
    void setO2Concentration(double concentration) {m_o2conc = concentration;}
    double getO2Concenration() const {return m_o2conc;}
 
 protected:
-   Vector m_loc;
+   Vec3 m_loc;
    double m_o2conc;
 };
 

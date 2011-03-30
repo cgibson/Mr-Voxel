@@ -5,13 +5,13 @@
 
 class HomogeneousRegion : public DensityRegion {
 public:
-    HomogeneousRegion(Vector min, Vector max, Spectrum absorbtion, Spectrum scatter,
+    HomogeneousRegion(Vec3 min, Vec3 max, Spectrum absorbtion, Spectrum scatter,
                       double greenstein, Spectrum emitt, double density)
     	: DensityRegion( min,max,absorbtion,scatter,greenstein,emitt ),
     	                 m_density(density) { };
 
 
-    double density( Vector pt )
+    double density( Vec3 pt )
     {
     	if(!mBounds.inside(pt))
 		return 0.0;

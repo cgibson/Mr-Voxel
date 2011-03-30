@@ -47,7 +47,6 @@ private:
   double mNear;
   double mLeft, mRight;
   double mTop, mBottom;
-  Color background;
   Camera _camera;
   MyMat _matrix;
 };
