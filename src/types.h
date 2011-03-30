@@ -17,6 +17,7 @@ extern "C" {
     // RENDER
     enum ambient_render_t { AMBIENT_NONE, AMBIENT_FLAT, AMBIENT_FULL };
     enum shading_render_t { SHADING_NONE, SHADING_FLAT, SHADING_SMOOTH };
+    enum render_target_t { TARGET_FULL, TARGET_DIFFUSE, TARGET_AMBIENT, TARGET_LIGHT_CACHE };
 
     // IMAGE
     enum antialiasing_t { ANTIALIASING_NONE, ANTIALIASING_STRATEFIED };

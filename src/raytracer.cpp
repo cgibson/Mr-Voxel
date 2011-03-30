@@ -67,11 +67,10 @@ int main(int argc, char* argv[])
 {
 
   Parser *parser = new JSONParser();
-  Scene *scene;
 
   config::parse(argv, argc);
 
-  scene = parser->parse_file(config::in_file);
+  config::scenePtr = parser->parse_file(config::in_file);
 
   if( parser->succeeded() ) {
     printf("Scene was compiled correctly.\n");
@@ -81,11 +80,11 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  scene->generateBoxHierarchy();
+  config::scenePtr->generateBoxHierarchy();
   
   ImageWriter writer = ImageWriter( config::image_resolution );
   
-  raycaster = new Raycaster( scene );
+  raycaster = new Raycaster( config::scenePtr );
   
   int cores = config::core_count;
   int corethreadcount = config::core_thread_count;
@@ -110,7 +109,7 @@ int main(int argc, char* argv[])
   lightCamera.right = Vector(1.33, 0, 0);
   lightCamera.up = Vector(0,1,0);
 
-  Raycaster lightCast(scene, lightCamera);
+  Raycaster lightCast(config::scenePtr, lightCamera);
 
   lightCast.surfelCast(1024,768, 1, 1, &writer);
 

@@ -61,11 +61,15 @@ namespace config {
     }
 
     // Render options
-    ambient_render_t ambience = AMBIENT_FLAT;
+    ambient_render_t ambience = AMBIENT_FULL;
+    bool specular = true;
     shading_render_t shading = SHADING_SMOOTH;
     int render_depth = 3;
     bool reflection = true;
     bool refraction = true;
+
+    // Render targets
+    render_target_t render_target = TARGET_FULL;
 
     // Image options
     Dimension image_resolution = {640, 480};
@@ -76,6 +80,8 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
+    int hemisphere_u = 4;
+    int hemisphere_t = 4;
 
     // Scene information
     Scene *scenePtr = NULL;

@@ -23,10 +23,14 @@ namespace config {
     
     // Render options
     extern ambient_render_t ambience;
+    extern bool specular;
     extern shading_render_t shading;
     extern int render_depth;
     extern bool reflection;
     extern bool refraction;
+
+    // Render target
+    extern render_target_t render_target;
 
     // Image options
     extern Dimension image_resolution;
@@ -37,6 +41,8 @@ namespace config {
 
     // Sample options
     extern sample_t hemisphere_sampler;
+    extern int hemisphere_u;
+    extern int hemisphere_t;
 
     // Scene information
     extern Scene *scenePtr;
