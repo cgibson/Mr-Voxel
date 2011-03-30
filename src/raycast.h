@@ -16,7 +16,6 @@ class Raycaster {
 public:
   Raycaster( Scene* scene );
   Raycaster( Scene* scene, Camera cam );
-  int find_intersect(Ray ray, Surface *surface);
   Color cast( int x, int y, int width, int height );
   void cam2World( int x, int y, int width, int height, Ray *ray );
   int iterate( Ray *ray, Surface *surface);
@@ -32,8 +31,6 @@ public:
             int height,
             int depth,
             ImageWriter *writer);
-  int recurse_intersect(Ray ray, Surface *surface, SceneObject *parent);
-  int intersect(Ray ray, Surface *surface);
 
   int surfelCast(
             int width,

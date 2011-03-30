@@ -53,6 +53,15 @@ Scene::Scene( void )
   mVolumes = (VolumeRegion**)calloc(mVolumeCountMax, sizeof(VolumeRegion*));
 }
 
+bool
+Scene::intersect(Ray ray, Surface* surface) {
+
+    if(mObjectBVH == NULL)
+        return false;
+
+    return static_cast<BBNode*>(mObjectBVH)->intersect(ray, surface);
+}
+
 /*
  * Split all SceneObjects down a given axis.  All objects are added to a 
  * parent bounding box and the box is split along the given axis
@@ -333,181 +342,6 @@ void Scene::addPlane( GeomObj* object )
 	  mPlanes = (GeomObj**)realloc(mPlanes, mPlaneCountMax * sizeof(GeomObj*));
   }
   mPlanes[mPlaneCount++] = object;
-}
-
-/*
- * Recursively test all objects within the given bounding box hierarchy
- *----------------------------------------------------------------------------*/
-int Scene::recurse_intersect(Ray ray, Surface *surface, SceneObject *parent)
-{
-  if(parent == NULL)
-    return false;
-
-  Ray tmp_ray;
-  Surface col_l, col_r;
-  double t = 0;
-  Vector n;
-  int hit;
-  int hit_l = false;
-  int hit_r = false;
-  double epsilon = 0.001f;
-  TYPE type = parent->getType();
-  BBNode *node;
-
-  // if the object is a node
-  if(type == NODE) {
-    // check to make sure it hits
-    hit = parent->test_intersect(ray, &t, &n);
-
-    // return false if no hit, no need to delve deeper
-    if(!hit)
-      return false;
-
-    node = (BBNode*)parent;
-    if(node == NULL) {
-      printf("ERROR: cannot use this node!\n");
-      exit(-1);
-    }
-    else {
-      // recurse into the left child
-      if(node->has_left())
-        hit_l = recurse_intersect(ray, &col_l, node->child_l);
-
-      // recurse into the right child
-      if(node->has_right())
-        hit_r = recurse_intersect(ray, &col_r, node->child_r);
-    }
-
-    // if both children return a hit
-    if(hit_l && hit_r) {
-      // compare the hit values and return the closest
-      if(col_l.t + epsilon < col_r.t) {
-        *surface = col_l;
-      }
-      else {
-        *surface = col_r;
-      }
-    // if the left child is hit
-    }
-    else if(hit_l) {
-      *surface = col_l;
-    // if the right child is hit
-    }
-    else if(hit_r) {
-      *surface = col_r;
-    }
-    else {
-      // no one was hit
-      return false;
-    }
-    return true;
-
-  // otherwise, the current node is a scene object
-  }
-  else if(type == VOLUME) {
-	  printf("ERROR: Intersecting volume is deprecated.");
-	  exit(-1);
-    // create a temporary ray to avoid clipping issues
-    GeomObj *obj = (GeomObj*)parent;
-    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
-
-    // test to see if the volume is hit
-    hit = parent->test_intersect(tmp_ray, &t, &n);
-
-    if(hit && (t > epsilon)) {
-      surface->t = t;
-      surface->n =  ((GeomObj*)parent)->matrix.trans() * Vector4(n,1);
-      surface->n.norm();
-      surface->p = ray.start + (ray.direction * t);
-      surface->finish = ((GeomObj*)parent)->finish;
-      surface->color = ((GeomObj*)parent)->pigment.rgbf;
-      surface->type = VolumeSurface;
-      surface->objPtr = obj;
-      return true;
-    }
-    return false;
-  }
-  else {
-    // create a temporary ray to avoid clipping issues
-    GeomObj *obj = (GeomObj*)parent;
-    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
-
-    // test the scene object's intersect
-    hit = parent->test_intersect(tmp_ray, &t, &n);
-
-    // if the value is closer than the 'closest'
-    if(hit && (t > epsilon)) {
-      surface->t = t;
-      surface->n = ((GeomObj*)parent)->matrix.trans() * Vector4(n,1);
-      surface->n.norm();
-      surface->p = ray.start + (ray.direction * t);
-      surface->finish = ((GeomObj*)parent)->finish;
-      surface->color = ((GeomObj*)parent)->pigment.rgbf;
-      surface->type = SolidSurface;
-      surface->objPtr = obj;
-      return true;
-    }
-    return false;
-  }
-}
-
-
-
-/*
- * Intersect given a ray
- *----------------------------------------------------------------------------*/
-int Scene::intersect(Ray ray, Surface *surface)
-{
-	SceneObject *root = mObjectBVH;
-	GeomObj **planes = mPlanes;
-	SceneObject *cur;
-	int plane_count = mPlaneCount;
-	double epsilon = 0.001f;
-
-	Surface closest, tmp_surf;
-	double closest_dist;
-
-	int hit;
-	int has_hit = false;
-
-	ray.start = ray.start + ray.direction * epsilon * 10;
-
-	int i;
-	// for every plane
-	for(i = 0; i < plane_count; i++) {
-
-		cur = planes[i];
-
-		// check to see if the plane hits
-		hit = recurse_intersect(ray, &tmp_surf, cur);
-		if(hit) {
-			// if the current intersection is the closest (or first)
-			if((!closest.isHit()) ||
-			(closest.t + epsilon > tmp_surf.t)) {
-				// set the intersect information as the 'closest'
-				closest = tmp_surf;
-				has_hit = true;
-			}
-		}
-	}
-
-	// recurse through the root
-	hit = recurse_intersect(ray, &tmp_surf, root);
-	if(hit) {
-	  // if the current intersection is the closest (or first)
-	  if((!closest.isHit()) ||
-		 (closest.t + epsilon > tmp_surf.t)) {
-	// set the intersect information as the 'closest'
-		closest = tmp_surf;
-		has_hit = true;
-	  }
-	}
-
-
-  *surface = closest;
-  return has_hit;
 }
 
 

@@ -6,6 +6,8 @@
 #include "../util/MyMat.h"
 #include "../util/rayutil.h"
 
+class Surface;
+
 /*
  * Represents a bounding box node
  *----------------------------------------------------------------------------*/
@@ -25,6 +27,8 @@ public:
   double cost();
   BBNode combine( BBNode node );
   Vector getCenter();
+
+  bool intersect(Ray ray, Surface* surface);
 
   int has_right()
   {

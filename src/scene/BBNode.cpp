@@ -1,6 +1,8 @@
 #include "BBNode.h"
 #include "Geometry.h"
 
+#include "scene.h"
+
 /*
  * Default BBNode Constructor
  *----------------------------------------------------------------------------*/
@@ -365,4 +367,109 @@ BBNode BBNode::combine(BBNode node)
     ret.max.z(max.z());
 
   return ret;
+}
+
+bool child_intersect(Ray ray, Surface *surface, SceneObject* object) {
+
+    Ray tmp_ray;
+    bool hit;
+    double epsilon = 0.001f;
+    double t = 0;
+    Vector n;
+    
+    // create a temporary ray to avoid clipping issues
+    GeomObj *obj = (GeomObj*)object;
+    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
+    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
+
+    // test the scene object's intersect
+    hit = obj->test_intersect(tmp_ray, &t, &n);
+
+    // if the value is closer than the 'closest'
+    if(hit && (t > epsilon)) {
+
+        surface->t = t;
+        surface->n = obj->matrix.trans() * Vector4(n,1);
+        surface->n.norm();
+        surface->p = ray.start + (ray.direction * t);
+        surface->finish = obj->finish;
+        surface->color = obj->pigment.rgbf;
+        surface->type = SolidSurface;
+        surface->objPtr = obj;
+        return true;
+    }
+    return false;
+}
+
+bool
+BBNode::intersect(Ray ray, Surface* surface) {
+
+    Surface col_l, col_r;
+    double t = 0;
+    Vector n;
+    int hit;
+    int hit_l = false;
+    int hit_r = false;
+    double epsilon = 0.001f;
+    TYPE type = getType();
+
+    // if the object is a node
+    if(type == NODE) {
+        // check to make sure it hits
+        hit = test_intersect(ray, &t, &n);
+
+        // return false if no hit, no need to delve deeper
+        if(!hit)
+            return false;
+
+        // recurse into the left child
+        if(has_left()) {
+            if(child_l->getType() == NODE) {
+                hit_l = static_cast<BBNode*>(child_l)->intersect(ray, &col_l);
+            }else{
+                hit_l = child_intersect(ray, &col_l, child_l);
+            }
+        }
+
+        // recurse into the right child
+        if(has_right()) {
+            if(child_r->getType() == NODE) {
+                hit_r = static_cast<BBNode*>(child_r)->intersect(ray, &col_r);
+            }else{
+                hit_r = child_intersect(ray, &col_r, child_r);
+            }
+        }
+
+
+        // if both children return a hit
+        if(hit_l && hit_r) {
+            // compare the hit values and return the closest
+            if(col_l.t + epsilon < col_r.t) {
+                *surface = col_l;
+            }
+            else {
+                *surface = col_r;
+            }
+            // if the left child is hit
+        }
+        else if(hit_l) {
+            *surface = col_l;
+            // if the right child is hit
+        }
+        else if(hit_r) {
+            *surface = col_r;
+        }
+        else {
+            // no one was hit
+            return false;
+        }
+        return true;
+
+        // otherwise, the current node is a scene object
+    }
+    else {
+        printf("ERROR: Deprecated code\n");
+        exit(1);
+        return false;
+    }
 }

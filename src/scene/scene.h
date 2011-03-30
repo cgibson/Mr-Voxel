@@ -119,8 +119,6 @@ public:
   void addPlane( GeomObj* object );
   void addLightSource( LightSource* light );
 
-  int intersect(Ray ray, Surface *surface);
-
   double getVolSampleStep(){ return mVolSampleStep; }
   double setVolSampleStep( double sampleStep ){ mVolSampleStep = sampleStep; }
 
@@ -128,9 +126,9 @@ public:
   int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
   LiNode* initCache(Vector min, Vector max){ mLiCache = new LiNode(min, max); }
 
-private:
+  bool intersect(Ray ray, Surface *surface);
 
-  int recurse_intersect(Ray ray, Surface *surface, SceneObject *parent);
+private:
 
   int mVolumeCount;
   int mVolumeCountMax;

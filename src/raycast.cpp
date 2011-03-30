@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "raycast.h"
+#include "light/brdf.h"
 
 //using namespace light;
 using namespace sys;
@@ -12,11 +13,6 @@ namespace this_thread = boost::this_thread;
 #define DEBUG 1
 //#define false 0
 //#define true 1
-
-double max(double a, double b)
-{
-  return (a > b) ? a : b;
-}
 
 /*
  * Default Raycaster Constructor given the current scene
@@ -117,186 +113,10 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
 }
 
 /*
- * Recursively test all objects within the given bounding box hierarchy
- *----------------------------------------------------------------------------*/
-int Raycaster::recurse_intersect(Ray ray, Surface *surface, SceneObject *parent)
-{
-  if(parent == NULL)
-    return false;
-
-  Ray tmp_ray;
-  Surface col_l, col_r;
-  double t = 0;
-  Vector n;
-  int hit;
-  int hit_l = false;
-  int hit_r = false;
-  double epsilon = 0.001f;
-  TYPE type = parent->getType();
-  BBNode *node;
-
-  // if the object is a node
-  if(type == NODE) {
-    // check to make sure it hits
-    hit = parent->test_intersect(ray, &t, &n);
-    
-    // return false if no hit, no need to delve deeper
-    if(!hit)
-      return false;
-
-    node = (BBNode*)parent;
-    if(node == NULL) {
-      printf("ERROR: cannot use this node!\n");
-      exit(-1);
-    }
-    else {
-      // recurse into the left child
-      if(node->has_left())
-        hit_l = recurse_intersect(ray, &col_l, node->child_l);
-      
-      // recurse into the right child
-      if(node->has_right())
-        hit_r = recurse_intersect(ray, &col_r, node->child_r);
-    }
-    
-    // if both children return a hit
-    if(hit_l && hit_r) {
-      // compare the hit values and return the closest
-      if(col_l.t + epsilon < col_r.t) {
-        *surface = col_l;
-      }
-      else {
-        *surface = col_r;
-      }
-    // if the left child is hit
-    }
-    else if(hit_l) {
-      *surface = col_l;
-    // if the right child is hit
-    }
-    else if(hit_r) {
-      *surface = col_r;
-    }
-    else {
-      // no one was hit
-      return false;
-    }
-    return true;
-  
-  // otherwise, the current node is a scene object
-  }
-  else if(type == VOLUME) {
-	  printf("ERROR: Intersecting volume is deprecated.");
-	  exit(-1);
-    // create a temporary ray to avoid clipping issues
-    GeomObj *obj = (GeomObj*)parent;
-    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
-
-    // test to see if the volume is hit
-    hit = parent->test_intersect(tmp_ray, &t, &n);
-    
-    if(hit && (t > epsilon)) {
-      surface->t = t;
-      surface->n =  ((GeomObj*)parent)->matrix.trans() * Vector4(n,1);
-      surface->n.norm();
-      surface->p = ray.start + (ray.direction * t);
-      surface->finish = ((GeomObj*)parent)->finish;
-      surface->color = ((GeomObj*)parent)->pigment.rgbf;
-      surface->type = VolumeSurface;
-      surface->objPtr = obj;
-      return true;
-    }
-    return false;
-  }
-  else {
-    // create a temporary ray to avoid clipping issues
-    GeomObj *obj = (GeomObj*)parent;
-    tmp_ray.start = obj->matrix * Vector4(ray.start, 1);
-    tmp_ray.direction = obj->matrix * Vector4(ray.direction, 0);
-    
-    // test the scene object's intersect
-    hit = parent->test_intersect(tmp_ray, &t, &n);
-    
-    // if the value is closer than the 'closest'
-    if(hit && (t > epsilon)) {
-
-      surface->t = t;
-      surface->n = ((GeomObj*)parent)->matrix.trans() * Vector4(n,1);
-      surface->n.norm();
-      surface->p = ray.start + (ray.direction * t);
-      surface->finish = ((GeomObj*)parent)->finish;
-      surface->color = ((GeomObj*)parent)->pigment.rgbf;
-      surface->type = SolidSurface;
-      surface->objPtr = obj;
-      return true;
-    }
-    return false;
-  }
-}
-
-/*
- * Intersect given a ray
- *----------------------------------------------------------------------------*/
-int Raycaster::intersect(Ray ray, Surface *surface)
-{
-	SceneObject *root = mScene->getObjectBVH();
-	GeomObj **planes = mScene->getPlanes();
-	SceneObject *cur;
-	int plane_count = mScene->getPlaneCount();
-	double epsilon = 0.001f;
-
-	Surface closest, tmp_surf;
-	double closest_dist;
-
-	int hit;
-	int has_hit = false;
-
-	ray.start = ray.start + ray.direction * epsilon * 10;
-
-	int i;
-	// for every plane
-	for(i = 0; i < plane_count; i++) {
-
-		cur = planes[i];
-
-		// check to see if the plane hits
-		hit = recurse_intersect(ray, &tmp_surf, cur);
-		if(hit) {
-			// if the current intersection is the closest (or first)
-			if((!closest.isHit()) ||
-			(closest.t + epsilon > tmp_surf.t)) {
-				// set the intersect information as the 'closest'
-				closest = tmp_surf;
-				has_hit = true;
-			}
-		}
-	}
-    
-	// recurse through the root
-	hit = recurse_intersect(ray, &tmp_surf, root);
-	if(hit) {
-	  // if the current intersection is the closest (or first)
-	  if((!closest.isHit()) ||
-		 (closest.t + epsilon > tmp_surf.t)) {
-	// set the intersect information as the 'closest'
-		closest = tmp_surf;
-		has_hit = true;
-	  }
-	}
-
-  
-  *surface = closest;
-  return has_hit;
-}
-
-
-/*
  * New Sum Lights for a given surface
  * ---------------------------------------------------------------------------*/
 
 Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
-    Color Lcolor; // temporary light color
     Color result; // resulting color to be returned
 
     Vector D = ray.direction;
@@ -307,83 +127,12 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
         surface.n = surface.n * -1;
     }
 
-    Ray shadow_ray;
-
     result = Color(0);
 
-    // Initialize result to the ambient value
+    // Gather indirect light
+    result = light::shadeIndirect(surface, gather, ambient);
 
-
-    if(gather && config::ambience == AMBIENT_FULL) {
-        double tt;
-        Color amb;
-
-        //Vector rnd = Vector((rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f,(rand() / (float)RAND_MAX) - 0.5f);
-
-        HemisphereSampler sampler = HemisphereSampler(surface.n, config::hemisphere_u, config::hemisphere_t);
-
-        double rndn;
-        Vector smpl;
-
-        //*
-        while(sampler.getSample(&smpl)) {
-
-            rndn = (smpl * surface.n);
-            amb = mScene->lightCache()->gather(Ray(ray(surface.t) + (smpl * 0.0), smpl), &tt) * rndn;
-
-            result = result + amb * surface.finish.ambient * surface.color * (20. / (config::hemisphere_u*config::hemisphere_t));
-        }
-
-    } else if(config::ambience == AMBIENT_FLAT && ambient){
-        result = result + surface.color * surface.finish.ambient;
-    } else {
-        //nothing.
-    }
-    // Grab light sources
-    LightSource** lights = mScene->getLightSources();
-
-    // Iterate through each light
-    for(int i = 0; i < mScene->getLightSourceCount(); i++) {
-
-        // Grab temporary light pointer
-        LightSource *light = lights[i];
-        // Grab light color
-        Lcolor = light->color;
-        // Light position, relative to surface
-        Vector L = light->position - surface.p;
-        double l_dist = L.norm();
-        Vector H = V + L;
-        H.norm();
-
-        // Generate shadow ray
-        shadow_ray = Ray(surface.p, L);
-
-        // invert shininess so it makes sense
-        double shininess = 1 / surface.finish.roughness;
-
-        Surface surface2;
-
-        // Beginning transmittance is 1
-        Color Tr(1.);
-
-        // If an object is in the way
-        if(intersect(shadow_ray, &surface2) && (surface2.t <= l_dist)) {
-        	Tr = Tr * 0.0;
-
-        // Otherwise, integrate through all volumes
-        }else{
-        	Tr = 1.0;//Tr * mVolumeIntegrator->Transmittance( shadow_ray );
-        }
-
-            //result = result + brdf::shadeDiffuse(surface, ray.direction * -1, Tr);
-
-        result = result +
-            ((surface.color * Lcolor * Tr) * surface.finish.diffuse * max(0, surface.n * L));
-
-        if(config::specular && specular && !Tr.isBlack() && L.dot(surface.n) > 0) {
-            result = result + ((Lcolor) * surface.finish.specular * Tr * pow(max(0, H * surface.n), shininess));
-        }
-    }
+    result = result + light::shadeDiffuse(V, surface, specular);
     
     return result;
 }
@@ -403,7 +152,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
     }
 
     // Check for intersect.  Throw away ray if no intersect
-    if( !intersect(ray, &surface) ) {
+    if( !mScene->intersect(ray, &surface) ) {
         Color vol_color(0.);
         Color vol_transmittance(1.);
         //vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
@@ -529,7 +278,7 @@ ray.direction = ray.direction + Vector(us, vs, 0);
 }
 
 int Raycaster::iterate( Ray *ray, Surface *surface) {
-    if(intersect(*ray, surface)) {
+    if(mScene->intersect(*ray, surface)) {
         (*ray).start = (*ray)(surface->t);
         return 1;
     }
@@ -666,7 +415,7 @@ int Raycaster::surfelCast(
       
       color = 0;
 
-      while(intersect(ray, &surf)) {
+      while(mScene->intersect(ray, &surf)) {
 
           color = sumLights(surf, ray, 0, 0, false);
           mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.15)));
