@@ -147,18 +147,26 @@ namespace sh{
         free(Klm);
     }
 
-    void SHProject(Vec3 w, vector<Surfel> surfels, int lmax, SHCoef* coefs) {
+    void SHProject(vector<shared_ptr<Surfel> > surfels, int lmax, SHCoef* coefs) {
 
         float pdf = 1. / (4. * PI);
 
         float *Ylm = (float*)malloc(SHTerms(lmax) * sizeof(float));
 
-        vector<Surfel>::iterator s_it;
+        vector<shared_ptr<Surfel> >::iterator s_it;
 
-        for(s_it = surfels.begin(); s_it != surfels.end(); s_it++) {
-            SHEval(s_it->normal(), lmax, Ylm);
-            for( int i = 0; i < SHTerms(lmax); ++i) {
-                coefs[i] = coefs[i] + s_it->diffuse() * Ylm[i] /
+        shared_ptr<Surfel> s;
+
+        SHCoef *c_ptr;
+        for(int i = 0; i < surfels.size(); i++) {
+
+            c_ptr = coefs;
+
+            s = surfels[i];
+            SHEval(s->normal(), lmax, Ylm);
+            for( int i = 0; i < SHTerms(lmax); i++) {
+                //printf("testing %s\n", s->normal());
+                *c_ptr++ = coefs[i] + s->diffuse() * Ylm[i] /
                         (pdf * surfels.size());
             }
         }
@@ -173,9 +181,9 @@ namespace sh{
 
         float *K_c = (float*)malloc(SHTerms(lmax) * sizeof(float));
         SHEval(w, lmax, K_c);
-
+        
         // Includes reflection and diffuse coloring?
-        Color Kd = 0.;
+        Color Kd = 1.;
 
         Color Lo = 0.;
         for( int i = 0; i < SHTerms(lmax); ++i) {

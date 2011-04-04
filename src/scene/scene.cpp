@@ -2,6 +2,8 @@
 #include <string.h>
 #include "scene.h"
 
+#include "BBNode.h"
+
 using namespace std;
 
 

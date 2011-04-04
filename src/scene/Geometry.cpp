@@ -513,6 +513,7 @@ char* Disk::str( void )
           _radius,
           _innerRadius);
 
+  /*
   if(modifiers != NULL)
   {
     Modifier* current = *modifiers;
@@ -523,6 +524,7 @@ char* Disk::str( void )
       strcat(buffer, modifiers[count]->str());
     }
   }
+   * */
   return buffer;
 }
 

@@ -75,6 +75,8 @@ namespace config {
 
     // Image options
     Dimension image_resolution = {640, 480};
+    Dimension light_sample_resolution = {320, 240};
+    float surfel_size = 0.075;
     antialiasing_t antialiasing = ANTIALIASING_NONE;
     string in_file = "";
     string out_file = "";

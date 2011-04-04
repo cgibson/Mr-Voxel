@@ -11,13 +11,15 @@
 #include <stdio.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+
+using std::vector;
+using boost::shared_ptr;
+
 #include "../scene/Object.h"
 
 namespace sys{};
 
 using namespace sys;
-using std::vector;
-using boost::shared_ptr;
 
 class Surfel;
 
@@ -51,6 +53,8 @@ public:
 
     // Delete all surfel data in this node
     virtual int clear() = 0;
+    
+    virtual void postprocess() = 0;
 
 protected:
 
@@ -87,10 +91,15 @@ public:
     int size_of();
 
     Color gather(Ray ray, double *t);
+    
+    // Generate layers of multi-resolution lighting using spherical harmonics
+    void postprocess();
 
 protected:
     int _surfelCount;
     shared_ptr<Surfel> *_surfelData;
+
+    SHCoef sh_c[9];
 };
 
 #endif	/* OCTREE_H */

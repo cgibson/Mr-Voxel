@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
   Raycaster lightCast(config::scenePtr, lightCamera);
 
-  lightCast.surfelCast(1024,768, 1, 1, &writer);
+  lightCast.surfelCast(config::light_sample_resolution, 1, 1, &writer);
 
   while( end < jobs)
   {

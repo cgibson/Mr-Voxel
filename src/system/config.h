@@ -37,6 +37,8 @@ namespace config {
 
     // Image options
     extern Dimension image_resolution;
+    extern Dimension light_sample_resolution;
+    extern float surfel_size;
     extern antialiasing_t antialiasing;
     extern string in_file;
     extern string out_file;

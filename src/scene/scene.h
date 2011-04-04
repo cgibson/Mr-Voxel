@@ -5,7 +5,6 @@
 #include "../mrvoxel/VolumeRegion.h"
 #include "../types.h"
 #include "modifier.h"
-#include "BBNode.h"
 #include "Geometry.h"
 #include "../light/LiNode.h"
 #include "../light/Surfel.h"
@@ -13,6 +12,8 @@
 using namespace std;
 
 enum AXIS {XY, YZ, XZ};
+
+class BBNode;
 
 class Camera : public Object{
 public:

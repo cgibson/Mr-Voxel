@@ -8,6 +8,7 @@
 #include "LiNode.h"
 #include "../scene/Geometry.h"
 #include "Surfel.h"
+#include "sh.h"
 
 #include "../system/config.h"
 
@@ -87,15 +88,11 @@ LiNode::gather( Ray ray, double *t ) {
     Color tmp;
     Vec3 n;
 
-    //printf("GATHERING STAGE BEGIN\n");
-
     if(!OctreeNode::test_intersect( ray, &thit, &n )){
-        //printf("O NOES... NO INTERSECT!\n");
         *t = INFINITY;
         return config::background;
     }
 
-    //printf("WE CAN HAS INTERSECT!\n");
 
     if(hasChildren()) {
         for(int i = 0; i < 8; i++) {
@@ -113,26 +110,23 @@ LiNode::gather( Ray ray, double *t ) {
            *t = INFINITY;
            return config::background;
         }
-        //if(_surfelCount == 0) return Color(0,0,0.5);
-        //printf("Testing all Disks (%d)!\n", _surfelCount);
+
         for(int i = 0; i < _surfelCount; i++) {
-            //Disk disk = Disk((*_surfelData)->area(), 0, 2 * PI, Ray((*_surfelData)->position(), (*_surfelData)->normal()));
-            //Sphere sphere;
-            //sphere.center = (*_surfelData)->position();
-            //sphere.radius = (*_surfelData)->area();
-            //if(sphere.test_intersect(ray, &thit, &n)) {
-                //printf("WHAT\n");
+
             Ray tmpRay;
-            tmpRay.start = (*_surfelData)->matrix * Vec4(ray.start, 1);
-            tmpRay.direction = (*_surfelData)->matrix * Vec4(ray.direction, 0);
+            assert(_surfelData[i].get() != NULL);
+            shared_ptr<Surfel> s(_surfelData[i]);
+            tmpRay.start = s->matrix * Vec4(ray.start, 1);
+            tmpRay.direction = s->matrix * Vec4(ray.direction, 0);
             tmpRay.direction.norm();
 
             // Would be usefull if we wanted to suck at cheating
-            if((*_surfelData)->normal() * (ray.direction * -1) > 0) {
-                if((*_surfelData)->test_intersect(tmpRay, &thit, &n)) {
+            if(s->normal() * (ray.direction * -1) > 0) {
+                if(s->test_intersect(tmpRay, &thit, &n)) {
                     if(thit < tmin) {
                         tmin = thit;
-                        closest = (*_surfelData)->diffuse();
+                        closest = s->diffuse();
+                        //light::sh::reconstruct(ray.direction * -1, 2, sh_c);//
                     }
                 }
             }
@@ -147,7 +141,6 @@ LiNode::gather( Ray ray, double *t ) {
 int
 LiNode::subdivide() {
 
-    //printf("Subdividing %s - %s\n", m_min.str(), m_max.str());
     Vec3 size = (_max - _min) * 0.5;
 
     if(size.length() < 0.00000001) {
@@ -310,5 +303,44 @@ int
 LiNode::clear() {
     if(_surfelData != NULL) {
         delete _surfelData;
+    }
+}
+
+void
+LiNode::postprocess() {
+
+    // If a branch
+    if(hasChildren()) {
+        // Process children first
+        for( int i = 0; i < 8; i++) {
+            child(i)->postprocess();
+        }
+        // Sum children SH coefficients
+        // TODO: Later
+
+    // If a leaf
+    }else{
+        //printf("SURF: %d\n", _surfelCount);
+        if(_surfelCount == 0) {
+            return;
+        }
+
+        assert(_surfelData[0] != NULL);
+
+        // Process lighting using surfel list
+        vector<shared_ptr<Surfel> > surf_list;
+        for(int i = 0; i < _surfelCount; i++) {
+            
+            surf_list.push_back(shared_ptr<Surfel>());
+            surf_list[i] = _surfelData[i];
+            assert(_surfelData[i] != NULL);
+        }
+        light::sh::SHProject(surf_list, 2, sh_c);
+
+        assert(_surfelData[0] != NULL);
+        /*
+        printf("NODE FINISHED:\n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s \n\t%s\n",
+                sh_c[0].str(),sh_c[1].str(),sh_c[2].str(),sh_c[3].str(),sh_c[4].str(),sh_c[5].str(),sh_c[6].str(),sh_c[7].str(),sh_c[8].str());
+        //* */
     }
 }

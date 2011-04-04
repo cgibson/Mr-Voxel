@@ -27,5 +27,6 @@ Surfel::Surfel(const Surfel& orig)
 }
 
 Surfel::~Surfel() {
+    printf("BEING DELETED O NOES D:!\n");
 }
 

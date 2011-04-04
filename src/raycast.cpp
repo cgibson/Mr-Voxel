@@ -335,8 +335,7 @@ int Raycaster::raycast(
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
 int Raycaster::surfelCast(
-        int width,
-        int height,
+        Dimension size,
         int step_x,
         int step_y,
         ImageWriter *writer)
@@ -351,18 +350,18 @@ int Raycaster::surfelCast(
 
   mScene->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
-  for( x = 0; x < width; x+=step_x ) {
+  for( x = 0; x < size.width; x+=step_x ) {
 
-    for( y = 0; y < height; y+=step_y ) {
+    for( y = 0; y < size.height; y+=step_y ) {
 
-      cam2World(x, y, width, height, &ray);
+      cam2World(x, y, size.width, size.height, &ray);
       
       color = 0;
 
       while(mScene->intersect(ray, &surf)) {
 
           color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, 0.15)));
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size)));
           ray.start = ray(surf.t + 0.1);
           
       }
@@ -373,6 +372,8 @@ int Raycaster::surfelCast(
   printf("FINAL: %d\n", mScene->lightCache()->count());
 
   printf("Size: %d\n", mScene->lightCache()->size_of());
+
+  mScene->lightCache()->postprocess();
 
   return 0;
 }

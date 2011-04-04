@@ -1,5 +1,6 @@
 #include "volume.h"
 
+
 #define SHORT_MAX 65535
 
 int vol::recurse_vol_search( SceneObject* root, Ray ray, float t_max, std::vector<vol::volinfo>* list)

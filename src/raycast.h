@@ -32,8 +32,7 @@ public:
             ImageWriter *writer);
 
   int surfelCast(
-            int width,
-            int height,
+            Dimension size,
             int step_x,
             int step_y,
             ImageWriter *writer);
