@@ -16,6 +16,8 @@ namespace light{
 
     Color shadeIndirect(Surface &surface, bool gather = true, bool ambient = true) {
         Color result = 0.;
+
+        float pdf = 1. / (4. * PI);
         
         if(gather && config::ambience == AMBIENT_FULL) {
             double tt;
@@ -27,13 +29,15 @@ namespace light{
             double rndn;
             Vec3 smpl;
 
+            float sample_mul = pdf * (config::hemisphere_u*config::hemisphere_t);
+
             // Gather samples until the sampler runs out
             while(sampler.getSample(&smpl)) {
 
                 rndn = (smpl * surface.n);
                 amb = config::scenePtr->lightCache()->gather(Ray(surface.p + (smpl * 0.0), smpl), &tt) * rndn;
 
-                result = result + amb * surface.finish.ambient * surface.color * (20. / (config::hemisphere_u*config::hemisphere_t));
+                result = result + amb * surface.finish.ambient * surface.color / sample_mul;
             }
 
         } else if(config::ambience == AMBIENT_FLAT && ambient){

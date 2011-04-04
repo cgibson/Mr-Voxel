@@ -8,6 +8,9 @@
 #ifndef TYPES_H
 #define	TYPES_H
 
+//#define GLM_SWIZZLE
+//#include <glm/glm.hpp>
+
 #include "util/util.h"
 
 class MyMat;
@@ -38,9 +41,10 @@ typedef struct DIMENSION_T{
 // MATH
 typedef Vector3D Vec3;
 typedef Vector4D Vec4;
-
 typedef MyMat Matrix;
 typedef RGBColor Color;
+
+typedef Color SHCoef;
 
 #endif	/* TYPES_H */
 

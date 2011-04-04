@@ -28,12 +28,14 @@ public:
      float& z( void )       { return p_z; }
 
      float get( int i );
-	 void set(float x, float y, float z);
-	 void set(Vector3D& v);
-	 
-	 void x( float x ){ p_x = x;}
-	 void y( float y ){ p_y = y;}
-	 void z( float z ){ p_z = z;}
+     void set(float x, float y, float z);
+     void set(Vector3D& v);
+
+     void x( float x ){ p_x = x;}
+     void y( float y ){ p_y = y;}
+     void z( float z ){ p_z = z;}
+
+     bool isNormalized(){ return length() > .995 && length() < 1.005f; }
 
      /*operator overload for math simplicity */ 
      Vector3D operator=( const Vector3D& );
