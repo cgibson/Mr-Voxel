@@ -17,7 +17,7 @@ public:
   virtual int test_intersect( Ray ray, double *t, Vec3 *n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return GEOM; }
+  virtual inline TYPE getType( void ){ return GEOM; }
   void generateMatrix();
 
   Pigment pigment;
@@ -43,7 +43,7 @@ public:
   int test_intersect( Ray ray, double *t, Vec3 *n);
   Vec3 get_normal( Vec3 pt );
   BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return BOX; }
+  virtual inline TYPE getType( void ){ return BOX; }
 
   Vec3 min(){ return _min; }
   Vec3 max(){ return _max; }
@@ -68,7 +68,7 @@ public:
   int test_intersect( Ray ray, double *t, Vec3 *n);
   Vec3 get_normal( Vec3 pt );
   BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return DISK; }
+  virtual inline TYPE getType( void ){ return DISK; }
 
 
 protected:
@@ -89,7 +89,7 @@ public:
   virtual int test_intersect( Ray ray, double *t, Vec3 *n);
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return SPHERE; }
+  virtual inline TYPE getType( void ){ return SPHERE; }
 
   Vec3 center;
   double radius;
@@ -105,7 +105,7 @@ public:
   virtual int test_intersect( Ray ray, double *t, Vec3 *n);
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return CONE; }
+  virtual inline TYPE getType( void ){ return CONE; }
 
   Vec3 end1;
   Vec3 end2;
@@ -124,7 +124,7 @@ public:
   virtual int test_intersect( Ray ray, double *t, Vec3 *n);
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return TRIANGLE; }
+  virtual inline TYPE getType( void ){ return TRIANGLE; }
 
   Vec3 corner1;
   Vec3 corner2;
@@ -141,7 +141,7 @@ public:
   virtual int test_intersect( Ray ray, double *t, Vec3 *n);
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
-  virtual TYPE getType( void ){ return PLANE; }
+  virtual inline TYPE getType( void ){ return PLANE; }
 
   Vec3 normal;
   double distance;

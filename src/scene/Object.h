@@ -22,7 +22,7 @@ public:
   SceneObject( void );
   virtual int test_intersect( Ray ray, double *t, Vec3 *n )
     { return false; }
-  virtual TYPE getType( void ){ return UNDEF; }
+  virtual inline TYPE getType( void ){ return UNDEF; }
 };
 
 #endif /* OBJECT_H_ */

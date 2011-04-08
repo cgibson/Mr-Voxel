@@ -18,10 +18,10 @@ public:
     Surfel(const Surfel& orig);
     virtual ~Surfel();
 
-    Vec3 position(){ return _pos; }
-    Vec3 normal(){ return _normal; }
-    Color diffuse(){ return _diffuse; }
-    float area(){ return _radius; }
+    inline Vec3 position(){ return _pos; }
+    inline Vec3 normal(){ return _normal; }
+    inline Color diffuse(){ return _diffuse; }
+    inline float area(){ return _radius; }
     
 private:
 

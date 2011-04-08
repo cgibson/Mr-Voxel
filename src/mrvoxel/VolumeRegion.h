@@ -13,13 +13,13 @@ public:
 
     VolumeRegion(Vec3 min, Vec3 max);
 
-    virtual Vec3 World2Volume( Vec3 pt ) {
+    virtual inline Vec3 World2Volume( Vec3 pt ) {
     	return pt;// - mBounds.min;
     }
 
     BBNode bounds(){ return mBounds; }
     virtual int test_intersect( Ray ray, double *t, Vec3 *n );
-    virtual TYPE getType( void ){ return VOLUME; }
+    virtual inline TYPE getType( void ){ return VOLUME; }
 
     virtual Spectrum sigma_a( Vec3 pt ) = 0;
     virtual Spectrum sigma_s( Vec3 pt ) = 0;

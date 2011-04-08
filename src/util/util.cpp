@@ -135,21 +135,10 @@ void Vector3D::set(Vector3D& v) {
 	this->p_z = v.p_z;
 }
 
-Vector3D Vector3D::operator=( const Vector3D& v1) {
-	this->p_x = v1.x();
-	this->p_y = v1.y();
-	this->p_z = v1.z();
-	return(*this );
-}
-
 void Vector3D::cross(const Vector3D in, Vector3D *out) {
 	out->p_x = (p_y*in.p_z - p_z*in.p_y); 
   	out->p_y= -(p_x*in.p_z - p_z*in.p_x); 
 	out->p_z= (p_x*in.p_y - p_y*in.p_x);
-}
-
-float Vector3D::dot(const Vector3D v2) {
-	return(p_x*v2.p_x + p_y*v2.p_y + p_z*v2.p_z);
 }
 
 float Vector3D::norm() {
