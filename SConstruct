@@ -7,6 +7,7 @@ conf = Configure(env)
 env["CXXFLAGS"] = "-std=c++0x"
 
 env["CXXFLAGS"] = "-O3"
+env["CXXFLAGS"] = "-O3 -pg"
 
 
 d = env.ParseFlags("-g")
