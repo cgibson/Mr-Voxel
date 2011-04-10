@@ -13,23 +13,23 @@ public:
 
     VolumeRegion(Vec3 min, Vec3 max);
 
-    virtual Vec3 World2Volume( Vec3 pt ) {
+    virtual inline Vec3 World2Volume( const Vec3 &pt ) {
     	return pt;// - mBounds.min;
     }
 
     BBNode bounds(){ return mBounds; }
     virtual int test_intersect( Ray ray, double *t, Vec3 *n );
-    virtual TYPE getType( void ){ return VOLUME; }
+    virtual inline TYPE getType( void ){ return VOLUME; }
 
-    virtual Spectrum sigma_a( Vec3 pt ) = 0;
-    virtual Spectrum sigma_s( Vec3 pt ) = 0;
-    virtual Spectrum sigma_t( Vec3 pt ) = 0;
+    virtual Spectrum sigma_a( const Vec3 &pt ) = 0;
+    virtual Spectrum sigma_s( const Vec3 &pt ) = 0;
+    virtual Spectrum sigma_t( const Vec3 &pt ) = 0;
 
-    virtual Spectrum Lve( Vec3 pt ) = 0;
+    virtual Spectrum Lve( const Vec3 &pt ) = 0;
 
-    virtual double phase( Vec3 pt, Vec3 w, Vec3 w_prime ) = 0;
+    virtual double phase( const Vec3 &pt, const Vec3 &w, const Vec3 &w_prime ) = 0;
 
-    virtual Spectrum tau( Ray ray, double stepSize, double offset) = 0;
+    virtual Spectrum tau( const Ray &ray, const double &stepSize, const double &offset) = 0;
 protected:
     BBNode mBounds;
 
@@ -43,29 +43,30 @@ public:
 		: sig_a(absorbtion), sig_s(scatter), g_scatter(greenstein),
 		  le(emitt), VolumeRegion(min, max) { }
 
-	virtual double density( Vec3 v ) = 0;
+	virtual double density( const Vec3 &v ) = 0;
 
-	Spectrum sigma_a( Vec3 pt ) {
-		return sig_a * density( World2Volume(pt) );
+	inline Spectrum sigma_a( const Vec3 &pt ) {
+		return sig_a * density( pt );
 	}
 
-	Spectrum sigma_s( Vec3 pt ) {
-		return sig_s * density( World2Volume(pt) );
+	inline Spectrum sigma_s( const Vec3 &pt ) {
+		return sig_s * density( pt );
 	}
 
-	Spectrum sigma_t( Vec3 pt ) {
-		return (sig_a + sig_s) * density( World2Volume(pt) );
+	inline Spectrum sigma_t( const Vec3 &pt ) {
+            //printf("PT: %s\n", pt.str());
+		return (sig_a + sig_s) * density( pt );
 	}
 
-	Spectrum Lve( Vec3 pt ) {
-		return le * density( World2Volume(pt));
+	inline Spectrum Lve( const Vec3 &pt ) {
+		return le * density( pt );
 	}
 
-	double phase( Vec3 pt, Vec3 w, Vec3 w_prime ) {
+	inline double phase( const Vec3 &pt, const Vec3 &w, const Vec3 &w_prime ) {
 		return PhaseHG(w, w_prime, g_scatter);
 	}
 
-	Spectrum tau( Ray ray, double stepSize, double offset);
+	Spectrum tau( const Ray &ray, const double &stepSize, const double &offset);
 
 protected:
 

@@ -8,11 +8,11 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
     double step;
 
     int numVolumes = mScene->getVolumeCount();
+    VolumeRegion **volumes = mScene->getVolumes();
+
     if(numVolumes < 1) {
         return 0.;
     }
-    
-    VolumeRegion **volumes = mScene->getVolumes();
 
     double t1, t0 = 0;
     Vec3 n;
@@ -23,9 +23,6 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
     if(ray.maxt < t1)
         t1 = ray.maxt;
 
-    //printf("Ray P: %s D: %s\n", ray.start.str(), ray.direction.str());
-
-    //printf("T0: %f T1: %f\n", t0, t1);
 
     numSamples = (int)((t1 - t0) / mStepSize);
 
@@ -63,7 +60,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         Ray tRay = Ray(pPrev, p - pPrev, 0.0, step);
 
         Spectrum stepTau = volumes[0]->tau(tRay, 0.5 * step, 0);
-
+        
         Tr = Tr * Exp(stepTau * -1);
 
         if (Tr.toTrans() < 1e-3) {
@@ -123,15 +120,21 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 Spectrum
 VolumeIntegrator::Transmittance(Ray ray) {
 
-    int numVolumes = mScene->getVolumeCount();
-    if(numVolumes < 1) {
-        return 1.;
-    }
-    VolumeRegion **volumes = mScene->getVolumes();
+	int numVolumes = mScene->getVolumeCount();
+	VolumeRegion **volumes = mScene->getVolumes();
 
-    //TODO: NOTE: multiple volumes will need aggregators!
-    Spectrum res = volumes[0]->tau(ray, mStepSize * 2, 0.0);
+        if(numVolumes < 1) {
+            return 1.;
+        }
 
-    return Exp(res * -1);
-    
+        double t0,t1;
+	Vec3 n;
+
+	//if(!volumes[0]->bounds().test_intersect(ray, &t0, &t1, &n)) return 1.f;
+
+	//TODO: NOTE: multiple volumes will need aggregators!
+	Spectrum res = volumes[0]->tau(ray, mStepSize * 2, 0.0);
+	//printf("res: %f, %f, %f\n", res.r(), res.g(), res.b());
+
+	return Exp(res * -1);
 }

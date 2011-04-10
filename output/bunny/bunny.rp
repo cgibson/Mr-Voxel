@@ -1,5 +1,5 @@
 {
-    "render_size" : [ 800, 600 ],
+    "render_size" : [ 640, 480 ],
     
     "volSampleStep" : 0.01,
     
@@ -20,44 +20,24 @@
     "lights" : [
         {
             //"location" : [ -4.0, -7.0, 10.0 ],
-            "location" : [ 1.5, 5.5, 0.0 ],
-            "color" : [ 1.5, 1.5, 1.5 ]
-        },
-        {
-            //"location" : [ -4.0, -7.0, 10.0 ],
-            "location" : [ -1.5, 5.5, 0.0 ],
+            "location" : [ 0.0, 5.5, 0.0 ],
             "color" : [ 1.5, 1.5, 1.5 ]
         }
     ],
-
+    
     // All of the spheres in the scene
     "spheres" : [
         {
-            "center" : [ 1.25, 1.25, 0.0 ],
+            "center" : [ 1.25, 1.75, 0.0 ],
             "radius" : 1.25,
-
+            
             "pigment" : [ 0.2, 0.2, 0.2 ],
             "finish" : {
-                "ambient" : 0.3,
-                "diffuse" : 0.5,
+                "ambient" : 0.1,
+                "diffuse" : 0.3,
                 "specular" : 0.8,
                 "roughness" : 0.004,
                 "reflection" : 0.7,
-                "refraction" : 0.0,
-                "ior" : 1.0
-            }
-        },
-        {
-            "center" : [ -1.25, 1.25, 0.0 ],
-            "radius" : 1.0,
-
-            "pigment" : [ 0.8, 0.8, 0.8 ],
-            "finish" : {
-                "ambient" : 0.3,
-                "diffuse" : 0.5,
-                "specular" : 0.1,
-                "roughness" : 0.02,
-                "reflection" : 0.0,
                 "refraction" : 0.0,
                 "ior" : 1.0
             }
@@ -68,8 +48,8 @@
     "volumes" : [
         {
             "type" : "brick",
-            "min" : [-2.5,  0.0, -1.25 ],
-            "max" : [ 0.0,  2.5,  1.25 ],
+            "min" : [-2.5,  0.5, -1.25 ],
+            "max" : [ 0.0,  3.0,  1.25 ],
             "size" : 256,
 
             "file" : "/home/cgibson/tmp/bunny/",
@@ -77,7 +57,7 @@
             "iso_max" : 60000,
 
             "file_resolution" : [512,361,512],
-            "volume_resolution" : [128,128,128],
+            "volume_resolution" : [256,256,256],
 
             "density" : 10.0,
             "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
@@ -107,7 +87,7 @@
             "pigment" : [ 1.0, 1.0, 1.0 ],
 
             "finish" : {
-                "ambient" : 0.3,
+                "ambient" : 0.2,
                 "diffuse" : 0.4,
                 "specular" : 0.05,
                 "roughness" : 0.4,
@@ -131,31 +111,7 @@
             "pigment" : [ 1.0, 1.0, 1.0 ],
 
             "finish" : {
-                "ambient" : 0.3,
-                "diffuse" : 0.4,
-                "specular" : 0.05,
-                "roughness" : 0.4,
-                "reflection" : 0.0,
-                "refraction" : 0.0,
-                "ior" : 1.0
-            },
-
-            "modifiers" : []
-        },
-
-        {
-
-        "vertices" : [
-            [-2.0,  5.0, -3.2],
-            [ 2.0,  5.0, -3.2],
-            [ 2.0,  5.0,  3.2],
-            [-2.0,  5.0,  3.2]
-        ],
-
-            "pigment" : [ 1.0, 1.0, 1.0 ],
-
-            "finish" : {
-                "ambient" : 0.3,
+                "ambient" : 0.2,
                 "diffuse" : 0.4,
                 "specular" : 0.05,
                 "roughness" : 0.4,
@@ -179,7 +135,7 @@
             "pigment" : [ 0.05, 0.6, 0.1 ],
 
             "finish" : {
-                "ambient" : 0.3,
+                "ambient" : 0.2,
                 "diffuse" : 0.4,
                 "specular" : 0.05,
                 "roughness" : 0.4,
@@ -203,7 +159,7 @@
             "pigment" : [ 0.6, 0.1, 0.05 ],
 
             "finish" : {
-                "ambient" : 0.3,
+                "ambient" : 0.2,
                 "diffuse" : 0.4,
                 "specular" : 0.05,
                 "roughness" : 0.4,
@@ -227,7 +183,7 @@
             "pigment" : [ 1.0, 1.0, 1.0 ],
 
             "finish" : {
-                "ambient" : 0.3,
+                "ambient" : 0.2,
                 "diffuse" : 0.4,
                 "specular" : 0.05,
                 "roughness" : 0.4,

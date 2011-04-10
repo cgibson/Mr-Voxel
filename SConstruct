@@ -4,10 +4,11 @@ env = Environment(CC = 'g++')
 env.Append(CPPPATH=['include'])
 conf = Configure(env)
 
-env["CXXFLAGS"] = "-std=c++0x"
+#env["CXXFLAGS"] = "-O3"
 
-env["CXXFLAGS"] = "-O3"
-env["CXXFLAGS"] = "-O3 -pg"
+
+#env.Append(CCFLAGS=['-g','-pg','-O3'], LINKFLAGS=['-pg'])
+env.Append(CCFLAGS=['-g','-O3'])
 
 
 d = env.ParseFlags("-g")

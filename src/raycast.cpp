@@ -103,7 +103,6 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
     if( !mScene->intersect(ray, &surface) ) {
         Color vol_color(0.);
         Color vol_transmittance(1.);
-        vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
         vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
 
@@ -155,10 +154,9 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 
         Color vol_color(0.);
         Color vol_transmittance(1.);
-        vol::integrate_volume( mScene->getVolumeBVH(), ray, surface.t, &vol_color);
 
         vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
-
+        
         //return color + reflect_color * reflection;
         if(!success && surface.finish.refraction ) {
             color = color * (1 - surface.color.f()) + color_reflect;

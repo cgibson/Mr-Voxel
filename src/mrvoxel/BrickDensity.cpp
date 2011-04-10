@@ -5,28 +5,6 @@ BrickDensityRegion::BrickDensityRegion(
 		double greenstein, Spectrum emitt, double density
 		):DensityRegion( min,max,absorbtion,scatter,greenstein,emitt ),m_density_mult(density) {
 
-/*
-	int size = 256;
-
-	m_brickData = BrickGrid(size,size,size);
-
-	Voxel *tmp;
-
-	for(int i = 0; i < size; i++) {
-		for(int j = 0; j < size; j++) {
-			for(int k = 0; k < size; k++) {
-				tmp = m_brickData(i,j,k);
-				float d_x = ((size/2.) - (float)i) / (size/2.);
-				float d_y = ((size/2.) - (float)j) / (size/2.);
-				float d_z = ((size/2.) - (float)k) / (size/2.);
-				float d = sqrt(pow(d_x, 2) + pow(d_y, 2) + pow(d_z, 2));
-				if(d < 1)
-                    tmp->set(1, 0.8);
-
-			}(int)
-		}
-	}
-*/
 };
 
 void BrickDensityRegion::set(int i, int j, int k, float val) {
@@ -39,18 +17,6 @@ void BrickDensityRegion::set(int i, int j, int k, float val) {
 
     Voxel *tmp = m_brickData(i,j,k);
     tmp->set(0, val);
-}
-
-void BrickDensityRegion::add(int i, int j, int k, float val) {
-    if(i < 0 || i > m_brickData.size_x() ||
-       j < 0 || j > m_brickData.size_y() ||
-       k < 0 || k > m_brickData.size_z()) {
-        printf("Error: setting index out of value [%d, %d, %d]\n", i, j, k);
-        exit(1);
-    }
-
-    Voxel *tmp = m_brickData(i,j,k);
-    tmp->add(0, val);
 }
 
 void BrickDensityRegion::loadCT(string file, Vec3 file_res, Vec3 vol_res) {
@@ -189,22 +155,22 @@ BrickDensityRegion::splat(int x, int y, int z, float val, int splat) {
     }
 }
 
-float BrickDensityRegion::interpolate(float x, float y, float z, VoxVal val) {
+float BrickDensityRegion::interpolate(const float x, const float y, const float z, const VoxVal val) {
     
     // subtracting 0.5 to center
-    x -= 0.5;
-    y -= 0.5;
-    z -= 0.5;
+    const float cx = x - 0.5f;
+    const float cy = y - 0.5f;
+    const float cz = z - 0.5f;
 
     // integer (base case) for each voxel
-    int ix = floor(x);
-    int iy = floor(y);
-    int iz = floor(z);
+    const int ix = floor(cx);
+    const int iy = floor(cy);
+    const int iz = floor(cz);
 
     // float value for each voxel
-    float tx = x - ix;
-    float ty = y - iy;
-    float tz = z - iz;
+    const float tx = cx - ix;
+    const float ty = cy - iy;
+    const float tz = cz - iz;
 
     // Each voxel
     Voxel *v1 = m_brickData(ix, iy, iz);
@@ -217,24 +183,24 @@ float BrickDensityRegion::interpolate(float x, float y, float z, VoxVal val) {
     Voxel *v8 = m_brickData(ix+1, iy+1, iz+1);
 
     // Float values for each voxel
-    float f1 = (*v1)(val);
-    float f2 = (*v2)(val);
-    float f3 = (*v3)(val);
-    float f4 = (*v4)(val);
-    float f5 = (*v5)(val);
-    float f6 = (*v6)(val);
-    float f7 = (*v7)(val);
-    float f8 = (*v8)(val);
+    const float f1 = (*v1)(val);
+    const float f2 = (*v2)(val);
+    const float f3 = (*v3)(val);
+    const float f4 = (*v4)(val);
+    const float f5 = (*v5)(val);
+    const float f6 = (*v6)(val);
+    const float f7 = (*v7)(val);
+    const float f8 = (*v8)(val);
 
     // Find 4 average points interpolated along the y-axis
-    float fy1 = (1-ty)*f1 + (ty)*f5;
-    float fy2 = (1-ty)*f2 + (ty)*f6;
-    float fy3 = (1-ty)*f3 + (ty)*f7;
-    float fy4 = (1-ty)*f4 + (ty)*f8;
+    const float fy1 = (1-ty)*f1 + (ty)*f5;
+    const float fy2 = (1-ty)*f2 + (ty)*f6;
+    const float fy3 = (1-ty)*f3 + (ty)*f7;
+    const float fy4 = (1-ty)*f4 + (ty)*f8;
 
     // Find 2 average points interpolated along the x-axis
-    float fx1 = (1-tx)*fy1 + (tx)*fy2;
-    float fx2 = (1-tx)*fy3 + (tx)*fy4;
+    const float fx1 = (1-tx)*fy1 + (tx)*fy2;
+    const float fx2 = (1-tx)*fy3 + (tx)*fy4;
 
     // Find final interpolation along z-axis
     float final = (1-tz)*fx1 + (tz)*fx2;
@@ -242,54 +208,19 @@ float BrickDensityRegion::interpolate(float x, float y, float z, VoxVal val) {
     return final;
 }
 
-double BrickDensityRegion::density(Vec3 v) {
-
-	if(!mBounds.inside(v))
-		return 0.0;
-
-	Vec3 loc = v - mBounds.min;
-	Vec3 dim = mBounds.max - mBounds.min;
-
-    // find exact floating-point position inside of grid
-	float off_x = (loc.x() / dim.x()) * m_brickData.size_x();
-	float off_y = (loc.y() / dim.y()) * m_brickData.size_y();
-	float off_z = (loc.z() / dim.z()) * m_brickData.size_z();
-
-    // retrieve surrounding voxels
-    // Voxel *vox = m_brickData((int)off_x, (int)off_y, (int)off_z);
-
-    return interpolate(off_x, off_y, off_z, DENSITY);
-
-    // sum and interpolate voxel density values
-    // interpolate(i, j, k, DENSITY)
-    //	return (*vox)(DENSITY);
-}
-
-unsigned short BrickDensityRegion::twoByte2ShortX(char *ptr)
-{
-  unsigned short r = 0;
-  r |= *ptr & 0xFF;
-  r <<= 8;
-  ptr++;
-  r |= *ptr & 0xFF;
-  return r;
-}
-
-void BrickDensityRegion::loadVolSlice(std::string file, Vec3 file_res, Vec3 vol_res, int y_val, int iso_min, int iso_max) {
-  int size_squared = (int)(file_res.x() * file_res.z());
-
-  //cout << "READING: " << file << endl;
+void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_res, const Vec3 &vol_res, int y_val, int iso_min, int iso_max) {
 
   if(file_res.x() < vol_res.x() || file_res.z() < vol_res.z()) {
     printf("Error: Volume must be at most file_resolution large.\n");
     exit(1);
   }
-
-  float multiply = (vol_res.x() / file_res.x());
-
+  
+  const int size_squared = (int)(file_res.x() * file_res.z());
+  const float multiply = (vol_res.x() / file_res.x());
+  
   char buffer[size_squared * 2];
-
   ifstream inFile(file.c_str(), ios::in | ios::binary);
+  
   if((!inFile))
   {
     printf("An error occurred!  Could not read \"%s\"\n", file.c_str());
@@ -304,6 +235,7 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vec3 file_res, Vec3 vol_
 
   unsigned short max = 0;
   unsigned short min = 50000;
+  
   unsigned short bufferShort[size_squared];
 
   for(int i = 0; i < size_squared; i++)
@@ -319,7 +251,6 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vec3 file_res, Vec3 vol_
   //printf("MIN: %d, MAX: %d\n", min, max);
 
   unsigned short tmp;
-  float tmp_data;
 
   for(int i = 0; i < (int)file_res.x(); i++)
   {
@@ -329,8 +260,6 @@ void BrickDensityRegion::loadVolSlice(std::string file, Vec3 file_res, Vec3 vol_
       //printf("tmp is huge! %d\n", tmp);
       tmp = (int(tmp) - iso_min > 0) ? tmp : 0;
       tmp = (tmp > iso_max) ? 0 : tmp;
-
-      //printf("Voxel %d %d %d -> %f\n", (int)(i * multiply), (int)((file_res.y() - (y_val + 1)) * multiply), (int)(j * multiply), (float)tmp / (float)max);
       add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);
     }
   }

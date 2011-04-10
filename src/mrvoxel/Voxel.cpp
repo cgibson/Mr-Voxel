@@ -34,21 +34,6 @@ void Voxel::fill( int size, ... ) {
 	va_end(ap);
 }
 
-void Voxel::set( int offset, float val ) {
-
-    float *f = (float*)(m_data + offset);
-
-    *f = val;
-}
-
-
-void Voxel::add( int offset, float val ) {
-
-    float *f = (float*)(m_data + offset);
-
-    *f += val;
-}
-
 Voxel::~Voxel( void ) {
 
 	if(m_size)
@@ -62,21 +47,11 @@ Voxel::Voxel( void ) {
 	m_size = 0;
 }
 
-float Voxel::operator () (VoxVal loc) {
-	if(loc < 0 || loc >= m_size) {
-		printf("Error: access out of bounds for voxel [%d]\n", loc);
-		exit(1);
-	}
-	//printf("LOC: %d\n", loc);
-	return *((float*)m_data);
-}
-
 
 Voxel::Voxel( Voxel const& v ) {
-	m_data = (char*)malloc(v.m_size);
+	m_data = new char[v.m_size];
 	m_data = (char*)memcpy(m_data, v.m_data, v.m_size);
 
 	m_size = v.m_size;
-	//printf("m_data is now %f\n", v(0));
 }
 

@@ -217,83 +217,10 @@ unsigned short twoByte2Short(char *ptr)
   return r;
 }
 
-void loadSlice(Volume *volume, string file, int y_val, int size)
-{
-  int size_squared = size * size;
-
-  char buffer[size_squared * 2];
-
-  ifstream inFile(file.c_str(), ios::in | ios::binary);
-  if((!inFile))
-  {
-    printf("An error occurred!  Could not read \"%s\"\n", file.c_str());
-    exit(1);
-  }
-
-  if(!inFile.read(buffer, size_squared * 2))
-  {
-    printf("Could not read %d bytes of data\n", size_squared * 2);
-    exit(1);
-  }
-
-  unsigned short max = 0;
-  unsigned short min = 50000;
-  unsigned short bufferShort[size_squared];
-
-  for(int i = 0; i < size_squared; i++)
-  {
-    bufferShort[i] = twoByte2Short(buffer + (2 * i));
-    if(bufferShort[i] > max)
-      max = bufferShort[i];
-    if(bufferShort[i] < min)
-      min = bufferShort[i];
-  }
-
-  //printf("MIN: %d, MAX: %d\n", min, max);
-
-  unsigned short tmp;
-
-  for(int i = 0; i < size; i++)
-  {
-    for(int j = 0; j < size; j++)
-    {
-      tmp = bufferShort[j * size + i];
-      tmp = (int(tmp) - 1024 > 0) ? tmp-1024 : 0;
-      tmp /= 10;
-      volume->set(i, size - (y_val + 1), j, (tmp-16>0?tmp-16:0));
-    }
-  }
-}
-
-void loadVolumeData(Json::Value val, Volume *volume, int size)
-{
-    string file = val["file"].asString();
-    int slices = val["slices"].asInt();
-
-     std::string tmp_str;
-
-     double offset = double(slices) / double(size);
-
-     int tmp;
-    for(int i = 0; i < size; i++) {
-
-        tmp = (int)(i * offset);
-
-        if(tmp == 0)
-            tmp = 1;
-        std::stringstream out;
-        out << tmp;
-        tmp_str = out.str();
-        loadSlice(volume, file + tmp_str, i, size);
-    }
-
-}
-
 VolumeRegion *parseVolume(Json::Value val)
 {
   Vec3 min = parseVec3(val["min"]);
   Vec3 max = parseVec3(val["max"]);
-  int size = val["size"].asInt();
 
   VolumeRegion *region;
 
@@ -347,7 +274,7 @@ VolumeRegion *parseVolume(Json::Value val)
 	  Color emitt = parseColor(val["emitt"]);
 	  double greenstein = val["greenstein"].asDouble();
 
-	  region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+	  region = new HomogeneousRegion(min, max, absorbtion, scatter, greenstein, \
 			                         emitt, density);
 
   }else{

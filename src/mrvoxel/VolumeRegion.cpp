@@ -21,7 +21,7 @@ float PhaseHG(Vec3 w, Vec3 wp, float g) {
     return val;
 }
 
-Spectrum DensityRegion::tau( Ray ray, double stepSize, double offset) {
+Spectrum DensityRegion::tau( const Ray &ray, const double &stepSize, const double &offset) {
 	// Optical width
 	Spectrum tau(0.);
 
@@ -31,9 +31,7 @@ Spectrum DensityRegion::tau( Ray ray, double stepSize, double offset) {
 	if(ray.direction.length() == 0) return 0.f;
 
 	if(!mBounds.test_intersect(ray, &t0, &t1, &n)) return 0.f;
-	
-	//if(ray.maxt < 10)
-		//printf("MAXT: %f\n", ray.maxt);
+        
 	// Handle rays with a max t
 	if(ray.maxt < t1){
 		//printf("T1 %f replaced with %f\n", t1, ray.maxt);
@@ -48,7 +46,12 @@ Spectrum DensityRegion::tau( Ray ray, double stepSize, double offset) {
 		//tau = tau + Spectrum(0.1);
 		tau = tau + sigma_t(ray(t0));
 		t0 += stepSize;
+                //printf("tau: %s t: %f\n", (tau * stepSize).str(), t0);
 	}
+/*
+        if(!tau.isBlack())
+            printf("teh tau: %s\n", (tau * stepSize).str());
+ //*/
 	//printf("tau: %s.  Size %f\n", tau.str(), stepSize);
 	// Return integral (evaluated at stepsize)
 	return tau * stepSize;

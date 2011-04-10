@@ -14,14 +14,12 @@ public:
 	Brick();
 	virtual ~Brick();
 
-	Voxel *operator () (int i, int j, int k)
+	inline Voxel *operator () (int i, int j, int k) const
 	{
-		//printf("values: %d %d %d\n", i, j, k);
-		//printf("\tlocation: %d\n", i + (BRICK_DIM * j) + (BRICK_DIM * BRICK_DIM * k));
 		return m_data[i + (BRICK_DIM * j) + (BRICK_DIM * BRICK_DIM * k)];
 	}
 
-	Voxel *get(int i, int j, int k)
+	inline Voxel *get(int i, int j, int k) const
 	{
 		return m_data[i + (BRICK_DIM * j) + (BRICK_DIM * BRICK_DIM * k)];
 	}
@@ -35,13 +33,29 @@ public:
 	BrickGrid(){};
 	BrickGrid(int size_x, int size_y, int size_z);
 
-	Voxel *operator () (int i, int j, int k);
+	inline Voxel *operator () (int i, int j, int k) const {
+
+            if(i < 0 || j < 0 || k < 0 || i >= m_size_x || j >= m_size_y || k >= m_size_z)
+                return m_zero_voxel;
+
+            const int x = i / BRICK_DIM;
+            const int y = j / BRICK_DIM;
+            const int z = k / BRICK_DIM;
+
+            const int off_x = i % BRICK_DIM;
+            const int off_y = j % BRICK_DIM;
+            const int off_z = k % BRICK_DIM;
+
+            const Brick* b = m_data[x + (m_brick_size_y * y) + (m_brick_size_y * m_brick_size_z * z)];
+
+            return (*b)(off_x, off_y, off_z);
+        }
 
 	virtual ~BrickGrid();
 
-	int size_x(){ return m_size_x; }
-	int size_y(){ return m_size_y; }
-	int size_z(){ return m_size_z; }
+	inline int size_x() const { return m_size_x; }
+	inline int size_y() const { return m_size_y; }
+	inline int size_z() const { return m_size_z; }
 
 private:
 

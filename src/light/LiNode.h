@@ -75,7 +75,7 @@ public:
     int add(shared_ptr<Surfel> obj);
 
     // Check if element intersects
-    bool inside(shared_ptr<Surfel> obj);
+    bool inside(const shared_ptr<Surfel> &obj);
 
     // Subdivide node into 8 children
     int subdivide();

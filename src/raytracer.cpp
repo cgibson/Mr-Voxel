@@ -87,11 +87,21 @@ int main(int argc, char* argv[])
   ImageWriter writer = ImageWriter( config::image_resolution );
   
   raycaster = new Raycaster( config::scenePtr );
-  
-  int cores = config::core_count;
-  int corethreadcount = config::core_thread_count;
-  int jobs = config::thread_jobs;
+
+  int cores;
+  int corethreadcount;
+  int jobs;
   Dimension img_size = config::image_resolution;
+
+  if(config::multi_threading) {
+      cores = config::core_count;
+      corethreadcount = config::core_thread_count;
+      jobs = config::thread_jobs;
+  }else{
+      cores = 1;
+      corethreadcount = 1;
+      jobs = 1;
+  }
 
   raytracer *rtrcs[jobs];
   thread thrds[jobs];

@@ -78,11 +78,11 @@ namespace light{
 
             // If an object is in the way
             if(config::scenePtr->intersect(shadow_ray, &surface2) && (surface2.t <= l_dist)) {
-                Tr = Tr * 0.0;
+                Tr = 0.0;
 
             // Otherwise, integrate through all volumes
             }else{
-                Tr = Tr * config::volume_integrator->Transmittance( shadow_ray );
+                Tr = config::volume_integrator->Transmittance( shadow_ray );
             }
 
             result = result + light::brdf(V, L, surf, light, Tr, specular);

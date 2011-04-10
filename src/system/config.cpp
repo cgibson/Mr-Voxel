@@ -74,7 +74,7 @@ namespace config {
     render_target_t render_target = TARGET_FULL;
 
     // Image options
-    Dimension image_resolution = {320, 240};
+    Dimension image_resolution = {800, 600};
     Dimension light_sample_resolution = {320, 240};
     float surfel_size = 0.075;
     antialiasing_t antialiasing = ANTIALIASING_NONE;
@@ -84,8 +84,8 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 3;
-    int hemisphere_t = 3;
+    int hemisphere_u = 16;
+    int hemisphere_t = 16;
 
     // Scene information
     Scene *scenePtr = NULL;

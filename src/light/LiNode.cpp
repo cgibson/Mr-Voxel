@@ -275,24 +275,28 @@ LiNode::add(shared_ptr<Surfel> obj) {
 
 
 bool
-LiNode::inside(shared_ptr<Surfel> obj) {
+LiNode::inside(const shared_ptr<Surfel> &obj) {
     float dmin = 0;
 
-    Vec3 sphere_pos = obj->position();
+    const Vec3 sphere_pos = obj->position();
 
     if(sphere_pos.x() > _min.x() && sphere_pos.x() < _max.x() &&
             sphere_pos.y() > _min.y() && sphere_pos.y() < _max.y() &&
             sphere_pos.z() > _min.z() && sphere_pos.z() < _max.z())
         return true;
 
-    float c, bmin, bmax;
-    for(int i = 0; i < 3; i++) {
-        c = sphere_pos.get(i);
-        bmin = _min.get(i);
-        bmax = _max.get(i);
-        if( c < bmin ) dmin += sqrt( c - bmin); else
-        if( c > bmax ) dmin += sqrt( c - bmax);
-    }
+    // X axis
+    if( sphere_pos.x() < _min.x()) dmin += sqrt( sphere_pos.x() - _min.x()); else
+    if( sphere_pos.x() > _max.x()) dmin += sqrt( sphere_pos.x() - _max.x());
+
+    // Y axis
+    if( sphere_pos.y() < _min.y()) dmin += sqrt( sphere_pos.y() - _min.y()); else
+    if( sphere_pos.y() > _max.y()) dmin += sqrt( sphere_pos.y() - _max.y());
+
+    // Z axis
+    if( sphere_pos.z() < _min.z()) dmin += sqrt( sphere_pos.z() - _min.z()); else
+    if( sphere_pos.z() > _max.z()) dmin += sqrt( sphere_pos.z() - _max.z());
+
     if( dmin <= obj->area() ) return true;
 
     return false;

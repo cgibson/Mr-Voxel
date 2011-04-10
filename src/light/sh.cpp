@@ -113,7 +113,7 @@ namespace sh{
         float *sines = (float*)malloc((lmax+1) * sizeof(float));
         float *cosines = (float*)malloc((lmax+1) * sizeof(float));
 
-        float xyLen = sqrt(max(0.f, 1.f - w.z()*w.z()));
+        float xyLen = sqrt(max(0., 1. - w.z()*w.z()));
         if (xyLen == 0.f) {
             for (int i = 0; i <= lmax; ++i) sines[i] = 0.f;
             for (int i = 0; i <= lmax; ++i) cosines[i] = 1.f;

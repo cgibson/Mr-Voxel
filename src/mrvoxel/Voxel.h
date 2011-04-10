@@ -15,13 +15,33 @@ public:
 	virtual ~Voxel();
 	Voxel( Voxel const& v );
 
-	float operator () (VoxVal loc);
-	void set( int size, float val );
-	void add( int size, float val );
+	inline void set( int offset, float val ) {
+
+            float *f = (float*)(m_data + offset);
+
+            *f = val;
+        }
+
+	inline void add( int offset, float val ) {
+
+            float *f = (float*)(m_data + offset);
+
+            *f += val;
+        }
+
 	void fill( int size, ... );
 
 	char *m_data;
 	int m_size;
+
+        inline float operator () (const VoxVal &loc) {
+	if(loc < 0 || loc >= m_size) {
+		printf("Error: access out of bounds for voxel [%d]\n", loc);
+		exit(1);
+	}
+        
+	return *((float*)m_data);
+}
 
 private:
     union fl2Char{

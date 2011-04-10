@@ -14,14 +14,14 @@
 class Ray {
 public:
   Ray( void ): mint(0), maxt(INFINITY) {};
-  Ray( Vec3 s, Vec3 d, double t0 = 0, double t1 = INFINITY ):start(s), direction(d), mint(t0), maxt(t1) {};
+  Ray( const Vec3 &s, const Vec3 &d, double t0 = 0, double t1 = INFINITY ):start(s), direction(d), mint(t0), maxt(t1) {};
   Vec3 start;
   Vec3 direction;
   
   double mint, maxt;
   
 
-  Vec3 operator() ( double t ){ return start + (direction * t); }
+  Vec3 operator() ( double t ) const { return start + (direction * t); }
 };
 
 /*
@@ -56,21 +56,23 @@ public:
   
   bool isBlack(){ return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
 
-  RGBColor operator+( const RGBColor& c )
+  inline RGBColor operator+( const RGBColor& c ) const
     { return RGBColor( p_r + c.p_r, p_g + c.p_g, p_b + c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
-  RGBColor operator-( const RGBColor& c )
+  inline RGBColor operator-( const RGBColor& c ) const
     { return RGBColor( p_r - c.p_r, p_g - c.p_g, p_b - c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
-  RGBColor operator*( const RGBColor& c )
+  inline RGBColor operator*( const RGBColor& c ) const
     { return RGBColor( p_r * c.p_r, p_g * c.p_g, p_b * c.p_b, p_f * c.p_f); }
-  RGBColor operator/( const RGBColor& c )
+  inline RGBColor operator/( const RGBColor& c ) const
     { return RGBColor( p_r / c.p_r, p_g / c.p_g, p_b / c.p_b, p_f / c.p_f); }
-  RGBColor operator*( const double f )
+  inline RGBColor operator*( const double f ) const
     { return RGBColor( p_r * f, p_g * f, p_b * f, p_f); }
-  RGBColor operator/( const double f )
+  inline RGBColor operator/( const double f ) const
     { return RGBColor( p_r / f, p_g / f, p_b / f, p_f); }
+  inline RGBColor operator=( const RGBColor& c)
+    { this->p_r = c.p_r; this->p_g = c.p_g; this->p_b = c.p_b; return(*this );}
 
   friend RGBColor Exp(const RGBColor &c) {
-     return RGBColor(expf(c.r()), exp(c.g()), exp(c.b()));
+     return RGBColor(exp(c.r()), exp(c.g()), exp(c.b()));
   }
     
 
