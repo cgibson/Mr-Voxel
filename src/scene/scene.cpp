@@ -11,7 +11,7 @@ using namespace std;
  * Collision data constructor including offending object, intersect point, 
  * distance and normal of face
  *----------------------------------------------------------------------------*/
-Surface::Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col)
+Surface::Surface(const Vec3 &point, double distance, const Vec3 &normal, const Finish &fin, const Color &col)
 {
   p = point;
   t = distance;
@@ -56,7 +56,7 @@ Scene::Scene( void )
 }
 
 bool
-Scene::intersect(Ray ray, Surface* surface) {
+Scene::intersect(const Ray &ray, Surface* const surface) {
 
     if(mObjectBVH == NULL)
         return false;

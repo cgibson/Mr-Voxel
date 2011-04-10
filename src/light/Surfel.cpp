@@ -7,7 +7,7 @@
 
 #include "Surfel.h"
 
-Surfel::Surfel(Vec3 position, Vec3 normal, Color diffuse, float area)
+Surfel::Surfel(const Vec3 &position, const Vec3 &normal, const Color &diffuse, float area)
         : Disk(area, 0, 2 * PI,  Ray(position, normal)),
           _pos(position), _normal(normal), _diffuse(diffuse) {
 }

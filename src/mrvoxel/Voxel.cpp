@@ -1,5 +1,6 @@
 #include "Voxel.h"
 
+/*
 Voxel::Voxel( int size, ... ) {
 
 	int i;
@@ -13,6 +14,14 @@ Voxel::Voxel( int size, ... ) {
 		m_data[i] = (float)va_arg(ap, double);
 	}
 	va_end(ap);
+
+}
+*/
+
+Voxel::Voxel( int size ) {
+
+	m_size = size;
+	m_data = new char[size];
 
 }
 

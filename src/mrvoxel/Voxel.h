@@ -11,7 +11,8 @@ enum VoxVal{ DENSITY };
 class Voxel {
 public:
 	Voxel( void );
-	Voxel( int size, ... );
+        Voxel(int size);
+	//Voxel( int size, ... );
 	virtual ~Voxel();
 	Voxel( Voxel const& v );
 

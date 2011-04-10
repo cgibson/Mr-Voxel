@@ -1,4 +1,6 @@
 #include "util.h"
+#include "rayutil.h"
+#include "../types.h"
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -15,34 +17,75 @@ int test_intersect_1d(double p, double d,
                       double min, double max,
                       double *result_near, double *result_far)
 {
-  double tmp;
-  double tnear = -1000.0;
-  double tfar = 1000.0;
-  double t1 = (min - p) / d;
-  double t2 = (max - p) / d;
+    const double t1 = (min - p) / d;
+    const double t2 = (max - p) / d;
 
-  // if the component is zero
-  if(d == 0)
-  {
-    return (p > min) && (p < max);
-  }
+    // if the component is zero
+    if(d == 0)
+    {
+        *result_near = 0;
+        *result_far = INFINITY;
+        return (p > min) && (p < max);
+    }
 
-  // switch if t1 > t2
-  if(t1 > t2)
-  {
-    tmp = t1;
-    t1 = t2;
-    t2 = tmp;
-  }
-
-  if(t1 > tnear) tnear = t1;
-  if(t2 < tfar) tfar = t2;
-
-  *result_near = tnear;
-  *result_far = tfar;
-  return true;
+    // switch if t1 > t2
+    if(t1 > t2)
+    {
+        *result_near = t2;
+        *result_far = t1;
+    }else{
+        *result_near = t1;
+        *result_far = t2;
+    }
+    return true;
 }
 
+bool test_intersect_region(const Ray &ray, const Vector3D &min, const Vector3D &max,
+        double * const t1, double * const t2) {
+
+    double near = -1000; double far = 1000;
+    double near_tmp, far_tmp;
+
+    *t1 = ray.mint;
+    *t2 = ray.maxt;
+
+    bool r;
+    
+    // X AXIS
+    r = test_intersect_1d(ray.start.x(), ray.direction.x(), min.x(), max.x(), &near_tmp, &far_tmp);
+    if(!r)
+            return false;
+    
+    if(near_tmp > near) near = near_tmp;
+    if(far_tmp < far) far = far_tmp;
+
+    // Y AXIS
+    r = test_intersect_1d(ray.start.y(), ray.direction.y(), min.y(), max.y(), &near_tmp, &far_tmp);
+    if(!r)
+            return false;
+
+    if(near_tmp > near) near = near_tmp;
+    if(far_tmp < far) far = far_tmp;
+
+    // Z AXIS
+    r = test_intersect_1d(ray.start.z(), ray.direction.z(), min.z(), max.z(), &near_tmp, &far_tmp);
+    if(!r)
+            return false;
+
+    if(near_tmp > near) near = near_tmp;
+    if(far_tmp < far) far = far_tmp;
+
+
+    if(near > far) return false;
+    if(far < 0.) return false;
+
+    if(near > ray.mint)
+        *t1 = near;
+    if(far < ray.maxt)
+        *t2 = far;
+    
+    return true;
+}
 
 /* Vector3D constructors */
 /* default */
@@ -65,7 +108,7 @@ char* Vector3D::str( void ) const{
     return buffer;
 }
 
-Vector3D Vector3D::reflect(Vector3D n)
+Vector3D Vector3D::reflect(Vector3D n) const
 {
     n.norm();
     Vector3D d = Vector3D(p_x, p_y, p_z);
@@ -73,7 +116,7 @@ Vector3D Vector3D::reflect(Vector3D n)
     return d - (n * (2 *(n * d)));
 }
 /**/
-Vector3D Vector3D::refract(Vector3D N, double n1, double n2, int *success)
+Vector3D Vector3D::refract(Vector3D N, double n1, double n2, int *success) const
 {
     N.norm();
     Vector3D D = Vector3D(p_x, p_y, p_z);

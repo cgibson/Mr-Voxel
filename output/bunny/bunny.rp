@@ -1,7 +1,7 @@
 {
     "render_size" : [ 640, 480 ],
     
-    "volSampleStep" : 0.01,
+    "volSampleStep" : 0.1,
     
     "camera" : {
         "eye" :     [  0.00,  3.00, -10.00 ],

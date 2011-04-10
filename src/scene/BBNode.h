@@ -13,19 +13,19 @@ public:
   BBNode( void );
   BBNode( SceneObject *o );
   BBNode( SceneObject *o1, SceneObject *o2 );
-  BBNode( Vec3 minimum, Vec3 maximum );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n );
-  virtual int test_intersect( Ray ray, double *t1, double *t2, Vec3 *n );
-  BBNode construct( Matrix matrix );
+  BBNode( const Vec3 &minimum, const Vec3 &maximum );
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
+  virtual int test_intersect( const Ray &ray, double *t1, double *t2, Vec3 * const n );
+  BBNode construct( const Matrix &matrix );
   int inside( Vec3 );
   virtual char* str( void );
   char* recurse_str( void );
-  virtual TYPE getType( void ){ return NODE; }
+  virtual inline TYPE getType( void ){ return NODE; }
   double cost();
-  BBNode combine( BBNode node );
+  BBNode combine( const BBNode &node );
   Vec3 getCenter();
 
-  bool intersect(Ray ray, Surface* surface);
+  bool intersect(const Ray &ray, Surface* surface);
 
   int has_right()
   {

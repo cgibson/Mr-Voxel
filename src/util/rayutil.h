@@ -54,7 +54,7 @@ public:
 
   double toTrans(){ return (p_r + p_g + p_b) / 3.0; }
   
-  bool isBlack(){ return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
+  bool isBlack() const { return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
 
   inline RGBColor operator+( const RGBColor& c ) const
     { return RGBColor( p_r + c.p_r, p_g + c.p_g, p_b + c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }

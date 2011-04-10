@@ -12,7 +12,7 @@
 
 #include "../system/config.h"
 
-OctreeNode::OctreeNode( Vec3 min, Vec3 max ): _min(min), _max(max) {
+OctreeNode::OctreeNode( const Vec3 &min, const Vec3 &max ): _min(min), _max(max) {
 
     // Clear all children
     for(int i = 0; i < 8; i++)
@@ -41,47 +41,17 @@ OctreeNode::cascadeDelete() {
     }
 }
 
-int
-OctreeNode::test_intersect( Ray ray, double *t, Vec3 *n ) {
+inline int
+OctreeNode::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 
-    BBNode node = BBNode(_min, _max);
+    double tmp_t;
 
-    return node.test_intersect(ray, t, n);
+    return test_intersect_region(ray, _min, _max, t, &tmp_t);
     
-  double near = -1000; double far = 1000;
-  double near_tmp, far_tmp;
-
-  double p[3] = {ray.start.x(), ray.start.y(), ray.start.z()};
-  double d[3] = {ray.direction.x(), ray.direction.y(), ray.direction.z()};
-  double tmin[3] = {_min.x(), _min.y(), _min.z()};
-  double tmax[3] = {_max.x(), _max.y(), _max.z()};
-  int r, i;
-
-  for(i = 0; i < 3; i++)
-  {
-    r = test_intersect_1d(p[i], d[i], tmin[i], tmax[i], &near_tmp, &far_tmp);
-    if(!r)
-      return false;
-
-    if(near_tmp > near)
-    {
-      near = near_tmp;
-    }
-
-    if(far_tmp < far)
-    {
-      far = far_tmp;
-    }
-  }
-
-  if(near > far) return false;
-  if(far < 0) return false;
-
-  return true;
 }
 
 Color
-LiNode::gather( Ray ray, double *t ) {
+LiNode::gather( const Ray &ray, double *t ) {
     double tmin = INFINITY;
     double thit;
     Color closest = config::background;
@@ -231,7 +201,7 @@ LiNode::LiNode(Vec3 min, Vec3 max):OctreeNode(min,max), _surfelCount(0) {
 }
 
 int
-LiNode::add(shared_ptr<Surfel> obj) {
+LiNode::add(const shared_ptr<Surfel> obj) {
 
         //printf("Adding to NODE: %s - %s\n", m_min.str(), m_max.str());
 
@@ -275,7 +245,7 @@ LiNode::add(shared_ptr<Surfel> obj) {
 
 
 bool
-LiNode::inside(const shared_ptr<Surfel> &obj) {
+LiNode::inside(const shared_ptr<Surfel> obj) {
     float dmin = 0;
 
     const Vec3 sphere_pos = obj->position();

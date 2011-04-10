@@ -14,7 +14,7 @@
 
 class Surfel : public Disk{
 public:
-    Surfel(Vec3 position, Vec3 normal, Color diffuse, float area);
+    Surfel(const Vec3 &position, const Vec3 &normal, const Color &diffuse, float area);
     Surfel(const Surfel& orig);
     virtual ~Surfel();
 

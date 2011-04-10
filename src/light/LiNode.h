@@ -27,7 +27,7 @@ class Surfel;
 
 class OctreeNode : public SceneObject {
 public:
-    OctreeNode( Vec3 min, Vec3 max );
+    OctreeNode( const Vec3 &min, const Vec3 &max );
 
     // Nodes should NEVER be passed by reference.  only by pointer
     OctreeNode(const OctreeNode& orig);
@@ -40,7 +40,7 @@ public:
     Vec3 max(){ return _max; }
 
     // Test intersect for given ray
-    int test_intersect( Ray ray, double *t, Vec3 *n );
+    inline int test_intersect( const Ray &ray, double *t, Vec3 * const n );
 
     // Return if node has children
     bool hasChildren(){ return m_children[0] != NULL;}
@@ -72,10 +72,10 @@ public:
     LiNode* child(int index){ return (index >= 0 && index < 8) ? (LiNode*)m_children[index] : NULL;}
     
     // Add element to octree node
-    int add(shared_ptr<Surfel> obj);
+    int add(const shared_ptr<Surfel> obj);
 
     // Check if element intersects
-    bool inside(const shared_ptr<Surfel> &obj);
+    bool inside(const shared_ptr<Surfel> obj);
 
     // Subdivide node into 8 children
     int subdivide();
@@ -90,7 +90,7 @@ public:
 
     int size_of();
 
-    Color gather(Ray ray, double *t);
+    Color gather(const Ray &ray, double *t);
     
     // Generate layers of multi-resolution lighting using spherical harmonics
     void postprocess();

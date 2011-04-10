@@ -7,14 +7,14 @@
 
 #include "brdf.h"
 
-double max(double a, double b)
+inline double max(double a, double b)
 {
   return (a > b) ? a : b;
 }
 
 namespace light{
 
-    Color shadeIndirect(Surface &surface, bool gather = true, bool ambient = true) {
+    Color shadeIndirect(const Surface &surface, bool gather = true, bool ambient = true) {
         Color result = 0.;
 
         float pdf = 1. / (4. * PI);
@@ -49,7 +49,7 @@ namespace light{
         return result;
     }
 
-    Color shadeDiffuse(Vec3 &V, Surface &surf, bool specular = true) {
+    Color shadeDiffuse(const Vec3 &V, const Surface &surf, bool specular = true) {
 
         Color result = 0.;
         
@@ -92,7 +92,7 @@ namespace light{
         
     }
 
-    Color brdf(Vec3 &V, Vec3 &L, Surface &surf, LightSource *light, Color &lightTr, bool specular = true) {
+    Color brdf(const Vec3 &V, const Vec3 &L, const Surface &surf, LightSource *light, const Color &lightTr, bool specular = true) {
         
         Vec3 H = V + L;
         H.norm();

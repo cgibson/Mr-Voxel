@@ -41,7 +41,7 @@ Raycaster::Raycaster( Scene* scene )
 /*
  * Default Raycaster Constructor given the current scene with an overrided camera
  *----------------------------------------------------------------------------*/
-Raycaster::Raycaster( Scene* scene, Camera cam )
+Raycaster::Raycaster( Scene* scene, const Camera &cam )
 {
   mCastMode = PERSPECTIVE;
   _camera = cam;
@@ -66,15 +66,10 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
  * New Sum Lights for a given surface
  * ---------------------------------------------------------------------------*/
 
-Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
+Color Raycaster::sumLights( const Surface &surface, const Ray &ray, int specular, int ambient, bool gather ) {
     Color result; // resulting color to be returned
 
     Vec3 V = ray.direction * -1;
-
-    // Invert backwards normals
-    if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(V) < 0) {
-        surface.n = surface.n * -1;
-    }
 
     // Gather indirect light
     result = light::shadeIndirect(surface, gather, ambient);
@@ -88,7 +83,7 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 /*
  * New Handle Intersect Code
  * ---------------------------------------------------------------------------*/
-Color Raycaster::handleIntersect( Ray ray, int depth )
+Color Raycaster::handleIntersect( const Ray &ray, int depth )
 {
     Color color;
 
@@ -109,16 +104,24 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
         return (config::background * vol_transmittance) + vol_color;
     }
 
-    Vec3 D = ray.direction;
-    Vec3 N = surface.n;
-    Vec3 R = ray.direction.reflect(N);
-    Vec3 P = surface.p;
-    Ray ray_reflect = Ray(P, R);
+    const Vec3 D = ray.direction;
+    const Vec3 N = surface.n;
+    const Vec3 R = ray.direction.reflect(N);
+    const Vec3 P = surface.p;
+    const Ray ray_reflect = Ray(P, R);
 
     Color color_reflect;
     Color color_refract;
 
     if(surface.type == SolidSurface) {
+
+
+
+        // Invert backwards normals
+        if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(D * -1) < 0) {
+            surface.n = surface.n * -1;
+        }
+        
         color = color + sumLights(surface, ray, 1, 1, true);
 
         int success;
@@ -174,7 +177,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 /*
  * New Ray Color Cast
  *----------------------------------------------------------------------------*/
-Color Raycaster::initialCast( Ray ray, int depth )
+Color Raycaster::initialCast( const Ray &ray, int depth )
 {
     if(depth <= 0)
         return config::background;
@@ -188,39 +191,39 @@ Color Raycaster::initialCast( Ray ray, int depth )
  *----------------------------------------------------------------------------*/
 Color Raycaster::cast( int x, int y, int width, int height )
 {
-  Color color;
+    Color color;
 
-  double us = mLeft + ((mRight - mLeft)
+    double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
-  double vs = mBottom + ((mTop - mBottom)
+    double vs = mBottom + ((mTop - mBottom)
         * (double)((double)(y + 0.5f) / height));
-  //cout << "US: " << us << "  VS: " << vs << endl;
+    //cout << "US: " << us << "  VS: " << vs << endl;
 
-  Ray ray;
+    Ray ray;
 
-ray.start.set(0, 0, 0);
-ray.start = ray.start + Vec3(us, vs, 0);
+    ray.start.set(0, 0, 0);
+    ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vec3(0,0,-1);
-ray.direction.norm();
-ray.direction = ray.direction + Vec3(us, vs, 0);
-
-
-  ray.start = _matrix * Vec4(ray.start, 1);
-  ray.direction = _matrix * Vec4(ray.direction, 0);
-  ray.direction.norm();
-
-  double t;
-
-  if(config::render_target == TARGET_LIGHT_CACHE) {
-    color = mScene->lightCache()->gather(ray, &t);
-  } else {
-    color = initialCast(ray, mDepth);
-  }
+    ray.direction = Vec3(0,0,-1);
+    ray.direction.norm();
+    ray.direction = ray.direction + Vec3(us, vs, 0);
 
 
-  color.clamp(0, 1);
-  return color;
+    ray.start = _matrix * Vec4(ray.start, 1);
+    ray.direction = _matrix * Vec4(ray.direction, 0);
+    ray.direction.norm();
+
+    double t;
+
+    if(config::render_target == TARGET_LIGHT_CACHE) {
+        color = mScene->lightCache()->gather(ray, &t);
+    } else {
+        color = initialCast(ray, mDepth);
+    }
+
+
+    color.clamp(0, 1);
+    return color;
 }
 
 int Raycaster::iterate( Ray *ray, Surface *surface) {
@@ -238,25 +241,25 @@ int Raycaster::iterate( Ray *ray, Surface *surface) {
 void Raycaster::cam2World( int x, int y, int width, int height, Ray *external_ray )
 {
 
-  double us = mLeft + ((mRight - mLeft)
+    const double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
-  double vs = mBottom + ((mTop - mBottom)
+    const double vs = mBottom + ((mTop - mBottom)
         * (double)((double)(y + 0.5f) / height));
-  //cout << "US: " << us << "  VS: " << vs << endl;
-  Ray ray = Ray();
+    //cout << "US: " << us << "  VS: " << vs << endl;
+    Ray ray = Ray();
 
-ray.start.set(0, 0, 0);
-ray.start = ray.start + Vec3(us, vs, 0);
+    ray.start.set(0, 0, 0);
+    ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vec3(0,0,-1);
-ray.direction.norm();
-ray.direction = ray.direction + Vec3(us, vs, 0);
+    ray.direction = Vec3(0,0,-1);
+    ray.direction.norm();
+    ray.direction = ray.direction + Vec3(us, vs, 0);
 
-  ray.start = _matrix * Vec4(ray.start, 1);
-  ray.direction = _matrix * Vec4(ray.direction, 0);
-  ray.direction.norm();
+    ray.start = _matrix * Vec4(ray.start, 1);
+    ray.direction = _matrix * Vec4(ray.direction, 0);
+    ray.direction.norm();
 
-  *external_ray = ray;
+    *external_ray = ray;
 }
 
 /*
@@ -272,7 +275,7 @@ int Raycaster::raycast(
         int depth,
         ImageWriter *writer)
 {
-  int rays = width * height;
+  const int rays = width * height;
   int print_percent = 1;
   int rays_done = 0;
   int percent_done = 0;
@@ -333,7 +336,7 @@ int Raycaster::raycast(
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
 int Raycaster::surfelCast(
-        Dimension size,
+        const Dimension &size,
         int step_x,
         int step_y,
         ImageWriter *writer)
@@ -357,6 +360,11 @@ int Raycaster::surfelCast(
       color = 0;
 
       while(mScene->intersect(ray, &surf)) {
+
+            // Invert backwards normals
+            if(surf.objPtr->getType() == TRIANGLE && surf.n.dot(ray.direction * -1) < 0) {
+                surf.n = surf.n * -1;
+            }
 
           color = sumLights(surf, ray, 0, 0, false);
           mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size)));

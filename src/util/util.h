@@ -6,9 +6,14 @@
 
 using namespace std;
 
+class Ray;
+class Vector3D;
+
 int test_intersect_1d(double p, double d,
                       double min, double max,
                       double *result_near, double *result_far);
+
+bool test_intersect_region(const Ray &ray, const Vector3D &min, const Vector3D &max, double * const t1, double * const t2);
 
 /* A Vector3D class for 3D Vector3Ds */
 class Vector3D{
@@ -76,7 +81,7 @@ public:
 
     void cross(const Vector3D in, Vector3D *out);
 
-    inline double dot(const Vector3D v2){
+    inline double dot(const Vector3D v2) const {
 	return(p_x*v2.p_x + p_y*v2.p_y + p_z*v2.p_z);
     };
     
@@ -87,8 +92,8 @@ public:
     }
 
     char* str() const;
-    Vector3D reflect(Vector3D n);
-    Vector3D refract(Vector3D n, double n1, double n2, int *success);
+    Vector3D reflect(Vector3D n) const ;
+    Vector3D refract(Vector3D n, double n1, double n2, int *success) const ;
 
 private:
      double p_x, p_y, p_z;

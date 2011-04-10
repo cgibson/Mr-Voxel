@@ -84,7 +84,7 @@ public:
   GeomObj *objPtr;
   
   Surface();
-  Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col);
+  Surface(const Vec3 &point, double distance, const Vec3 &normal, const Finish &fin, const Color &col);
   bool isHit( void ){ return hit; }
 private:
   bool hit;
@@ -127,7 +127,7 @@ public:
   int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
   LiNode* initCache(Vec3 min, Vec3 max){ mLiCache = new LiNode(min, max); }
 
-  bool intersect(Ray ray, Surface *surface);
+  bool intersect(const Ray &ray, Surface * const surface);
 
 private:
 
