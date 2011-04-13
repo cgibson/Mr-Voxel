@@ -215,10 +215,24 @@ Color Raycaster::cast( int x, int y, int width, int height )
 
     double t;
 
-    if(config::render_target == TARGET_LIGHT_CACHE) {
-        color = mScene->lightCache()->gather(ray, &t);
-    } else {
-        color = initialCast(ray, mDepth);
+    switch(config::render_target) {
+        case TARGET_LIGHT_CACHE_RESULT:
+            color = mScene->lightCache()->gather(ray, &t);
+            break;
+        case TARGET_LIGHT_CACHE_TEST_COUNT:
+        {
+            int testCount;
+            mScene->lightCache()->getTestCount(ray, &testCount);
+            testCount = (testCount < 255) ? testCount : 255;
+            //printf("TEST: %d\n", testCount);
+            color = (float)testCount / 50.;
+        }
+            break;
+        case TARGET_DIFFUSE:
+        case TARGET_AMBIENT:
+        case TARGET_FULL:
+            color = initialCast(ray, mDepth);
+            break;
     }
 
 

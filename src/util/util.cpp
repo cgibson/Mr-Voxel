@@ -49,6 +49,11 @@ bool test_intersect_region(const Ray &ray, const Vector3D &min, const Vector3D &
     *t1 = ray.mint;
     *t2 = ray.maxt;
 
+    if(min.x() == max.x() &&
+        min.y() == max.y() &&
+        min.z() == max.z())
+        return true;
+
     bool r;
     
     // X AXIS

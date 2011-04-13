@@ -55,7 +55,6 @@ public:
     virtual int clear() = 0;
     
     virtual void postprocess() = 0;
-
 protected:
 
     OctreeNode* m_children[8];
@@ -94,6 +93,9 @@ public:
     
     // Generate layers of multi-resolution lighting using spherical harmonics
     void postprocess();
+
+    int getTestCount( const Ray &ray, int *testCount );
+
 
 protected:
     int _surfelCount;

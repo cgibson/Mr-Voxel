@@ -41,6 +41,100 @@ OctreeNode::cascadeDelete() {
     }
 }
 
+int
+LiNode::getTestCount( const Ray &ray, int *testCount ) {
+    double tmin = -1;
+    double thit;
+    int tmp;
+    Vec3 n;
+
+    if(!OctreeNode::test_intersect( ray, &thit, &n )){
+        *testCount = 1;
+        return 0;
+    }
+
+
+    if(hasChildren()) {
+        vector<pair<double, int> > ch_hit;
+        vector<pair<double, int> >::iterator ch_It;
+        double tmp_t;
+        Vec3 tmp_n;
+        for(int i = 0; i < 8; i++) {
+            if(child(i)->test_intersect(ray, &tmp_t, &tmp_n)) {
+                ch_hit.push_back(pair<double, int>(tmp_t,i));
+            }
+        }
+/*
+        int test_tot = 0;
+        int tmp_test = 0;
+        tmp = 0;
+        for(int i = 0; i < 8; i++) {
+            tmp += child(i)->getTestCount( ray, &tmp_test);
+            test_tot += tmp_test;
+        }
+
+        if(tmp > 0) {
+            *testCount = test_tot;
+            return 1;
+        }else{
+            *testCount = test_tot;
+            return 0;
+        }
+        //*/
+//*
+        sort( ch_hit.begin(), ch_hit.end());
+
+        int test_tot = 0;
+        int tmp_test = 0;
+        for(ch_It = ch_hit.begin(); ch_It != ch_hit.end(); ch_It++) {
+            //printf("testing child %d\n", ch_It->second);
+            assert(child(ch_It->second) != NULL);
+            tmp = child(ch_It->second)->getTestCount( ray, &tmp_test);
+            test_tot += tmp_test;
+
+            if(tmp > 0) {
+                *testCount = test_tot;
+                return 1;
+            }
+        }
+        *testCount = test_tot;
+        return 0;
+//*/
+    }else{
+        /**/
+        if((_min.x() < ray.start.x() && _max.x() > ray.start.x()) &&
+           (_min.y() < ray.start.y() && _max.y() > ray.start.y()) &&
+           (_min.z() < ray.start.z() && _max.z() > ray.start.z())) {
+           *testCount = 1;
+           return 0;
+        }
+        *testCount = 1;
+
+        for(int i = 0; i < _surfelCount; i++) {
+
+            Ray tmpRay;
+            assert(_surfelData[i].get() != NULL);
+            shared_ptr<Surfel> s(_surfelData[i]);
+            tmpRay.start = s->matrix * Vec4(ray.start, 1);
+            tmpRay.direction = s->matrix * Vec4(ray.direction, 0);
+            tmpRay.direction.norm();
+
+            // Would be usefull if we wanted to suck at cheating
+            if(s->normal() * (ray.direction * -1) > 0) {
+                if(s->test_intersect(tmpRay, &thit, &n)) {
+                    if(thit < tmin || tmin < 0.) {
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+
+    *testCount = 1;
+
+    return false;
+}
+
 inline int
 OctreeNode::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 
@@ -52,32 +146,51 @@ OctreeNode::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 
 Color
 LiNode::gather( const Ray &ray, double *t ) {
-    double tmin = INFINITY;
+    double tmin = -1;
     double thit;
     Color closest = config::background;
     Color tmp;
     Vec3 n;
 
     if(!OctreeNode::test_intersect( ray, &thit, &n )){
-        *t = INFINITY;
+        *t = -1;
         return config::background;
     }
 
 
     if(hasChildren()) {
+        vector<pair<double, int> > ch_hit;
+        vector<pair<double, int> >::iterator ch_It;
+        double tmp_t;
+        Vec3 tmp_n;
         for(int i = 0; i < 8; i++) {
-            tmp = child(i)->gather( ray, &thit);
-            if(thit < tmin) {
-                tmin = thit;
-                closest = tmp;
+            if(child(i)->test_intersect(ray, &tmp_t, &tmp_n)) {
+                ch_hit.push_back(pair<double, int>(tmp_t,i));
             }
         }
+
+        sort( ch_hit.begin(), ch_hit.end());
+
+        for(ch_It = ch_hit.begin(); ch_It != ch_hit.end(); ch_It++) {
+            //printf("testing child %d\n", ch_It->second);
+            assert(child(ch_It->second) != NULL);
+            tmp = child(ch_It->second)->gather( ray, &thit);
+            /*if(thit < tmin) {
+                tmin = thit;
+                closest = tmp;
+            }*/
+            if(thit >= 0) {
+                *t = thit;
+                return tmp;
+            }
+        }
+
     }else{
         /**/
         if((_min.x() < ray.start.x() && _max.x() > ray.start.x()) &&
            (_min.y() < ray.start.y() && _max.y() > ray.start.y()) &&
            (_min.z() < ray.start.z() && _max.z() > ray.start.z())) {
-           *t = INFINITY;
+           *t = -1;
            return config::background;
         }
 
@@ -93,7 +206,7 @@ LiNode::gather( const Ray &ray, double *t ) {
             // Would be usefull if we wanted to suck at cheating
             if(s->normal() * (ray.direction * -1) > 0) {
                 if(s->test_intersect(tmpRay, &thit, &n)) {
-                    if(thit < tmin) {
+                    if(thit < tmin || tmin < 0.) {
                         tmin = thit;
                         closest = s->diffuse();
                         //light::sh::reconstruct(ray.direction * -1, 2, sh_c);//

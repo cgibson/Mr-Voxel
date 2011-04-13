@@ -31,13 +31,21 @@ namespace light{
 
             float sample_mul = pdf * (config::hemisphere_u*config::hemisphere_t);
 
+            Color Tr = 1.;
+            Color VLi = 0.;
+            Ray sampleRay;
+
             // Gather samples until the sampler runs out
             while(sampler.getSample(&smpl)) {
 
                 rndn = (smpl * surface.n);
-                amb = config::scenePtr->lightCache()->gather(Ray(surface.p + (smpl * 0.0), smpl), &tt) * rndn;
+                amb = config::scenePtr->lightCache()->gather(sampleRay, &tt) * rndn;
 
-                result = result + amb * surface.finish.ambient * surface.color / sample_mul;
+                sampleRay = Ray(surface.p + (smpl * 0.0), smpl, 0.0, tt);
+
+                //VLi = config::volume_integrator->Li(sampleRay, &Tr);
+
+                result = result + (amb * surface.finish.ambient * surface.color * Tr + VLi * .1) / sample_mul;
             }
 
         } else if(config::ambience == AMBIENT_FLAT && ambient){
@@ -69,7 +77,7 @@ namespace light{
             double l_dist = L.norm();
 
             // Generate shadow ray
-            shadow_ray = Ray(surf.p, L);
+            shadow_ray = Ray(surf.p, L, 0.0, l_dist);
 
             Surface surface2;
 
