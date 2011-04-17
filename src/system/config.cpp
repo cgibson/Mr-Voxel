@@ -71,12 +71,12 @@ namespace config {
     Color background = 0.;
 
     // Render targets
-    render_target_t render_target = TARGET_LIGHT_CACHE_TEST_COUNT;
+    render_target_t render_target = TARGET_FULL;
 
     // Image options
     Dimension image_resolution = {800, 600};
-    Dimension light_sample_resolution = {400, 300};
-    float surfel_size = 0.08;
+    Dimension light_sample_resolution = {800, 600};
+    float surfel_size = 0.05;
     antialiasing_t antialiasing = ANTIALIASING_NONE;
     string in_file = "";
     string out_file = "";
@@ -84,8 +84,8 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 3;
-    int hemisphere_t = 3;
+    int hemisphere_u = 4;
+    int hemisphere_t = 8;
 
     // Scene information
     Scene *scenePtr = NULL;

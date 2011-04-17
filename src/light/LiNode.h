@@ -11,11 +11,13 @@
 #include <stdio.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/pointer_cast.hpp>
 
 using std::vector;
 using boost::shared_ptr;
 
 #include "../scene/Object.h"
+#include "Surfel.h"
 
 namespace sys{};
 
@@ -23,7 +25,7 @@ using namespace sys;
 
 class Surfel;
 
-#define MAX_SURFEL_COUNT 16
+#define MAX_SAMPLE_COUNT 16
 
 class OctreeNode : public SceneObject {
 public:
@@ -43,7 +45,7 @@ public:
     inline int test_intersect( const Ray &ray, double *t, Vec3 * const n );
 
     // Return if node has children
-    bool hasChildren(){ return m_children[0] != NULL;}
+    bool hasChildren(){ return _hasChildren;}
 
     // Delete all children
     void cascadeDelete();
@@ -55,8 +57,11 @@ public:
     virtual int clear() = 0;
     
     virtual void postprocess() = 0;
+
+    virtual void cleanEmpty() = 0;
 protected:
 
+    bool _hasChildren;
     OctreeNode* m_children[8];
 
     Vec3 _min, _max;
@@ -71,10 +76,10 @@ public:
     LiNode* child(int index){ return (index >= 0 && index < 8) ? (LiNode*)m_children[index] : NULL;}
     
     // Add element to octree node
-    int add(const shared_ptr<Surfel> obj);
+    int add(const shared_ptr<LiSample> obj);
 
     // Check if element intersects
-    bool inside(const shared_ptr<Surfel> obj);
+    bool inside(const shared_ptr<LiSample> obj);
 
     // Subdivide node into 8 children
     int subdivide();
@@ -96,9 +101,12 @@ public:
 
     int getTestCount( const Ray &ray, int *testCount );
 
+    void cleanEmpty();
+
 
 protected:
     int _surfelCount;
+    int _lvoxelCount;
     shared_ptr<Surfel> *_surfelData;
 
     SHCoef sh_c[9];

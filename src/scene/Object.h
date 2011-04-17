@@ -4,7 +4,7 @@
 #include "../util/MyMat.h"
 #include "../util/rayutil.h"
 
-enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK};
+enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK, UNDEF_SAMPLE, SURFEL, LVOXEL};
 
 /*
  * Represents a generic scene object
