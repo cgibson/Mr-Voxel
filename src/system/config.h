@@ -37,8 +37,6 @@ namespace config {
 
     // Image options
     extern Dimension image_resolution;
-    extern Dimension light_sample_resolution;
-    extern float surfel_size;
     extern antialiasing_t antialiasing;
     extern string in_file;
     extern string out_file;
@@ -48,6 +46,9 @@ namespace config {
     extern sample_t hemisphere_sampler;
     extern int hemisphere_u;
     extern int hemisphere_t;
+    extern Dimension light_sample_resolution;
+    extern float surfel_size;
+    extern float surfel_grow;
 
     // Scene information
     extern Scene *scenePtr;

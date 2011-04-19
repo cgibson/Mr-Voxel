@@ -363,6 +363,8 @@ int Raycaster::surfelCast(
   Surface surf;
   Ray ray;
 
+  float vdotn;
+
   mScene->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
   for( x = 0; x < size.width; x+=step_x ) {
@@ -380,8 +382,10 @@ int Raycaster::surfelCast(
                 surf.n = surf.n * -1;
             }
 
+            vdotn = abs(surf.n.dot(ray.direction));
+
           color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size)));
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size + (config::surfel_size * config::surfel_grow * (1 - vdotn)))));
           ray.start = ray(surf.t + 0.1);
           
       }

@@ -122,13 +122,13 @@ LiNode::getTestCount( const Ray &ray, int *testCount ) {
             tmpRay.direction.norm();
 
             // Would be usefull if we wanted to suck at cheating
-            if(s->normal() * (ray.direction * -1) > 0) {
+            //if(s->normal() * (ray.direction * -1) > 0) {
                 if(s->test_intersect(tmpRay, &thit, &n)) {
                     if(thit < tmin || tmin < 0.) {
                         return 1;
                     }
                 }
-            }
+            //}
         }
     }
 
@@ -183,6 +183,7 @@ LiNode::gather( const Ray &ray, double *t ) {
             }*/
             if(thit >= 0) {
                 *t = thit;
+                
                 return tmp;
             }
         }
@@ -206,15 +207,23 @@ LiNode::gather( const Ray &ray, double *t ) {
             tmpRay.direction.norm();
 
             // Would be usefull if we wanted to suck at cheating
-            if(s->normal() * (ray.direction * -1) > 0) {
+            //if(s->normal() * (ray.direction * -1) > 0) {
                 if(s->test_intersect(tmpRay, &thit, &n)) {
                     if(thit < tmin || tmin < 0.) {
                         tmin = thit;
-                        closest = s->diffuse();
-                        //light::sh::reconstruct(ray.direction * -1, 2, sh_c);//
+
+                        // This is a horrible horrible hack.  This ensures that
+                        // non-manifold surfaces will NOT operate correctly!
+                        // At least, it ensures that the backsides of surfels
+                        // will not be ignored, but simply blacked out... :-(
+                        // But it makes stuff PRETTY :(((
+                        if(s->normal() * (ray.direction * -1) > 0)
+                            closest = s->diffuse();
+                        else
+                            closest = 0.;
                     }
                 }
-            }
+            //}
         }
     }
 

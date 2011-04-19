@@ -75,8 +75,6 @@ namespace config {
 
     // Image options
     Dimension image_resolution = {800, 600};
-    Dimension light_sample_resolution = {800, 600};
-    float surfel_size = 0.05;
     antialiasing_t antialiasing = ANTIALIASING_NONE;
     string in_file = "";
     string out_file = "";
@@ -84,8 +82,12 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 4;
-    int hemisphere_t = 8;
+    int hemisphere_u = 16;
+    int hemisphere_t = 32;
+    Dimension light_sample_resolution = {800, 600};
+    float surfel_size = 0.020;
+    float surfel_grow = 8.0;
+    Vec3 vol_sample_size = Vec3(0.1,0.1,0.1);
 
     // Scene information
     Scene *scenePtr = NULL;
