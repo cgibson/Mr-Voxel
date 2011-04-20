@@ -11,19 +11,7 @@
 #include "../util/util.h"
 #include "../util/rayutil.h"
 #include "../scene/Geometry.h"
-
-class LiSample : public SceneObject {
-public:
-    LiSample(Vec3 pos, float area):_pos(pos), _radius(area){}
-    
-    inline Vec3 position(){ return _pos; }
-    inline float area(){ return _radius; }
-    virtual inline TYPE getType( void ){ return UNDEF_SAMPLE; }
-    
-private:
-    float _radius;
-    Vec3 _pos;       // Surface position
-};
+#include "LSample.h"
 
 class Surfel : public LiSample{
 public:
@@ -34,7 +22,6 @@ public:
     Vec3 get_normal( Vec3 pt );
 
     inline Vec3 normal(){ return _normal; }
-    inline Color diffuse(){ return _diffuse; }
     virtual inline TYPE getType( void ){ return SURFEL; }
 
     MyMat matrix;
@@ -45,7 +32,6 @@ private:
     float _innerRadius;
     float _phiMax;
     Vec3 _normal;    // Surface normal
-    Color _diffuse;    // Direct lighting data
 };
 
 #endif	/* SURFEL_H */

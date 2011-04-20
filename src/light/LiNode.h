@@ -18,6 +18,7 @@ using boost::shared_ptr;
 
 #include "../scene/Object.h"
 #include "Surfel.h"
+#include "LVoxel.h"
 
 namespace sys{};
 
@@ -108,6 +109,7 @@ protected:
     int _surfelCount;
     int _lvoxelCount;
     shared_ptr<Surfel> *_surfelData;
+    shared_ptr<LVoxel> *_lvoxelData;
 
     SHCoef sh_c[9];
 };

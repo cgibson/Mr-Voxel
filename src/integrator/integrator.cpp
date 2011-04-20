@@ -80,11 +80,11 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
             Vec3 wL = light->position - p;
 
 
-            wL.norm();
+            float Ldist = wL.norm();
 
             Ray shadRay = Ray(p, wL);
 
-            if(!mScene->intersect(shadRay, &surface) || (surface.t > (p-wL).length()))
+            if(!mScene->intersect(shadRay, &surface) || (surface.t > Ldist))
             {
 
                 Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);

@@ -99,7 +99,7 @@ LiNode::getTestCount( const Ray &ray, int *testCount ) {
                 return 1;
             }
         }
-        *testCount = test_tot;
+        *testCount = test_tot+1;
         return 0;
 //*/
     }else{
@@ -151,7 +151,7 @@ LiNode::gather( const Ray &ray, double *t ) {
     double tmin = -1;
     double thit;
     Color closest = config::background;
-    Color tmp;
+    Color tmp = 0.;
     Vec3 n;
 
     if(!OctreeNode::test_intersect( ray, &thit, &n )){
@@ -176,7 +176,7 @@ LiNode::gather( const Ray &ray, double *t ) {
         for(ch_It = ch_hit.begin(); ch_It != ch_hit.end(); ch_It++) {
             //printf("testing child %d\n", ch_It->second);
             assert(child(ch_It->second) != NULL);
-            tmp = child(ch_It->second)->gather( ray, &thit);
+            tmp = tmp + child(ch_It->second)->gather( ray, &thit);
             /*if(thit < tmin) {
                 tmin = thit;
                 closest = tmp;
@@ -196,7 +196,6 @@ LiNode::gather( const Ray &ray, double *t ) {
            *t = -1;
            return config::background;
         }
-
         for(int i = 0; i < _surfelCount; i++) {
 
             Ray tmpRay;
@@ -225,11 +224,36 @@ LiNode::gather( const Ray &ray, double *t ) {
                 }
             //}
         }
+
+        //*
+        Color Tr = 1.;
+
+        // If we didn't hit anything
+        float tClosest = (tmin < 0.) ? INFINITY : tmin;
+
+        Color vRet = 0.;
+        for(int i = 0; i < _lvoxelCount; i++) {
+
+            Ray tmpRay = ray;
+            assert(_lvoxelData[i].get() != NULL);
+            shared_ptr<LVoxel> s(_lvoxelData[i]);
+
+            //tmpRay.maxt = tClosest;
+            if(s->test_intersect(tmpRay, &thit)) {
+                vRet = vRet + s->integrate(&Tr);
+                //printf("Tr: %s\nReturned: %s\n", Tr.str(), vRet.str());
+            }
+
+        }
+        vRet.clamp(0.0,0.99);
+        Tr = 1.;
+        closest = closest * Tr + vRet;
+
     }
 
     *t = tmin;
 
-    return closest;
+    return closest + tmp;
 }
 
 int
@@ -272,16 +296,27 @@ LiNode::subdivide() {
     }
 
     int surfCount = _surfelCount;
+    int lvoxCount = _lvoxelCount;
 
     //_surfelCount = 0;
 
     // Iterate over all existing surfel data
     for(int i = 0; i < surfCount; i++) {
-        
+
         // Re-add the surfel, allowing it to recurse into the children
         add(_surfelData[i]);
     }
+
+    // Iterate over all existing lvoxel data
+    for(int i = 0; i < lvoxCount; i++) {
+
+        // Re-add the surfel, allowing it to recurse into the children
+        add(_lvoxelData[i]);
+    }
+    
     // Clear all surfel data in this node
+    //clear();
+
     return 0;
 }
 
@@ -330,6 +365,7 @@ LiNode::LiNode(Vec3 min, Vec3 max):OctreeNode(min,max), _surfelCount(0), _lvoxel
     
     // Allocate data enough for the maximum amount of surfels
     _surfelData = new shared_ptr<Surfel>[MAX_SAMPLE_COUNT];
+    _lvoxelData = new shared_ptr<LVoxel>[MAX_SAMPLE_COUNT];
     
 }
 
@@ -337,6 +373,11 @@ int
 LiNode::add(const shared_ptr<LiSample> obj) {
 
         //printf("Adding to NODE: %s - %s\n", m_min.str(), m_max.str());
+    /*
+    if(obj->getType() != SURFEL) {
+        return 0;
+    }
+    //*/
 
     if(!inside(obj))
         return 0;
@@ -353,8 +394,9 @@ LiNode::add(const shared_ptr<LiSample> obj) {
         }
 
         // Keep track of how many surfels are underneath a given node
-        if(obj->getType() == LVOXEL)
+        if(obj->getType() == LVOXEL){
             _lvoxelCount++;
+        }
         else
             _surfelCount++;
         
@@ -369,14 +411,15 @@ LiNode::add(const shared_ptr<LiSample> obj) {
             // Re-add this element.  It will recurse in this time
             return add(obj);
         }else{
+            assert(obj != NULL);
+            assert(_surfelCount + _lvoxelCount < MAX_SAMPLE_COUNT);
             if(obj->getType() == SURFEL) {
-                assert(obj != NULL);
-                assert(_surfelCount < MAX_SAMPLE_COUNT);
                 _surfelData[_surfelCount] = boost::static_pointer_cast<Surfel>(obj);
+                _surfelCount++;
             }else{
-                //TODO: add lvoxeldata list
+                _lvoxelData[_lvoxelCount] = boost::static_pointer_cast<LVoxel>(obj);
+                _lvoxelCount++;
             }
-            _surfelCount++;
             //printf("Surfel count: %d\n", _surfelCount);
 
             return 0;
@@ -419,6 +462,9 @@ LiNode::clear() {
     if(_surfelData != NULL) {
         delete _surfelData;
     }
+    if(_lvoxelData != NULL) {
+        delete _lvoxelData;
+    }
 }
 
 void
@@ -429,7 +475,7 @@ LiNode::postprocess() {
         // Process children first
         for( int i = 0; i < 8; i++) {
             assert(child(i) != NULL);
-            if(child(i)->_surfelCount == 0) {
+            if(child(i)->_surfelCount + child(i)->_lvoxelCount == 0) {
                 delete child(i);
                 m_children[i] = NULL;
             }else{
@@ -442,7 +488,7 @@ LiNode::postprocess() {
     // If a leaf
     }else{
         //printf("SURF: %d\n", _surfelCount);
-        assert(_surfelCount > 0);
+        assert(_surfelCount + _lvoxelCount > 0);
 
         // Process lighting using surfel list
         vector<shared_ptr<Surfel> > surf_list;
@@ -453,6 +499,6 @@ LiNode::postprocess() {
         }
         light::sh::SHProject(surf_list, 2, sh_c);
 
-        assert(_surfelData[0] != NULL);
+        assert(_surfelData[0] != NULL || _lvoxelData != NULL);
     }
 }

@@ -74,7 +74,7 @@ namespace config {
     render_target_t render_target = TARGET_FULL;
 
     // Image options
-    Dimension image_resolution = {800, 600};
+    Dimension image_resolution = {1920, 1080};
     antialiasing_t antialiasing = ANTIALIASING_NONE;
     string in_file = "";
     string out_file = "";
@@ -82,10 +82,10 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 16;
-    int hemisphere_t = 32;
-    Dimension light_sample_resolution = {800, 600};
-    float surfel_size = 0.020;
+    int hemisphere_u = 3;
+    int hemisphere_t = 6;
+    Dimension light_sample_resolution = {1000, 1000};
+    float surfel_size = 0.016;
     float surfel_grow = 8.0;
     Vec3 vol_sample_size = Vec3(0.1,0.1,0.1);
 

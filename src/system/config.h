@@ -49,6 +49,7 @@ namespace config {
     extern Dimension light_sample_resolution;
     extern float surfel_size;
     extern float surfel_grow;
+    extern Vec3 vol_sample_size;
 
     // Scene information
     extern Scene *scenePtr;

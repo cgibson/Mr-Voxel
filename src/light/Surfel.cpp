@@ -8,9 +8,9 @@
 #include "Surfel.h"
 
 Surfel::Surfel(const Vec3 &position, const Vec3 &normal, const Color &diffuse, float area):
-          LiSample(position, area),
+          LiSample(position, diffuse, area),
           _innerRadius(0), _phiMax(2 * PI),
-          _normal(normal), _diffuse(diffuse) {
+          _normal(normal) {
     
     Vec3 up = Vec3(0,1,0);
     Vec3 w = normal;

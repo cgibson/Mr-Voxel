@@ -393,9 +393,56 @@ int Raycaster::surfelCast(
     }
   }
 
-  printf("FINAL: %d\n", mScene->lightCache()->count());
 
-  printf("Size: %d\n", mScene->lightCache()->size_of());
+
+    const int numVolumes = mScene->getVolumeCount();
+    VolumeRegion **volumes = mScene->getVolumes();
+
+    VolumeRegion *volume;
+    Vec3 min, max, sample;
+
+    sample = config::vol_sample_size;
+
+    Color Tr;
+    Ray shadow_ray;
+
+    LightSource** lights = config::scenePtr->getLightSources();
+
+    LightSource* light = lights[0];
+
+    Surface surface;
+
+    if(numVolumes > 0) {
+
+        // ADD all volume representations to the scene
+        for(int i = 0; i < numVolumes; i++) {
+            volume = volumes[i];
+            min = volume->bounds().min;
+            max = volume->bounds().max;
+            for(float x = min.x(); x < max.x(); x += sample.x()) {
+                for(float y = min.y(); y < max.y(); y += sample.y()) {
+                    for(float z = min.z(); z < max.z(); z += sample.z()) {
+
+                        Vec3 p = Vec3(x + sample.x() * 0.5,y + sample.y() * 0.5,z + sample.z() * 0.5);
+                        Vec3 L = light->position - p;
+                        double l_dist = L.norm();
+                        // Generate shadow ray
+                        shadow_ray = Ray(p, L, 0.0, l_dist);
+
+                        if(config::scenePtr->intersect(shadow_ray, &surface) && (surface.t <= l_dist)) {
+                            Tr = 0.0;
+                        }else{
+
+                            Tr = config::volume_integrator->Transmittance( shadow_ray );
+                        }
+
+                        mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.2,0.2,0.2), Tr, sample.length())));
+                    }
+
+                }
+            }
+        }
+    }
 
   mScene->lightCache()->postprocess();
 

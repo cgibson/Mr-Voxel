@@ -7,6 +7,7 @@
 #include "modifier.h"
 #include "Geometry.h"
 #include "../light/LiNode.h"
+#include "../light/LVoxel.h"
 #include "../light/Surfel.h"
 
 using namespace std;
@@ -125,6 +126,7 @@ public:
 
   LiNode* lightCache(){ return mLiCache; }
   int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
+  int addLVoxel( shared_ptr<LVoxel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
   LiNode* initCache(Vec3 min, Vec3 max){ mLiCache = new LiNode(min, max); }
 
   bool intersect(const Ray &ray, Surface * const surface);
