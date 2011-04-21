@@ -1,4 +1,5 @@
 #include "config.h"
+#include "../integrator/integrator.h"
 
 
 namespace sys {
@@ -74,7 +75,7 @@ namespace config {
     render_target_t render_target = TARGET_FULL;
 
     // Image options
-    Dimension image_resolution = {1920, 1080};
+    Dimension image_resolution = {800, 600};
     antialiasing_t antialiasing = ANTIALIASING_NONE;
     string in_file = "";
     string out_file = "";
@@ -82,10 +83,10 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 3;
-    int hemisphere_t = 6;
-    Dimension light_sample_resolution = {1000, 1000};
-    float surfel_size = 0.016;
+    int hemisphere_u = 5;
+    int hemisphere_t = 10;
+    Dimension light_sample_resolution = {800, 600};
+    float surfel_size = 0.02;
     float surfel_grow = 8.0;
     Vec3 vol_sample_size = Vec3(0.1,0.1,0.1);
 

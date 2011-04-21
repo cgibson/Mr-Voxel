@@ -2,6 +2,9 @@
 #define INTEGRATOR_H_
 
 #include "../scene/scene.h"
+#include "../system/config.h"
+
+using namespace sys;
 
 class Integrator {
 public:

@@ -41,6 +41,18 @@ namespace sample {
         MyMat _matrix;
     };
 
+
+    class SphericalSampler : public Sampler<Vec3> {
+    public:
+        SphericalSampler(int us, int ts, bool random = false);
+        bool getSample(Vec3* sample);
+
+    protected:
+        int _max_us;
+        int _max_ts;
+        int _us, _ts;
+    };
+
 }
 
 #endif	/* SAMPLER_H */

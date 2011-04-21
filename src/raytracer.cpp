@@ -15,6 +15,7 @@
 #include "util/image.h"
 #include "json/jsonparser.h"
 #include "system/config.h"
+#include "integrator/integrator.h"
 
 using namespace std;
 using namespace boost;

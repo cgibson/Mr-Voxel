@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "raycast.h"
 #include "light/brdf.h"
+#include "integrator/integrator.h"
 
 //using namespace light;
 using namespace sys;

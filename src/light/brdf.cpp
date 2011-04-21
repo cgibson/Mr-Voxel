@@ -6,6 +6,7 @@
  */
 
 #include "brdf.h"
+#include "../integrator/integrator.h"
 
 inline double max(double a, double b)
 {

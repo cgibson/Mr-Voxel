@@ -13,8 +13,9 @@
 #include <stdio.h>
 #include <string>
 
-#include "../integrator/integrator.h"
 #include "../scene/scene.h"
+
+class VolumeIntegrator;
 
 using std::string;
 

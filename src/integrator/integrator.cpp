@@ -1,4 +1,5 @@
 #include "integrator.h"
+#include "../sample/Sampler.h"
 
 Spectrum
 VolumeIntegrator::Li(Ray ray, Spectrum *T) {
@@ -86,27 +87,40 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 
             if(!mScene->intersect(shadRay, &surface) || (surface.t > Ldist))
             {
-
                 Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
-
-                //printf("P: %s\n", p.str());
-                //printf("LTR: %f, %f, %f\n", lTr.r(), lTr.g(), lTr.b());
-
                 Spectrum Ld = lTr * lights[0]->color;
-
-                //printf("Not black.\n\tcurloc: %f, %f, %f\n\tlightTrn: %.2f, %.2f, %.2f\n\tLightCol: %.2f, %.2f, %.2f\n\tSingleSc: %.2f, %.2f, %.2f\n\tCurTrans: %.2f, %.2f, %.2f\n", \
-                p.x(), p.y(), p.z(), lTr.r(), lTr.g(), lTr.b(), lights[0]->color.r(), lights[0]->color.g(), lights[0]->color.b(), ss.r(), ss.g(), ss.b(), Tr.r(), Tr.g(), Tr.b());
-
                 Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
-
-                //printf("Phase: %f\n", volumes[0]->phase(p, w, wL));
             }
+
         }
 
-        //for(int i = 0; i < scene->getLightSourceCount(); i++) {
-        // Grab temporary light pointer
-        //	LightSource *light = lights[i];
+        float pdf = 1. / (1. * PI);
+        
+        Color AdTot = 0.;
 
+        if(config::ambience == AMBIENT_FULL)
+        {
+            int sAmt = 2;
+            sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
+
+            Vec3 smpl;
+            while(sampler.getSample(&smpl))
+            {
+                Ray indirRay;
+                // Indirect lighting
+                indirRay = Ray(p, smpl);
+                indirRay.direction.norm();
+                double tt;
+                //Spectrum aTr = Exp(volumes[0]->tau(indirRay, mStepSize * 2, 0.0) * -1);
+                Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt);
+                AdTot = AdTot + Ad * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
+            }
+
+            AdTot = AdTot / (pdf * sAmt * sAmt);
+            
+        }
+
+        Lv = Lv + AdTot;
 
 
         //}
