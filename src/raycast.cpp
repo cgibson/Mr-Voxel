@@ -317,10 +317,10 @@ int Raycaster::raycast(
       color = cast(x, y, width, height);
 
       writer->setPixel(x, y,
-              color.r() * 255,
-              color.g() * 255,
-              color.b() * 255,
-              (color.f() == 1.0) ? 255 : 255
+              color.r(),
+              color.g(),
+              color.b(),
+              color.f()
       );
 
       if(color.r() < low) low = color.r();
