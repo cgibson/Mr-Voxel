@@ -149,10 +149,10 @@ void ImageWriter::write( string filename )
     for(int j = 0; j < mHeight; j++)
     {
       int offset = ((j * mWidth) + i) * 4;
-      chData[offset + 3] = (char)(mData[offset + 3] * 255);
-      chData[offset + 2] = (char)(mData[offset + 2] * 255);
-      chData[offset + 1] = (char)(mData[offset + 1] * 255);
-      chData[offset + 0] = (char)(mData[offset + 0] * 255);
+      chData[offset + 3] = (char)(pow(mData[offset + 3], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 2] = (char)(pow(mData[offset + 2], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 1] = (char)(pow(mData[offset + 1], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 0] = (char)(pow(mData[offset + 0], 1.0 / sys::config::gamma_correction) * 255);
 
     }
   }

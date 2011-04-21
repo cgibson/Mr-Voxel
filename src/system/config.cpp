@@ -77,6 +77,7 @@ namespace config {
     // Image options
     Dimension image_resolution = {640, 480};
     antialiasing_t antialiasing = ANTIALIASING_NONE;
+    double gamma_correction = 2.2f;
     string in_file = "";
     string out_file = "";
     file_out_t save_option = FILE_INPUT_NAME;

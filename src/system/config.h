@@ -39,6 +39,7 @@ namespace config {
     // Image options
     extern Dimension image_resolution;
     extern antialiasing_t antialiasing;
+    extern double gamma_correction;
     extern string in_file;
     extern string out_file;
     extern file_out_t save_option;
