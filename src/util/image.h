@@ -2,6 +2,8 @@
 #define _IMAGE_H_
 
 #include "../types.h"
+#include "../system/config.h"
+#include <math.h>
 #include <string>
 
 using std::string;
