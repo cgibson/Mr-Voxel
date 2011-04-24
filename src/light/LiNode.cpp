@@ -147,7 +147,7 @@ OctreeNode::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 }
 
 Color
-LiNode::gather( const Ray &ray, double *t ) {
+LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
     double tmin = -1;
     double thit;
     Color closest = config::background;
@@ -176,7 +176,7 @@ LiNode::gather( const Ray &ray, double *t ) {
         for(ch_It = ch_hit.begin(); ch_It != ch_hit.end(); ch_It++) {
             //printf("testing child %d\n", ch_It->second);
             assert(child(ch_It->second) != NULL);
-            tmp = tmp + child(ch_It->second)->gather( ray, &thit);
+            tmp = tmp + child(ch_It->second)->gather( ray, &thit, Tr);
             /*if(thit < tmin) {
                 tmin = thit;
                 closest = tmp;
@@ -217,7 +217,7 @@ LiNode::gather( const Ray &ray, double *t ) {
                         // will not be ignored, but simply blacked out... :-(
                         // But it makes stuff PRETTY :(((
                         if(s->normal() * (ray.direction * -1) > 0)
-                            closest = s->diffuse();
+                            closest = s->diffuse() * (*Tr);
                         else
                             closest = 0.;
                     }
@@ -226,7 +226,6 @@ LiNode::gather( const Ray &ray, double *t ) {
         }
 
         //*
-        Color Tr = 1.;
 
         // If we didn't hit anything
         float tClosest = (tmin < 0.) ? INFINITY : tmin;
@@ -239,15 +238,14 @@ LiNode::gather( const Ray &ray, double *t ) {
             shared_ptr<LVoxel> s(_lvoxelData[i]);
 
             //tmpRay.maxt = tClosest;
-            if(s->test_intersect(tmpRay, &thit)) {
-                vRet = vRet + s->integrate(&Tr);
+            if(s->test_intersect(tmpRay, &thit) && !s->inside(ray.start)) {
+                vRet = vRet + s->integrate(Tr);
                 //printf("Tr: %s\nReturned: %s\n", Tr.str(), vRet.str());
             }
 
         }
         vRet.clamp(0.0,0.99);
-        Tr = 1.;
-        closest = closest * Tr + vRet;
+        tmp = tmp + vRet;
 
     }
 

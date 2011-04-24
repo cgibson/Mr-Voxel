@@ -218,7 +218,10 @@ Color Raycaster::cast( int x, int y, int width, int height )
 
     switch(config::render_target) {
         case TARGET_LIGHT_CACHE_RESULT:
-            color = mScene->lightCache()->gather(ray, &t);
+        {
+            Color Tr = 1.;
+            color = mScene->lightCache()->gather(ray, &t, &Tr);
+        }
             break;
         case TARGET_LIGHT_CACHE_TEST_COUNT:
         {
@@ -400,10 +403,13 @@ int Raycaster::surfelCast(
     VolumeRegion **volumes = mScene->getVolumes();
 
     VolumeRegion *volume;
-    Vec3 min, max, sample;
+    Vec3 min, max;
 
-    sample = config::vol_sample_size;
-
+    float sample_size = config::vol_sample_size;
+    float test_count = config::vol_tests_per_sample * config::vol_tests_per_sample * config::vol_tests_per_sample;
+    float test_step = sample_size / ((float)config::vol_tests_per_sample);
+    float sample_size_div_two = sample_size * 0.5;
+    float radius = sqrt(sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two);
     Color Tr;
     Ray shadow_ray;
 
@@ -420,15 +426,31 @@ int Raycaster::surfelCast(
             volume = volumes[i];
             min = volume->bounds().min;
             max = volume->bounds().max;
-            for(float x = min.x(); x < max.x(); x += sample.x()) {
-                for(float y = min.y(); y < max.y(); y += sample.y()) {
-                    for(float z = min.z(); z < max.z(); z += sample.z()) {
+            for(float x = min.x(); x < max.x(); x += sample_size) {
+                for(float y = min.y(); y < max.y(); y += sample_size) {
+                    for(float z = min.z(); z < max.z(); z += sample_size) {
 
-                        Vec3 p = Vec3(x + sample.x() * 0.5,y + sample.y() * 0.5,z + sample.z() * 0.5);
+                        Vec3 p = Vec3(x + sample_size * 0.5,y + sample_size * 0.5,z + sample_size * 0.5);
                         Vec3 L = light->position - p;
                         double l_dist = L.norm();
                         // Generate shadow ray
                         shadow_ray = Ray(p, L, 0.0, l_dist);
+
+                        Color sig_t = 0;
+                        Color sig_s = 0;
+
+                        for(float tx = x; tx < x + sample_size; tx += test_step) {
+                            for(float ty = y; ty < y + sample_size; ty += test_step) {
+                                for(float tz = z; tz < z + sample_size; tz += test_step) {
+                                    Vec3 test = Vec3(tx,ty,tz);
+                                    sig_t = sig_t + volume->sigma_t(test);
+                                    sig_s = sig_s + volume->sigma_s(test);
+                                }
+                            }
+                        }
+
+                        sig_t = sig_t / (float)test_count;
+                        sig_s = sig_s / (float)test_count;
 
                         if(config::scenePtr->intersect(shadow_ray, &surface) && (surface.t <= l_dist)) {
                             Tr = 0.0;
@@ -437,7 +459,8 @@ int Raycaster::surfelCast(
                             Tr = config::volume_integrator->Transmittance( shadow_ray );
                         }
 
-                        mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.2,0.2,0.2), Tr, sample.length())));
+
+                        mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), Tr, sig_t, sig_s, radius)));
                     }
 
                 }

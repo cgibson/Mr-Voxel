@@ -32,22 +32,22 @@ namespace light{
 
             float sample_mul = pdf * (config::hemisphere_u*config::hemisphere_t);
 
-            Color Tr = 1.;
             Color VLi = 0.;
             Ray sampleRay;
 
             // Gather samples until the sampler runs out
             while(sampler.getSample(&smpl)) {
 
+                Color Tr = 1.;
                 rndn = (smpl * surface.n);
                 sampleRay = Ray(surface.p + (surface.n * 0.05), smpl, 0.0);
-                amb = config::scenePtr->lightCache()->gather(sampleRay, &tt) * rndn;
+                amb = config::scenePtr->lightCache()->gather(sampleRay, &tt, &Tr) * rndn;
 
                 //sampleRay = Ray(surface.p + (smpl * 0.0), smpl, 0.0, tt);
 
                 //VLi = config::volume_integrator->Li(sampleRay, &Tr);
 
-                result = result + (amb * surface.finish.ambient * surface.color * Tr + VLi * .1) / sample_mul;
+                result = result + (amb * surface.finish.ambient * surface.color + VLi * .1) / sample_mul;
             }
 
         } else if(config::ambience == AMBIENT_FLAT && ambient){

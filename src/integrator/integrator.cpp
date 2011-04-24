@@ -94,13 +94,13 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
 
         }
 
-        float pdf = 1. / (1. * PI);
+        float pdf = 6. / (1. * PI);
         
         Color AdTot = 0.;
 
-        if(config::ambience == AMBIENT_FULL)
+        if(config::ambience == AMBIENT_FULL && false)
         {
-            int sAmt = 2;
+            int sAmt = 0;
             sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
 
             Vec3 smpl;
@@ -112,7 +112,8 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
                 indirRay.direction.norm();
                 double tt;
                 //Spectrum aTr = Exp(volumes[0]->tau(indirRay, mStepSize * 2, 0.0) * -1);
-                Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt);
+                Color aTr = 1.;
+                Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
                 AdTot = AdTot + Ad * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
             }
 

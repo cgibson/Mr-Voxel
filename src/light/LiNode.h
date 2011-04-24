@@ -95,7 +95,7 @@ public:
 
     int size_of();
 
-    Color gather(const Ray &ray, double *t);
+    Color gather(const Ray &ray, double *t, Color *Tr);
     
     // Generate layers of multi-resolution lighting using spherical harmonics
     void postprocess();

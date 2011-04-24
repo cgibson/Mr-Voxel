@@ -84,12 +84,13 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 6;
-    int hemisphere_t = 12;
+    int hemisphere_u = 8;
+    int hemisphere_t = 16;
     Dimension light_sample_resolution = {800, 600};
     float surfel_size = 0.02;
     float surfel_grow = 8.0;
-    Vec3 vol_sample_size = Vec3(0.1,0.1,0.1);
+    float vol_tests_per_sample = 3;
+    float vol_sample_size = 0.125;
 
     // Scene information
     Scene *scenePtr = NULL;

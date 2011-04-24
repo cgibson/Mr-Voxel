@@ -48,8 +48,13 @@ LVoxel::test_intersect( const Ray &ray, double *t )
   }
 }
 
+int
+LVoxel::inside( const Vec3 &p ) {
+    return (p - position()).length() <= area();
+}
+
 Color
 LVoxel::integrate( Color* Tr) {
-    *Tr = (*Tr) * 0.2;//_transmittance;//Exp(_transmittance * -1);
-    return (*Tr) * diffuse() * _transmittance;
+    *Tr = (*Tr) * Exp(sigma_t() * 0.125 * -1);//_transmittance;//Exp(_transmittance * -1);
+    return *Tr * sigma_s() * 0.125 * _transmittance;
 }
