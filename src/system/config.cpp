@@ -84,8 +84,8 @@ namespace config {
 
     // Sample options
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
-    int hemisphere_u = 8;
-    int hemisphere_t = 16;
+    int hemisphere_u = 3;
+    int hemisphere_t = 6;
     Dimension light_sample_resolution = {800, 600};
     float surfel_size = 0.02;
     float surfel_grow = 8.0;

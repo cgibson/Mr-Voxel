@@ -50,7 +50,7 @@ LVoxel::test_intersect( const Ray &ray, double *t )
 
 int
 LVoxel::inside( const Vec3 &p ) {
-    return (p - position()).length() <= area();
+    return (p - position()).length() <= sqrt(area() * area());
 }
 
 Color

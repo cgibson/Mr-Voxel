@@ -98,30 +98,51 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         
         Color AdTot = 0.;
 
-        if(config::ambience == AMBIENT_FULL && false)
+        if(config::ambience == AMBIENT_FULL && true && !ss.isBlack())
         {
-            int sAmt = 0;
-            sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
-
-            Vec3 smpl;
-            while(sampler.getSample(&smpl))
-            {
-                Ray indirRay;
-                // Indirect lighting
-                indirRay = Ray(p, smpl);
-                indirRay.direction.norm();
-                double tt;
-                //Spectrum aTr = Exp(volumes[0]->tau(indirRay, mStepSize * 2, 0.0) * -1);
-                Color aTr = 1.;
-                Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
-                AdTot = AdTot + Ad * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
+            int sAmt;
+            if(Tr.toTrans() > 0.8) {
+                sAmt = 4;
+            }else if(Tr.toTrans() > 0.5) {
+                sAmt = 3;
+            }else if(Tr.toTrans() > 0.3) {
+                sAmt = 2;
+            }else{
+                sAmt = 1;
             }
 
-            AdTot = AdTot / (pdf * sAmt * sAmt);
+            if(sAmt > 0)
+            {
+                sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
+
+                Vec3 smpl;
+                while(sampler.getSample(&smpl))
+                {
+                    Ray indirRay;
+                    // Indirect lighting
+                    indirRay = Ray(p, smpl);
+                    indirRay.direction.norm();
+                    double tt;
+                    //Spectrum aTr = Exp(volumes[0]->tau(indirRay, mStepSize * 2, 0.0) * -1);
+                    Color aTr = 1.;
+                    Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
+                            if(Ad.toTrans() < 0.0)
+                                printf("Ad below 0.0: %s\n", Ad.str());
+                            if(aTr.toTrans() < 0.0)
+                                printf("aTr below 0.0: %s\n", aTr.str());
+                    AdTot = AdTot + Ad * ss * aTr;// * volumes[0]->phase(p, w, wL * 1);
+                }
+
+                AdTot = AdTot / (pdf * sAmt * sAmt);
+
+                //if(AdTot.toTrans() < 0.0)
+            }
             
         }
 
-        Lv = Lv + AdTot;
+
+        Lv = Lv + (AdTot * Tr);
+
 
 
         //}

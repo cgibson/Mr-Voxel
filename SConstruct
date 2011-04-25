@@ -9,6 +9,7 @@ conf = Configure(env)
 
 #env.Append(CCFLAGS=['-g','-pg','-O3'], LINKFLAGS=['-pg'])
 env.Append(CCFLAGS=['-g','-O3'])
+#env.Append(CCFLAGS=['-g'])
 
 
 d = env.ParseFlags("-g")

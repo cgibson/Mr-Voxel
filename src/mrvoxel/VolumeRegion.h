@@ -55,6 +55,9 @@ public:
 
 	inline Spectrum sigma_t( const Vec3 &pt ) {
             //printf("PT: %s\n", pt.str());
+            if(density( pt ) < 0.0) {
+                printf(" WHAT %f\n", density( pt ));
+            }
 		return (sig_a + sig_s) * density( pt );
 	}
 

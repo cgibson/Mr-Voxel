@@ -452,15 +452,29 @@ int Raycaster::surfelCast(
                         sig_t = sig_t / (float)test_count;
                         sig_s = sig_s / (float)test_count;
 
-                        if(config::scenePtr->intersect(shadow_ray, &surface) && (surface.t <= l_dist)) {
-                            Tr = 0.0;
-                        }else{
+                        if(sig_t.toTrans() < 0.0)
+                            printf("T below 0.0: %s\n", sig_t.str());
+                        if(sig_s.toTrans() < 0.0)
+                            printf("S below 0.0: %s\n", sig_s.str());
 
-                            Tr = config::volume_integrator->Transmittance( shadow_ray );
+
+
+                        sig_t.clamp(0.0, 100.0);
+                        sig_s.clamp(0.0, 100.0);
+
+
+                        if(!sig_s.isBlack() && !sig_t.isBlack())
+                        {
+                            if(config::scenePtr->intersect(shadow_ray, &surface) && (surface.t <= l_dist)) {
+                                Tr = 0.0;
+                            }else{
+
+                                Tr = config::volume_integrator->Transmittance( shadow_ray );
+                            }
+
+
+                            mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), Tr, sig_t, sig_s, radius)));
                         }
-
-
-                        mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), Tr, sig_t, sig_s, radius)));
                     }
 
                 }

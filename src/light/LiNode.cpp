@@ -238,7 +238,7 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
             shared_ptr<LVoxel> s(_lvoxelData[i]);
 
             //tmpRay.maxt = tClosest;
-            if(s->test_intersect(tmpRay, &thit) && !s->inside(ray.start)) {
+            if(s->test_intersect(tmpRay, &thit) && !s->inside(tmpRay.start)) {
                 vRet = vRet + s->integrate(Tr);
                 //printf("Tr: %s\nReturned: %s\n", Tr.str(), vRet.str());
             }
