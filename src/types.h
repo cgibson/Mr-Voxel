@@ -30,6 +30,9 @@ enum file_out_t { FILE_INPUT_NAME, FILE_DATE, FILE_INPUT_NAME_AND_DATE,
 // SAMPLE
 enum sample_t { SAMPLE_RAND, SAMPLE_STRATEFIED, SAMPLE_GRID };
 
+// SCENE
+enum light_type_t { LIGHT_POINT, LIGHT_SPOTLIGHT };
+
 
 /* CLASS DEFINITIONS  *****************************************************/
 // IMAGE

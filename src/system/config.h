@@ -51,7 +51,7 @@ namespace config {
     extern Dimension light_sample_resolution;
     extern float surfel_size;
     extern float surfel_grow;
-    extern float vol_sample_size;
+    extern float lvoxel_size;
     extern float vol_tests_per_sample;
 
     // Scene information

@@ -107,14 +107,16 @@ namespace light{
         Vec3 H = V + L;
         H.norm();
 
+        Color lColor = light->sample(surf.p);
+
         // invert shininess so it makes sense
         double shininess = 1 / surf.finish.roughness;
 
         Color result = 0.;
-        result = ((surf.color * light->color * lightTr) * surf.finish.diffuse * max(0., surf.n * L));
+        result = ((surf.color * lColor * lightTr) * surf.finish.diffuse * max(0., surf.n * L));
 
         if(config::specular && specular && !lightTr.isBlack() && L.dot(surf.n) > 0) {
-            result = result + (light->color * surf.finish.specular * lightTr * pow(max(0, H * surf.n), shininess));
+            result = result + (lColor * surf.finish.specular * lightTr * pow(max(0, H * surf.n), shininess));
         }
 
         return result;

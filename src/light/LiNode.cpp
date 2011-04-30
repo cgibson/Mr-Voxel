@@ -137,7 +137,7 @@ LiNode::getTestCount( const Ray &ray, int *testCount ) {
     return false;
 }
 
-inline int
+int
 OctreeNode::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 
     double tmp_t;
@@ -150,6 +150,8 @@ Color
 LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
     double tmin = -1;
     double thit;
+    double Att;
+    double K = 5.0;
     Color closest = config::background;
     Color tmp = 0.;
     Vec3 n;
@@ -216,8 +218,11 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
                         // At least, it ensures that the backsides of surfels
                         // will not be ignored, but simply blacked out... :-(
                         // But it makes stuff PRETTY :(((
-                        if(s->normal() * (ray.direction * -1) > 0)
-                            closest = s->diffuse() * (*Tr);
+                        if(s->normal() * (ray.direction * -1) > 0) {
+
+                            Att = 1. / (K * pow(thit, 2));
+                            closest = s->diffuse() * (*Tr);// * Att;
+                        }
                         else
                             closest = 0.;
                     }
@@ -239,7 +244,8 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
 
             //tmpRay.maxt = tClosest;
             if(s->test_intersect(tmpRay, &thit) && !s->inside(tmpRay.start)) {
-                vRet = vRet + s->integrate(Tr);
+                Att = 1. / (K * pow(thit, 2));
+                vRet = vRet + s->integrate(Tr);// * Att;
                 //printf("Tr: %s\nReturned: %s\n", Tr.str(), vRet.str());
             }
 

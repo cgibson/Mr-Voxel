@@ -39,9 +39,13 @@ class LightSource : public Object{
 public:
   LightSource( void );
   virtual char* str( void );
-  
+  virtual Color sample(Vec3 pt);
+
   Vec3 position;
   Color color;
+  light_type_t lightType;
+  Vec3 dir;
+  double fov_inner, fov_outer;
 
 private:
 };

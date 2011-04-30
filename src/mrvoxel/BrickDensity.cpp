@@ -271,19 +271,12 @@ void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_
     for(int j = 0; j < (int)file_res.z(); j++)
     {
       tmp = (float)bufferShort[j * (int)file_res.x() + i];
-      //printf("tmp is huge! %d\n", tmp);
       tmp = (tmp - iso_min > 0) ? tmp : 0;
-      tmp = (tmp > iso_max) ? iso_max : tmp;
-      /**/
-      if(tmp < 0.0) {
-          printf("------TMP: %f\n", tmp);
-          printf("MAX: %d MIN: %d\n", iso_max, iso_min);
-      }
+      tmp = (tmp > iso_max) ? 0 : tmp;
+
       assert((float)tmp >= 0.0);
       assert((float)max >= 0.0);
-      //printf("maxmax: %f, multiply: %f, m_density_mult: %f\n", (float)max, multiply, m_density_mult);
-      //if(i > 0 && i < file_res.x() && j > 0 && j < file_res.z())
-      //if(tmp > 0.0)
+      if(tmp > 0.0)
         add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);
     }
   }

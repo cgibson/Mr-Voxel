@@ -405,17 +405,18 @@ int Raycaster::surfelCast(
     VolumeRegion *volume;
     Vec3 min, max;
 
-    float sample_size = config::vol_sample_size;
+    float sample_size = config::lvoxel_size;
     float test_count = config::vol_tests_per_sample * config::vol_tests_per_sample * config::vol_tests_per_sample;
     float test_step = sample_size / ((float)config::vol_tests_per_sample);
     float sample_size_div_two = sample_size * 0.5;
     float radius = sqrt(sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two);
-    Color Tr;
+    Color Tr, TrTot;
     Ray shadow_ray;
 
     LightSource** lights = config::scenePtr->getLightSources();
+    int light_count = config::scenePtr->getLightSourceCount();
 
-    LightSource* light = lights[0];
+    LightSource* light;
 
     Surface surface;
 
@@ -431,10 +432,9 @@ int Raycaster::surfelCast(
                     for(float z = min.z(); z < max.z(); z += sample_size) {
 
                         Vec3 p = Vec3(x + sample_size * 0.5,y + sample_size * 0.5,z + sample_size * 0.5);
-                        Vec3 L = light->position - p;
-                        double l_dist = L.norm();
+                        Vec3 L;
+                        double l_dist;
                         // Generate shadow ray
-                        shadow_ray = Ray(p, L, 0.0, l_dist);
 
                         Color sig_t = 0;
                         Color sig_s = 0;
@@ -465,15 +465,23 @@ int Raycaster::surfelCast(
 
                         if(!sig_s.isBlack() && !sig_t.isBlack())
                         {
-                            if(config::scenePtr->intersect(shadow_ray, &surface) && (surface.t <= l_dist)) {
-                                Tr = 0.0;
-                            }else{
+                            TrTot = 0.;
+                            for(int i = 0; i < light_count; i++)
+                            {
+                                
+                                light = lights[i];
+                                L = light->position - p;
+                                l_dist = L.norm();
+                                shadow_ray = Ray(p, L, 0.0, l_dist);
 
-                                Tr = config::volume_integrator->Transmittance( shadow_ray );
+                                if(!config::scenePtr->intersect(shadow_ray, &surface) || (surface.t > l_dist)) {
+                                    Tr = config::volume_integrator->Transmittance( shadow_ray );
+                                    TrTot = TrTot + (Tr * light->sample(p));
+                                }
                             }
 
 
-                            mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), Tr, sig_t, sig_s, radius)));
+                            mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), TrTot, sig_t, sig_s, radius)));
                         }
                     }
 

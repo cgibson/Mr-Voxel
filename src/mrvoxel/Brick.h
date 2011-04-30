@@ -48,11 +48,6 @@ public:
 
             const Brick* b = m_data[x + (m_brick_size_y * y) + (m_brick_size_y * m_brick_size_z * z)];
 
-            if( (*(*b)(off_x, off_y, off_z))(DENSITY) < 0.0) {
-                printf("ERROR:\n");
-                printf("\tx: %d, y: %d, z: %d\n", x, y, z);
-                printf("\toff_x: %d, off_y: %d, off_z: %d\n", off_x, off_y, off_z);
-            }
             return (*b)(off_x, off_y, off_z);
         }
 

@@ -299,6 +299,16 @@ LightSource *parseLight(Json::Value val)
   LightSource *light = new LightSource();
   light->position = parseVec3(val["location"]);
   light->color = parseColor(val["color"]);
+
+  if(!val["direction"].empty() && !val["fov_inner"].empty() && !val["fov_outer"].empty()) {
+      light->dir = parseVec3(val["direction"]);
+      light->dir.norm();
+      light->fov_inner = (val["fov_inner"].asDouble() / 360.) * 2 * PI;
+      light->fov_outer = (val["fov_outer"].asDouble() / 360.) * 2 * PI;
+      light->lightType = LIGHT_SPOTLIGHT;
+  }else{
+      light->lightType = LIGHT_POINT;
+  }
   return light;
 }
 

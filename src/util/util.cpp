@@ -40,7 +40,8 @@ int test_intersect_1d(double p, double d,
     return true;
 }
 
-bool test_intersect_region(const Ray &ray, const Vector3D &min, const Vector3D &max,
+bool
+test_intersect_region(const Ray &ray, const Vector3D &min, const Vector3D &max,
         double * const t1, double * const t2) {
 
     double near = -1000; double far = 1000;

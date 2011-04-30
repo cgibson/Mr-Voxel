@@ -42,20 +42,8 @@ Spectrum DensityRegion::tau( const Ray &ray, const double &stepSize, const doubl
 	t0 += offset * stepSize;
 
 	while(t0 < t1) {
-		//printf("t0: %f.  Point: %s\n", t0, ray(t0).str());
-		//tau = tau + Spectrum(0.1);
-            if(sigma_t(ray(t0)).toTrans() < 0.0) {
-                printf("WHAT %s\n", sigma_t(ray(t0)).str());
-            }
 		tau = tau + sigma_t(ray(t0));
 		t0 += stepSize;
-                //printf("tau: %s t: %f\n", (tau * stepSize).str(), t0);
 	}
-/*
-        if(!tau.isBlack())
-            printf("teh tau: %s\n", (tau * stepSize).str());
- //*/
-	//printf("tau: %s.  Size %f\n", tau.str(), stepSize);
-	// Return integral (evaluated at stepsize)
 	return tau * stepSize;
 }

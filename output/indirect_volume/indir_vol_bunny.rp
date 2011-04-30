@@ -8,7 +8,7 @@
         "up" :      [  0.00,  1.00,  0.00 ],
         "right" :   [  1.33,  0.00,  0.00 ],
         "look_at" : [  0.00,  3.00,  0.00 ],
-	"fov" : 40
+	"fov" : 45
     },
         
     // All planes in the scene
@@ -20,7 +20,17 @@
     "lights" : [
         {
             "location" : [ 0.0, 5.5, 0.0 ],
-            "color" : [ 1.5, 1.5, 1.5 ]
+            "color" : [ 1.5, 1.5, 1.5 ],
+            "direction" : [1.0, -1.0, 0.0 ],
+            "fov_inner" : 0,
+            "fov_outer" : 30
+        },
+        {
+            "location" : [ 0.0, 5.5, 0.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ],
+            "direction" : [-1.0, -1.0, 0.0 ],
+            "fov_inner" : 0,
+            "fov_outer" : 30
         }
 
     ],
@@ -34,8 +44,8 @@
             "size" : 256,
 
             "file" : "/home/cgibson/tmp/bunny/",
-            "iso_min" : 100,
-            "iso_max" : 60000,
+            "iso_min" : 1500,
+            "iso_max" : 5000,
 
             "file_resolution" : [512,361,512],
             "volume_resolution" : [128,128,128],

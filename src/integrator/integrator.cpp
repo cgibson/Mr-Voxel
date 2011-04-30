@@ -44,6 +44,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
     Spectrum Lv(0);
 
     LightSource** lights = mScene->getLightSources();
+    int light_count = mScene->getLightSourceCount();
 
     Vec3 p = ray(t0);
     Vec3 pPrev;
@@ -75,21 +76,26 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         Lv = Lv + volumes[0]->Lve(p);
         Spectrum ss = volumes[0]->sigma_s(p);
         if(!ss.isBlack()) {
-            //printf("Lighting?\n");
-            LightSource *light = lights[0];
 
-            Vec3 wL = light->position - p;
+            LightSource *light;
 
-
-            float Ldist = wL.norm();
-
-            Ray shadRay = Ray(p, wL);
-
-            if(!mScene->intersect(shadRay, &surface) || (surface.t > Ldist))
+            for(int i = 0; i < light_count; i++)
             {
-                Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
-                Spectrum Ld = lTr * lights[0]->color;
-                Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
+                light = lights[i];
+
+                Vec3 wL = light->position - p;
+
+
+                float Ldist = wL.norm();
+
+                Ray shadRay = Ray(p, wL);
+
+                if(!mScene->intersect(shadRay, &surface) || (surface.t > Ldist))
+                {
+                    Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
+                    Spectrum Ld = lTr * light->sample(p);
+                    Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
+                }
             }
 
         }
@@ -102,13 +108,13 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         {
             int sAmt;
             if(Tr.toTrans() > 0.8) {
-                sAmt = 4;
+                sAmt = 16;
             }else if(Tr.toTrans() > 0.5) {
-                sAmt = 3;
+                sAmt = 8;
             }else if(Tr.toTrans() > 0.3) {
-                sAmt = 2;
+                sAmt = 4;
             }else{
-                sAmt = 1;
+                sAmt = 2;
             }
 
             if(sAmt > 0)
@@ -123,19 +129,12 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
                     indirRay = Ray(p, smpl);
                     indirRay.direction.norm();
                     double tt;
-                    //Spectrum aTr = Exp(volumes[0]->tau(indirRay, mStepSize * 2, 0.0) * -1);
                     Color aTr = 1.;
                     Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
-                            if(Ad.toTrans() < 0.0)
-                                printf("Ad below 0.0: %s\n", Ad.str());
-                            if(aTr.toTrans() < 0.0)
-                                printf("aTr below 0.0: %s\n", aTr.str());
-                    AdTot = AdTot + Ad * ss * aTr;// * volumes[0]->phase(p, w, wL * 1);
+                    AdTot = AdTot + Ad * ss;// * volumes[0]->phase(p, w, wL * 1);
                 }
 
                 AdTot = AdTot / (pdf * sAmt * sAmt);
-
-                //if(AdTot.toTrans() < 0.0)
             }
             
         }

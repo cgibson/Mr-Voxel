@@ -43,7 +43,7 @@ public:
     Vec3 max(){ return _max; }
 
     // Test intersect for given ray
-    inline int test_intersect( const Ray &ray, double *t, Vec3 * const n );
+    int test_intersect( const Ray &ray, double *t, Vec3 * const n );
 
     // Return if node has children
     bool hasChildren(){ return _hasChildren;}

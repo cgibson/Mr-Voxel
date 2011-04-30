@@ -16,8 +16,8 @@ public:
 
     inline double density( const Vec3 &pt ) {
 
-        if(!mBounds.inside(pt))
-                return 0.0;
+        //if(!mBounds.inside(pt))
+        //        return 0.0;
 
         const Vec3 loc = pt - mBounds.min;
         const Vec3 dim = mBounds.max - mBounds.min;
