@@ -14,13 +14,13 @@
 class Raycaster {
 public:
   Raycaster( Scene* scene );
-  Raycaster( Scene* scene, Camera cam );
+  Raycaster( Scene* scene, const Camera &cam );
   Color cast( int x, int y, int width, int height );
   void cam2World( int x, int y, int width, int height, Ray *ray );
   int iterate( Ray *ray, Surface *surface);
-  Color handleIntersect( Ray ray, int depth );
-  Color sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather );
-  Color initialCast( Ray ray, int depth );
+  Color handleIntersect( const Ray &ray, int depth );
+  Color sumLights( const Surface &surface, const Ray &ray, int specular, int ambient, bool gather );
+  Color initialCast( const Ray &ray, int depth );
   int raycast( 
             int start_x,
             int start_y,
@@ -32,7 +32,7 @@ public:
             ImageWriter *writer);
 
   int surfelCast(
-            Dimension size,
+            const Dimension &size,
             int step_x,
             int step_y,
             ImageWriter *writer);

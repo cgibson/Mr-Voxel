@@ -14,7 +14,7 @@ class GeomObj : public SceneObject{
 public:
   GeomObj( void );
   virtual char* str( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n );
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return GEOM; }
@@ -40,7 +40,7 @@ public:
   Box( void );
   Box( Vec3 minimum, Vec3 maximum );
   virtual char* str( void );
-  int test_intersect( Ray ray, double *t, Vec3 *n);
+  int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   Vec3 get_normal( Vec3 pt );
   BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return BOX; }
@@ -65,7 +65,7 @@ public:
   Disk( float height, float radius, float innerRadius, float tmax);
   Disk(float radius, float innerRadius, float tmax, Ray orient);
   virtual char* str( void );
-  int test_intersect( Ray ray, double *t, Vec3 *n);
+  int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   Vec3 get_normal( Vec3 pt );
   BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return DISK; }
@@ -85,7 +85,7 @@ class Sphere : public GeomObj{
 public:
   Sphere( void );
   virtual char* str( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n);
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return SPHERE; }
@@ -101,7 +101,7 @@ class Cone : public GeomObj{
 public:
   Cone( void );
   virtual char* str( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n);
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return CONE; }
@@ -120,7 +120,7 @@ public:
   Triangle( void );
   Triangle( Vec3 c1, Vec3 c2, Vec3 c3 );
   virtual char* str( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n);
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return TRIANGLE; }
@@ -137,7 +137,7 @@ class Plane : public GeomObj{
 public:
   Plane( void );
   virtual char* str( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n);
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n );
   virtual Vec3 get_normal( Vec3 pt );
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return PLANE; }

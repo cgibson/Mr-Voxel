@@ -11,7 +11,7 @@ using namespace std;
  * Collision data constructor including offending object, intersect point, 
  * distance and normal of face
  *----------------------------------------------------------------------------*/
-Surface::Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col)
+Surface::Surface(const Vec3 &point, double distance, const Vec3 &normal, const Finish &fin, const Color &col)
 {
   p = point;
   t = distance;
@@ -56,7 +56,7 @@ Scene::Scene( void )
 }
 
 bool
-Scene::intersect(Ray ray, Surface* surface) {
+Scene::intersect(const Ray &ray, Surface* const surface) {
 
     if(mObjectBVH == NULL)
         return false;
@@ -413,4 +413,27 @@ char* LightSource::str( void )
   char *buffer = (char*)calloc(300, sizeof(char));
   sprintf(buffer, "[LIGHT SOURCE]\n\tPosition: %s\n\tColor: %s", position.str(), color.str());
   return buffer;
+}
+
+Color
+LightSource::sample(Vec3 pt) {
+    if(lightType == LIGHT_POINT)
+        return color;
+
+    Vec3 d = pt - position;
+    d.norm();
+    
+    double theta = d.dot(dir);
+
+    double angle = acos(theta);
+
+    if(angle > fov_outer)
+        return 0;
+    else if(angle < fov_inner)
+        return color;
+    else {
+        double ang_diff = angle - fov_inner;
+        double ang_t = ang_diff / (fov_outer - fov_inner);
+        return color * (1. - ang_t);
+    }
 }

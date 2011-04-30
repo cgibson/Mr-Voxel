@@ -1,4 +1,5 @@
 #include "integrator.h"
+#include "../sample/Sampler.h"
 
 Spectrum
 VolumeIntegrator::Li(Ray ray, Spectrum *T) {
@@ -43,6 +44,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
     Spectrum Lv(0);
 
     LightSource** lights = mScene->getLightSources();
+    int light_count = mScene->getLightSourceCount();
 
     Vec3 p = ray(t0);
     Vec3 pPrev;
@@ -74,38 +76,71 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         Lv = Lv + volumes[0]->Lve(p);
         Spectrum ss = volumes[0]->sigma_s(p);
         if(!ss.isBlack()) {
-            //printf("Lighting?\n");
-            LightSource *light = lights[0];
 
-            Vec3 wL = light->position - p;
+            LightSource *light;
 
-
-            wL.norm();
-
-            Ray shadRay = Ray(p, wL);
-
-            if(!mScene->intersect(shadRay, &surface) || (surface.t > (p-wL).length()))
+            for(int i = 0; i < light_count; i++)
             {
+                light = lights[i];
 
-                Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
+                Vec3 wL = light->position - p;
 
-                //printf("P: %s\n", p.str());
-                //printf("LTR: %f, %f, %f\n", lTr.r(), lTr.g(), lTr.b());
 
-                Spectrum Ld = lTr * lights[0]->color;
+                float Ldist = wL.norm();
 
-                //printf("Not black.\n\tcurloc: %f, %f, %f\n\tlightTrn: %.2f, %.2f, %.2f\n\tLightCol: %.2f, %.2f, %.2f\n\tSingleSc: %.2f, %.2f, %.2f\n\tCurTrans: %.2f, %.2f, %.2f\n", \
-                p.x(), p.y(), p.z(), lTr.r(), lTr.g(), lTr.b(), lights[0]->color.r(), lights[0]->color.g(), lights[0]->color.b(), ss.r(), ss.g(), ss.b(), Tr.r(), Tr.g(), Tr.b());
+                Ray shadRay = Ray(p, wL);
 
-                Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
-
-                //printf("Phase: %f\n", volumes[0]->phase(p, w, wL));
+                if(!mScene->intersect(shadRay, &surface) || (surface.t > Ldist))
+                {
+                    Spectrum lTr = Exp(volumes[0]->tau(shadRay, mStepSize * 2, 0.0) * -1);
+                    Spectrum Ld = lTr * light->sample(p);
+                    Lv = Lv + Ld * ss * Tr;// * volumes[0]->phase(p, w, wL * 1);
+                }
             }
+
         }
 
-        //for(int i = 0; i < scene->getLightSourceCount(); i++) {
-        // Grab temporary light pointer
-        //	LightSource *light = lights[i];
+        float pdf = 6. / (1. * PI);
+        
+        Color AdTot = 0.;
+
+        if(config::ambience == AMBIENT_FULL && true && !ss.isBlack())
+        {
+            int sAmt;
+            if(Tr.toTrans() > 0.8) {
+                sAmt = 16;
+            }else if(Tr.toTrans() > 0.5) {
+                sAmt = 8;
+            }else if(Tr.toTrans() > 0.3) {
+                sAmt = 4;
+            }else{
+                sAmt = 2;
+            }
+
+            if(sAmt > 0)
+            {
+                sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
+
+                Vec3 smpl;
+                while(sampler.getSample(&smpl))
+                {
+                    Ray indirRay;
+                    // Indirect lighting
+                    indirRay = Ray(p, smpl);
+                    indirRay.direction.norm();
+                    double tt;
+                    Color aTr = 1.;
+                    Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
+                    AdTot = AdTot + Ad * ss;// * volumes[0]->phase(p, w, wL * 1);
+                }
+
+                AdTot = AdTot / (pdf * sAmt * sAmt);
+            }
+            
+        }
+
+
+        Lv = Lv + (AdTot * Tr);
 
 
 

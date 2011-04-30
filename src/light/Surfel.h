@@ -11,23 +11,27 @@
 #include "../util/util.h"
 #include "../util/rayutil.h"
 #include "../scene/Geometry.h"
+#include "LSample.h"
 
-class Surfel : public Disk{
+class Surfel : public LiSample{
 public:
-    Surfel(Vec3 position, Vec3 normal, Color diffuse, float area);
-    Surfel(const Surfel& orig);
+    Surfel(const Vec3 &position, const Vec3 &normal, const Color &diffuse, float area);
+    //Surfel(const Surfel& orig);
     virtual ~Surfel();
+    int test_intersect( const Ray &ray, double *t, Vec3 * const n );
+    Vec3 get_normal( Vec3 pt );
 
-    inline Vec3 position(){ return _pos; }
     inline Vec3 normal(){ return _normal; }
-    inline Color diffuse(){ return _diffuse; }
-    inline float area(){ return _radius; }
-    
+    virtual inline TYPE getType( void ){ return SURFEL; }
+
+    MyMat matrix;
+
 private:
 
-    Vec3 _pos;       // Surface position
+    float _height;
+    float _innerRadius;
+    float _phiMax;
     Vec3 _normal;    // Surface normal
-    Color _diffuse;    // Direct lighting data
 };
 
 #endif	/* SURFEL_H */

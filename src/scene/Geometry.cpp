@@ -45,7 +45,7 @@ char* GeomObj::str( void )
 /*
  * Test the intersect with a default geometric object
  *----------------------------------------------------------------------------*/
-int GeomObj::test_intersect( Ray ray, double *t, Vec3 *n  )
+int GeomObj::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   return false;
 }
@@ -61,7 +61,7 @@ Sphere::Sphere( void )
  * Test sphere intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Sphere::test_intersect( Ray ray, double *t, Vec3 *n )
+int Sphere::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   Vec3 d = Vec3(ray.direction);
   Vec3 p = Vec3(ray.start);
@@ -155,7 +155,7 @@ Cone::Cone( void )
  * Test cone intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Cone::test_intersect( Ray ray, double *t, Vec3 *n )
+int Cone::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   return false;
 }
@@ -209,7 +209,7 @@ Box::Box( Vec3 minimum, Vec3 maximum )
  * Test box intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Box::test_intersect( Ray ray, double *t, Vec3 *n )
+int Box::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   double near = -1000; double far = 1000;
   double near_tmp, far_tmp;
@@ -464,7 +464,7 @@ BBNode Disk::construct_bb() {
             );
 }
 
-int Disk::test_intersect(Ray ray, double* t, Vec3* n) {
+int Disk::test_intersect( const Ray &ray, double *t, Vec3 * const n ) {
 
     //printf("1");
     // If we are parallel, don't bother
@@ -551,7 +551,7 @@ Triangle::Triangle( Vec3 c1, Vec3 c2, Vec3 c3 )
  * Test triangle intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Triangle::test_intersect( Ray ray, double *t, Vec3 *n  )
+int Triangle::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   Vec3 dir = ray.direction;
   Vec3 p0 = ray.start;
@@ -678,7 +678,7 @@ Plane::Plane( void )
  * Test plane intersect. return hit condition, overwrite distance and normal
  * variables given
  *----------------------------------------------------------------------------*/
-int Plane::test_intersect( Ray ray, double *t, Vec3 *n  )
+int Plane::test_intersect( const Ray &ray, double *t, Vec3 * const n )
 {
   if(normal.y() != 0)
   {

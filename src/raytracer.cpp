@@ -15,6 +15,7 @@
 #include "util/image.h"
 #include "json/jsonparser.h"
 #include "system/config.h"
+#include "integrator/integrator.h"
 
 using namespace std;
 using namespace boost;
@@ -54,11 +55,11 @@ struct raytracer
        //printf("Thread [%d] FINISHED\n", m_threadId);
     }
 
-    int m_start_x, m_start_y;
-    int m_end_x, m_end_y;
-    int m_width, m_height;
-    int m_depth;
-    int m_threadId;
+    const int m_start_x, m_start_y;
+    const int m_end_x, m_end_y;
+    const int m_width, m_height;
+    const int m_depth;
+    const int m_threadId;
     ImageWriter *m_writer;
 };
 
@@ -66,7 +67,7 @@ struct raytracer
 int main(int argc, char* argv[])
 {
 
-  Parser *parser = new JSONParser();
+  Parser * const parser = new JSONParser();
 
   config::parse(argv, argc);
 

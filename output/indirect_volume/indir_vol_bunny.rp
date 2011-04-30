@@ -1,0 +1,190 @@
+{
+    "render_size" : [ 800, 600 ],
+    
+    "volSampleStep" : 0.015,
+    
+    "camera" : {
+        "eye" :     [  0.00,  3.00, -10.00 ],
+        "up" :      [  0.00,  1.00,  0.00 ],
+        "right" :   [  1.33,  0.00,  0.00 ],
+        "look_at" : [  0.00,  3.00,  0.00 ],
+	"fov" : 45
+    },
+        
+    // All planes in the scene
+    "planes" : [
+
+    ],
+        
+    // All lights in the scene
+    "lights" : [
+        {
+            "location" : [ 0.0, 5.5, 0.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ],
+            "direction" : [1.0, -1.0, 0.0 ],
+            "fov_inner" : 0,
+            "fov_outer" : 30
+        },
+        {
+            "location" : [ 0.0, 5.5, 0.0 ],
+            "color" : [ 1.5, 1.5, 1.5 ],
+            "direction" : [-1.0, -1.0, 0.0 ],
+            "fov_inner" : 0,
+            "fov_outer" : 30
+        }
+
+    ],
+
+    // All of the boxes in the scene
+    "volumes" : [
+        {
+            "type" : "brick",
+            "min" : [-1.5,  0.0, -1.5 ],
+            "max" : [ 1.5,  3.0,  1.5 ],
+            "size" : 256,
+
+            "file" : "/home/cgibson/tmp/bunny/",
+            "iso_min" : 1500,
+            "iso_max" : 5000,
+
+            "file_resolution" : [512,361,512],
+            "volume_resolution" : [128,128,128],
+
+            "density" : 25.,
+            "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
+            "scatter" : [ 7.38, 5.47, 3.15 ],
+            "emitt" : [ 0.0, 0.0, 0.0 ],
+
+            "greenstein" : 2.0,
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "modifiers" : [
+            ]
+        }
+    ],
+
+    // All of the boxes in the scene
+    "polygons" : [
+        {
+
+        "vertices" : [
+            [-3.0,  0.0, -3.0],
+            [-3.0,  0.0,  3.0],
+            [ 3.0,  0.0,  3.0],
+            [ 3.0,  0.0, -3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.3,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : [ ]
+        },
+
+        {
+
+        "vertices" : [
+            [-3.0,  6.0, -3.0],
+            [ 3.0,  6.0, -3.0],
+            [ 3.0,  6.0,  3.0],
+            [-3.0,  6.0,  3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.3,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [-3.0,  0.0, -3.0],
+            [-3.0,  6.0, -3.0],
+            [-3.0,  6.0,  3.0],
+            [-3.0,  0.0,  3.0]
+        ],
+
+            "pigment" : [ 0.05, 0.6, 0.1 ],
+
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.3,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [3.0,  0.0, -3.0],
+            [3.0,  0.0,  3.0],
+            [3.0,  6.0,  3.0],
+            [3.0,  6.0, -3.0]
+        ],
+
+            "pigment" : [ 0.6, 0.1, 0.05 ],
+
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.3,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        },
+
+        {
+
+        "vertices" : [
+            [ 3.0,  0.0,  3.0],
+            [-3.0,  0.0,  3.0],
+            [-3.0,  6.0,  3.0],
+            [ 3.0,  6.0,  3.0]
+        ],
+
+            "pigment" : [ 1.0, 1.0, 1.0 ],
+
+            "finish" : {
+                "ambient" : 0.2,
+                "diffuse" : 0.3,
+                "specular" : 0.05,
+                "roughness" : 0.4,
+                "reflection" : 0.0,
+                "refraction" : 0.0,
+                "ior" : 1.0
+            },
+
+            "modifiers" : []
+        }
+    ]
+    
+}

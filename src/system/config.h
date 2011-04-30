@@ -13,8 +13,9 @@
 #include <stdio.h>
 #include <string>
 
-#include "../integrator/integrator.h"
 #include "../scene/scene.h"
+
+class VolumeIntegrator;
 
 using std::string;
 
@@ -37,9 +38,8 @@ namespace config {
 
     // Image options
     extern Dimension image_resolution;
-    extern Dimension light_sample_resolution;
-    extern float surfel_size;
     extern antialiasing_t antialiasing;
+    extern double gamma_correction;
     extern string in_file;
     extern string out_file;
     extern file_out_t save_option;
@@ -48,6 +48,11 @@ namespace config {
     extern sample_t hemisphere_sampler;
     extern int hemisphere_u;
     extern int hemisphere_t;
+    extern Dimension light_sample_resolution;
+    extern float surfel_size;
+    extern float surfel_grow;
+    extern float lvoxel_size;
+    extern float vol_tests_per_sample;
 
     // Scene information
     extern Scene *scenePtr;

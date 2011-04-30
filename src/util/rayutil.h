@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../types.h"
+#include <assert.h>
 
 #define PI 3.14159265
 
@@ -54,7 +55,7 @@ public:
 
   double toTrans(){ return (p_r + p_g + p_b) / 3.0; }
   
-  bool isBlack(){ return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
+  bool isBlack() const { return (p_r < 1e-5) && (p_g < 1e-5) && (p_b < 1e-5); }
 
   inline RGBColor operator+( const RGBColor& c ) const
     { return RGBColor( p_r + c.p_r, p_g + c.p_g, p_b + c.p_b, (p_f < c.p_f) ? p_f : c.p_f); }
@@ -69,7 +70,7 @@ public:
   inline RGBColor operator/( const double f ) const
     { return RGBColor( p_r / f, p_g / f, p_b / f, p_f); }
   inline RGBColor operator=( const RGBColor& c)
-    { this->p_r = c.p_r; this->p_g = c.p_g; this->p_b = c.p_b; return(*this );}
+    { /*assert(c.p_r >= 0.0); assert(c.p_g >= 0.0); assert(c.p_b >= 0.0);*/ this->p_r = c.p_r; this->p_g = c.p_g; this->p_b = c.p_b; return(*this );}
 
   friend RGBColor Exp(const RGBColor &c) {
      return RGBColor(exp(c.r()), exp(c.g()), exp(c.b()));

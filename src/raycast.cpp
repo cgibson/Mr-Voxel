@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "raycast.h"
 #include "light/brdf.h"
+#include "integrator/integrator.h"
 
 //using namespace light;
 using namespace sys;
@@ -41,7 +42,7 @@ Raycaster::Raycaster( Scene* scene )
 /*
  * Default Raycaster Constructor given the current scene with an overrided camera
  *----------------------------------------------------------------------------*/
-Raycaster::Raycaster( Scene* scene, Camera cam )
+Raycaster::Raycaster( Scene* scene, const Camera &cam )
 {
   mCastMode = PERSPECTIVE;
   _camera = cam;
@@ -66,15 +67,10 @@ Raycaster::Raycaster( Scene* scene, Camera cam )
  * New Sum Lights for a given surface
  * ---------------------------------------------------------------------------*/
 
-Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient, bool gather ) {
+Color Raycaster::sumLights( const Surface &surface, const Ray &ray, int specular, int ambient, bool gather ) {
     Color result; // resulting color to be returned
 
     Vec3 V = ray.direction * -1;
-
-    // Invert backwards normals
-    if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(V) < 0) {
-        surface.n = surface.n * -1;
-    }
 
     // Gather indirect light
     result = light::shadeIndirect(surface, gather, ambient);
@@ -88,7 +84,7 @@ Color Raycaster::sumLights( Surface surface, Ray ray, int specular, int ambient,
 /*
  * New Handle Intersect Code
  * ---------------------------------------------------------------------------*/
-Color Raycaster::handleIntersect( Ray ray, int depth )
+Color Raycaster::handleIntersect( const Ray &ray, int depth )
 {
     Color color;
 
@@ -109,16 +105,24 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
         return (config::background * vol_transmittance) + vol_color;
     }
 
-    Vec3 D = ray.direction;
-    Vec3 N = surface.n;
-    Vec3 R = ray.direction.reflect(N);
-    Vec3 P = surface.p;
-    Ray ray_reflect = Ray(P, R);
+    const Vec3 D = ray.direction;
+    const Vec3 N = surface.n;
+    const Vec3 R = ray.direction.reflect(N);
+    const Vec3 P = surface.p;
+    const Ray ray_reflect = Ray(P, R);
 
     Color color_reflect;
     Color color_refract;
 
     if(surface.type == SolidSurface) {
+
+
+
+        // Invert backwards normals
+        if(surface.objPtr->getType() == TRIANGLE && surface.n.dot(D * -1) < 0) {
+            surface.n = surface.n * -1;
+        }
+        
         color = color + sumLights(surface, ray, 1, 1, true);
 
         int success;
@@ -174,7 +178,7 @@ Color Raycaster::handleIntersect( Ray ray, int depth )
 /*
  * New Ray Color Cast
  *----------------------------------------------------------------------------*/
-Color Raycaster::initialCast( Ray ray, int depth )
+Color Raycaster::initialCast( const Ray &ray, int depth )
 {
     if(depth <= 0)
         return config::background;
@@ -188,39 +192,56 @@ Color Raycaster::initialCast( Ray ray, int depth )
  *----------------------------------------------------------------------------*/
 Color Raycaster::cast( int x, int y, int width, int height )
 {
-  Color color;
+    Color color;
 
-  double us = mLeft + ((mRight - mLeft)
+    double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
-  double vs = mBottom + ((mTop - mBottom)
+    double vs = mBottom + ((mTop - mBottom)
         * (double)((double)(y + 0.5f) / height));
-  //cout << "US: " << us << "  VS: " << vs << endl;
+    //cout << "US: " << us << "  VS: " << vs << endl;
 
-  Ray ray;
+    Ray ray;
 
-ray.start.set(0, 0, 0);
-ray.start = ray.start + Vec3(us, vs, 0);
+    ray.start.set(0, 0, 0);
+    ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vec3(0,0,-1);
-ray.direction.norm();
-ray.direction = ray.direction + Vec3(us, vs, 0);
-
-
-  ray.start = _matrix * Vec4(ray.start, 1);
-  ray.direction = _matrix * Vec4(ray.direction, 0);
-  ray.direction.norm();
-
-  double t;
-
-  if(config::render_target == TARGET_LIGHT_CACHE) {
-    color = mScene->lightCache()->gather(ray, &t);
-  } else {
-    color = initialCast(ray, mDepth);
-  }
+    ray.direction = Vec3(0,0,-1);
+    ray.direction.norm();
+    ray.direction = ray.direction + Vec3(us, vs, 0);
 
 
-  color.clamp(0, 1);
-  return color;
+    ray.start = _matrix * Vec4(ray.start, 1);
+    ray.direction = _matrix * Vec4(ray.direction, 0);
+    ray.direction.norm();
+
+    double t;
+
+    switch(config::render_target) {
+        case TARGET_LIGHT_CACHE_RESULT:
+        {
+            Color Tr = 1.;
+            color = mScene->lightCache()->gather(ray, &t, &Tr);
+        }
+            break;
+        case TARGET_LIGHT_CACHE_TEST_COUNT:
+        {
+            int testCount;
+            mScene->lightCache()->getTestCount(ray, &testCount);
+            testCount = (testCount < 255) ? testCount : 255;
+            //printf("TEST: %d\n", testCount);
+            color = (float)testCount / 50.;
+        }
+            break;
+        case TARGET_DIFFUSE:
+        case TARGET_AMBIENT:
+        case TARGET_FULL:
+            color = initialCast(ray, mDepth);
+            break;
+    }
+
+
+    color.clamp(0, 1);
+    return color;
 }
 
 int Raycaster::iterate( Ray *ray, Surface *surface) {
@@ -238,25 +259,25 @@ int Raycaster::iterate( Ray *ray, Surface *surface) {
 void Raycaster::cam2World( int x, int y, int width, int height, Ray *external_ray )
 {
 
-  double us = mLeft + ((mRight - mLeft)
+    const double us = mLeft + ((mRight - mLeft)
         * (double)((double)(x + 0.5f) / width));
-  double vs = mBottom + ((mTop - mBottom)
+    const double vs = mBottom + ((mTop - mBottom)
         * (double)((double)(y + 0.5f) / height));
-  //cout << "US: " << us << "  VS: " << vs << endl;
-  Ray ray = Ray();
+    //cout << "US: " << us << "  VS: " << vs << endl;
+    Ray ray = Ray();
 
-ray.start.set(0, 0, 0);
-ray.start = ray.start + Vec3(us, vs, 0);
+    ray.start.set(0, 0, 0);
+    ray.start = ray.start + Vec3(us, vs, 0);
 
-ray.direction = Vec3(0,0,-1);
-ray.direction.norm();
-ray.direction = ray.direction + Vec3(us, vs, 0);
+    ray.direction = Vec3(0,0,-1);
+    ray.direction.norm();
+    ray.direction = ray.direction + Vec3(us, vs, 0);
 
-  ray.start = _matrix * Vec4(ray.start, 1);
-  ray.direction = _matrix * Vec4(ray.direction, 0);
-  ray.direction.norm();
+    ray.start = _matrix * Vec4(ray.start, 1);
+    ray.direction = _matrix * Vec4(ray.direction, 0);
+    ray.direction.norm();
 
-  *external_ray = ray;
+    *external_ray = ray;
 }
 
 /*
@@ -272,7 +293,7 @@ int Raycaster::raycast(
         int depth,
         ImageWriter *writer)
 {
-  int rays = width * height;
+  const int rays = width * height;
   int print_percent = 1;
   int rays_done = 0;
   int percent_done = 0;
@@ -299,10 +320,10 @@ int Raycaster::raycast(
       color = cast(x, y, width, height);
 
       writer->setPixel(x, y,
-              color.r() * 255,
-              color.g() * 255,
-              color.b() * 255,
-              (color.f() == 1.0) ? 255 : 255
+              color.r(),
+              color.g(),
+              color.b(),
+              color.f()
       );
 
       if(color.r() < low) low = color.r();
@@ -333,7 +354,7 @@ int Raycaster::raycast(
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
 int Raycaster::surfelCast(
-        Dimension size,
+        const Dimension &size,
         int step_x,
         int step_y,
         ImageWriter *writer)
@@ -345,6 +366,8 @@ int Raycaster::surfelCast(
 
   Surface surf;
   Ray ray;
+
+  float vdotn;
 
   mScene->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
@@ -358,8 +381,15 @@ int Raycaster::surfelCast(
 
       while(mScene->intersect(ray, &surf)) {
 
+            // Invert backwards normals
+            if(surf.objPtr->getType() == TRIANGLE && surf.n.dot(ray.direction * -1) < 0) {
+                surf.n = surf.n * -1;
+            }
+
+            vdotn = abs(surf.n.dot(ray.direction));
+
           color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size)));
+          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size + (config::surfel_size * config::surfel_grow * (1 - vdotn)))));
           ray.start = ray(surf.t + 0.1);
           
       }
@@ -367,9 +397,98 @@ int Raycaster::surfelCast(
     }
   }
 
-  printf("FINAL: %d\n", mScene->lightCache()->count());
 
-  printf("Size: %d\n", mScene->lightCache()->size_of());
+
+    const int numVolumes = mScene->getVolumeCount();
+    VolumeRegion **volumes = mScene->getVolumes();
+
+    VolumeRegion *volume;
+    Vec3 min, max;
+
+    float sample_size = config::lvoxel_size;
+    float test_count = config::vol_tests_per_sample * config::vol_tests_per_sample * config::vol_tests_per_sample;
+    float test_step = sample_size / ((float)config::vol_tests_per_sample);
+    float sample_size_div_two = sample_size * 0.5;
+    float radius = sqrt(sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two);
+    Color Tr, TrTot;
+    Ray shadow_ray;
+
+    LightSource** lights = config::scenePtr->getLightSources();
+    int light_count = config::scenePtr->getLightSourceCount();
+
+    LightSource* light;
+
+    Surface surface;
+
+    if(numVolumes > 0) {
+
+        // ADD all volume representations to the scene
+        for(int i = 0; i < numVolumes; i++) {
+            volume = volumes[i];
+            min = volume->bounds().min;
+            max = volume->bounds().max;
+            for(float x = min.x(); x < max.x(); x += sample_size) {
+                for(float y = min.y(); y < max.y(); y += sample_size) {
+                    for(float z = min.z(); z < max.z(); z += sample_size) {
+
+                        Vec3 p = Vec3(x + sample_size * 0.5,y + sample_size * 0.5,z + sample_size * 0.5);
+                        Vec3 L;
+                        double l_dist;
+                        // Generate shadow ray
+
+                        Color sig_t = 0;
+                        Color sig_s = 0;
+
+                        for(float tx = x; tx < x + sample_size; tx += test_step) {
+                            for(float ty = y; ty < y + sample_size; ty += test_step) {
+                                for(float tz = z; tz < z + sample_size; tz += test_step) {
+                                    Vec3 test = Vec3(tx,ty,tz);
+                                    sig_t = sig_t + volume->sigma_t(test);
+                                    sig_s = sig_s + volume->sigma_s(test);
+                                }
+                            }
+                        }
+
+                        sig_t = sig_t / (float)test_count;
+                        sig_s = sig_s / (float)test_count;
+
+                        if(sig_t.toTrans() < 0.0)
+                            printf("T below 0.0: %s\n", sig_t.str());
+                        if(sig_s.toTrans() < 0.0)
+                            printf("S below 0.0: %s\n", sig_s.str());
+
+
+
+                        sig_t.clamp(0.0, 100.0);
+                        sig_s.clamp(0.0, 100.0);
+
+
+                        if(!sig_s.isBlack() && !sig_t.isBlack())
+                        {
+                            TrTot = 0.;
+                            for(int i = 0; i < light_count; i++)
+                            {
+                                
+                                light = lights[i];
+                                L = light->position - p;
+                                l_dist = L.norm();
+                                shadow_ray = Ray(p, L, 0.0, l_dist);
+
+                                if(!config::scenePtr->intersect(shadow_ray, &surface) || (surface.t > l_dist)) {
+                                    Tr = config::volume_integrator->Transmittance( shadow_ray );
+                                    TrTot = TrTot + (Tr * light->sample(p));
+                                }
+                            }
+
+
+                            mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), TrTot, sig_t, sig_s, radius)));
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 
   mScene->lightCache()->postprocess();
 

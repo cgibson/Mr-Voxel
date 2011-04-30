@@ -3,7 +3,8 @@
 Brick::Brick() {
 
 	for(int i = 0; i < BRICK_DIM * BRICK_DIM * BRICK_DIM; i++) {
-		m_data[i] = new Voxel(4, 0.0);
+		//m_data[i] = new Voxel(4, 0.0);
+		m_data[i] = new Voxel(4);
 	}
 }
 
@@ -28,7 +29,8 @@ BrickGrid::BrickGrid(int size_x, int size_y, int size_z)
 		m_data[i] = new Brick();
 	}
 
-    m_zero_voxel = new Voxel(4, 0.0);
+    //m_zero_voxel = new Voxel(4, 0.0);
+    m_zero_voxel = new Voxel(4);
 }
 
 BrickGrid::~BrickGrid() {

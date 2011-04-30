@@ -60,35 +60,6 @@
     ],
 
     // All of the boxes in the scene
-    "volumes" : [
-        {
-            "type" : "brick",
-            "min" : [-2.5,  0.0, -1.25 ],
-            "max" : [ 0.0,  2.5,  1.25 ],
-            "size" : 256,
-
-            "file" : "/home/cgibson/tmp/bunny/",
-            "iso_min" : 0000,
-            "iso_max" : 60000,
-
-            "file_resolution" : [512,361,512],
-            "volume_resolution" : [128,128,128],
-
-            "density" : 10.0,
-            "absorbtion" : [ 0.9002, 0.9028, 0.8963 ],
-            "scatter" : [ 7.38, 5.47, 3.15 ],
-            "emitt" : [ 0.0, 0.0, 0.0 ],
-
-            "greenstein" : 2.0,
-
-            "pigment" : [ 1.0, 1.0, 1.0 ],
-
-            "modifiers" : [
-            ]
-        }
-    ],
-
-    // All of the boxes in the scene
     "polygons" : [
         {
 

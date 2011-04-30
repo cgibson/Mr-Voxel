@@ -10,7 +10,7 @@ ImageWriter::ImageWriter( Dimension size )
   mWidth = size.width;
   mHeight = size.height;
   // allocate all image data
-  mData = (char*)calloc(size.width * size.height * 4, sizeof(char));
+  mData = (double*)calloc(size.width * size.height * 4, sizeof(double));
 }
 
 /*
@@ -32,6 +32,7 @@ int ImageWriter::getHeight( void )
 /*
  * Fills a specified box in the image data with a given color
  *----------------------------------------------------------------------------*/
+/*
 void ImageWriter::fillBox(int x1, int y1, int x2, int y2, int r, int g, int b, int a )
 {
   int x, y;
@@ -43,11 +44,12 @@ void ImageWriter::fillBox(int x1, int y1, int x2, int y2, int r, int g, int b, i
       }
     }
 }
-
+*/
 
 /*
  * Stretches so all values based on given low and high floating point numbers
  *----------------------------------------------------------------------------*/
+/*
 void ImageWriter::stretch( float low, float high )
 {
   float d = high - low;
@@ -64,25 +66,28 @@ void ImageWriter::stretch( float low, float high )
       }
     }
 }
+*/
 
 /*
  * Fills the entire screen with a specified color
  *----------------------------------------------------------------------------*/
+/*
 void ImageWriter::fill( int r, int g, int b, int a )
 {
   fillBox( 0, 0, mWidth, mHeight, (char)r, (char)g, (char)b, (char)a );
 }
+*/
 
 /*
  * Set a pixel in the image data
  *----------------------------------------------------------------------------*/
-void ImageWriter::setPixel( int x, int y, int r, int g, int b, int a )
+void ImageWriter::setPixel( int x, int y, double r, double g, double b, double a )
 {
   // offset represents the 2d location in a single dimension array
 	int offset = ((y * mWidth) + x) * 4;
 
   // data in TGA file is represented by BGR rather than RGB
-  mData[offset + 3] = a;
+  mData[offset + 3] = 1.0;//a;
   mData[offset + 2] = r;
   mData[offset + 1] = g;
   mData[offset + 0] = b;
@@ -91,16 +96,18 @@ void ImageWriter::setPixel( int x, int y, int r, int g, int b, int a )
 /*
  * Modifies pixel given multiply and translate values
  *----------------------------------------------------------------------------*/
+/*
 void ImageWriter::modPixel( int x, int y, float m, float c )
 {
   // offset represents the 2d location in a single dimension array
   int offset = ((y * mWidth) + x) * 4;
 
   // data in TGA file is represented by BGR rather than RGB
-  mData[offset + 2] = (char)((float)mData[offset + 2] * m - c);
-  mData[offset + 1] = (char)((float)mData[offset + 1] * m - c);
-  mData[offset + 0] = (char)((float)mData[offset + 0] * m - c);
+  mData[offset + 2] = (double)((float)mData[offset + 2] * m - c);
+  mData[offset + 1] = (double)((float)mData[offset + 1] * m - c);
+  mData[offset + 0] = (double)((float)mData[offset + 0] * m - c);
 }
+*/
 
 /*
  * Write the given image data to a given file name
@@ -135,8 +142,25 @@ void ImageWriter::write( string filename )
   putc(32,fp);
   putc(0,fp);
 
+  char *chData = (char*)malloc(mWidth * mHeight * 4 * sizeof(char));
+
+  for(int i = 0; i < mWidth; i++ )
+  {
+    for(int j = 0; j < mHeight; j++)
+    {
+      int offset = ((j * mWidth) + i) * 4;
+      chData[offset + 3] = (char)(pow(mData[offset + 3], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 2] = (char)(pow(mData[offset + 2], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 1] = (char)(pow(mData[offset + 1], 1.0 / sys::config::gamma_correction) * 255);
+      chData[offset + 0] = (char)(pow(mData[offset + 0], 1.0 / sys::config::gamma_correction) * 255);
+
+    }
+  }
+
   // write data as a large chunk
-  fwrite(mData, sizeof(char), (mWidth * mHeight * 4), fp);
+  fwrite(chData, sizeof(char), (mWidth * mHeight * 4), fp);
+
+  free(chData);
 
   // close the file pointer
   fclose(fp);

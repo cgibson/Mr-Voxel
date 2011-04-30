@@ -4,7 +4,7 @@
 #include "../util/MyMat.h"
 #include "../util/rayutil.h"
 
-enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK};
+enum TYPE {PLANE, SPHERE, BOX, TRIANGLE, NODE, GEOM, CONE, VOLUME, UNDEF, DISK, UNDEF_SAMPLE, SURFEL, LVOXEL};
 
 /*
  * Represents a generic scene object
@@ -20,7 +20,7 @@ private:
 class SceneObject : public Object{
 public:
   SceneObject( void );
-  virtual int test_intersect( Ray ray, double *t, Vec3 *n )
+  virtual int test_intersect( const Ray &ray, double *t, Vec3 * const n )
     { return false; }
   virtual inline TYPE getType( void ){ return UNDEF; }
 };

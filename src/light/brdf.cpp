@@ -6,15 +6,16 @@
  */
 
 #include "brdf.h"
+#include "../integrator/integrator.h"
 
-double max(double a, double b)
+inline double max(double a, double b)
 {
   return (a > b) ? a : b;
 }
 
 namespace light{
 
-    Color shadeIndirect(Surface &surface, bool gather = true, bool ambient = true) {
+    Color shadeIndirect(const Surface &surface, bool gather = true, bool ambient = true) {
         Color result = 0.;
 
         float pdf = 1. / (4. * PI);
@@ -31,13 +32,22 @@ namespace light{
 
             float sample_mul = pdf * (config::hemisphere_u*config::hemisphere_t);
 
+            Color VLi = 0.;
+            Ray sampleRay;
+
             // Gather samples until the sampler runs out
             while(sampler.getSample(&smpl)) {
 
+                Color Tr = 1.;
                 rndn = (smpl * surface.n);
-                amb = config::scenePtr->lightCache()->gather(Ray(surface.p + (smpl * 0.0), smpl), &tt) * rndn;
+                sampleRay = Ray(surface.p + (surface.n * 0.05), smpl, 0.0);
+                amb = config::scenePtr->lightCache()->gather(sampleRay, &tt, &Tr) * rndn;
 
-                result = result + amb * surface.finish.ambient * surface.color / sample_mul;
+                //sampleRay = Ray(surface.p + (smpl * 0.0), smpl, 0.0, tt);
+
+                //VLi = config::volume_integrator->Li(sampleRay, &Tr);
+
+                result = result + (amb * surface.finish.ambient * surface.color + VLi * .1) / sample_mul;
             }
 
         } else if(config::ambience == AMBIENT_FLAT && ambient){
@@ -49,7 +59,7 @@ namespace light{
         return result;
     }
 
-    Color shadeDiffuse(Vec3 &V, Surface &surf, bool specular = true) {
+    Color shadeDiffuse(const Vec3 &V, const Surface &surf, bool specular = true) {
 
         Color result = 0.;
         
@@ -69,7 +79,7 @@ namespace light{
             double l_dist = L.norm();
 
             // Generate shadow ray
-            shadow_ray = Ray(surf.p, L);
+            shadow_ray = Ray(surf.p, L, 0.0, l_dist);
 
             Surface surface2;
 
@@ -92,19 +102,21 @@ namespace light{
         
     }
 
-    Color brdf(Vec3 &V, Vec3 &L, Surface &surf, LightSource *light, Color &lightTr, bool specular = true) {
+    Color brdf(const Vec3 &V, const Vec3 &L, const Surface &surf, LightSource *light, const Color &lightTr, bool specular = true) {
         
         Vec3 H = V + L;
         H.norm();
+
+        Color lColor = light->sample(surf.p);
 
         // invert shininess so it makes sense
         double shininess = 1 / surf.finish.roughness;
 
         Color result = 0.;
-        result = ((surf.color * light->color * lightTr) * surf.finish.diffuse * max(0., surf.n * L));
+        result = ((surf.color * lColor * lightTr) * surf.finish.diffuse * max(0., surf.n * L));
 
         if(config::specular && specular && !lightTr.isBlack() && L.dot(surf.n) > 0) {
-            result = result + (light->color * surf.finish.specular * lightTr * pow(max(0, H * surf.n), shininess));
+            result = result + (lColor * surf.finish.specular * lightTr * pow(max(0, H * surf.n), shininess));
         }
 
         return result;

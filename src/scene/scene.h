@@ -7,6 +7,7 @@
 #include "modifier.h"
 #include "Geometry.h"
 #include "../light/LiNode.h"
+#include "../light/LVoxel.h"
 #include "../light/Surfel.h"
 
 using namespace std;
@@ -38,9 +39,13 @@ class LightSource : public Object{
 public:
   LightSource( void );
   virtual char* str( void );
-  
+  virtual Color sample(Vec3 pt);
+
   Vec3 position;
   Color color;
+  light_type_t lightType;
+  Vec3 dir;
+  double fov_inner, fov_outer;
 
 private:
 };
@@ -84,7 +89,7 @@ public:
   GeomObj *objPtr;
   
   Surface();
-  Surface(Vec3 point, double distance, Vec3 normal, Finish fin, Color col);
+  Surface(const Vec3 &point, double distance, const Vec3 &normal, const Finish &fin, const Color &col);
   bool isHit( void ){ return hit; }
 private:
   bool hit;
@@ -125,9 +130,10 @@ public:
 
   LiNode* lightCache(){ return mLiCache; }
   int addSurfel( shared_ptr<Surfel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
+  int addLVoxel( shared_ptr<LVoxel> obj ){ return (mLiCache != NULL) ? mLiCache->add(obj) : -1; }
   LiNode* initCache(Vec3 min, Vec3 max){ mLiCache = new LiNode(min, max); }
 
-  bool intersect(Ray ray, Surface *surface);
+  bool intersect(const Ray &ray, Surface * const surface);
 
 private:
 

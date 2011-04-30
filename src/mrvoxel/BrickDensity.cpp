@@ -16,6 +16,7 @@ void BrickDensityRegion::set(int i, int j, int k, float val) {
     }
 
     Voxel *tmp = m_brickData(i,j,k);
+    assert(false);
     tmp->set(0, val);
 }
 
@@ -158,19 +159,19 @@ BrickDensityRegion::splat(int x, int y, int z, float val, int splat) {
 float BrickDensityRegion::interpolate(const float x, const float y, const float z, const VoxVal val) {
     
     // subtracting 0.5 to center
-    const float cx = x - 0.5f;
-    const float cy = y - 0.5f;
+    const float cx = x; - 0.5f;
+    const float cy = y; - 0.5f;
     const float cz = z - 0.5f;
 
     // integer (base case) for each voxel
-    const int ix = floor(cx);
-    const int iy = floor(cy);
-    const int iz = floor(cz);
+    const int ix = floor(x);
+    const int iy = floor(y);
+    const int iz = floor(z);
 
     // float value for each voxel
-    const float tx = cx - ix;
-    const float ty = cy - iy;
-    const float tz = cz - iz;
+    const float tx = x - ix;
+    const float ty = y - iy;
+    const float tz = z - iz;
 
     // Each voxel
     Voxel *v1 = m_brickData(ix, iy, iz);
@@ -204,7 +205,20 @@ float BrickDensityRegion::interpolate(const float x, const float y, const float 
 
     // Find final interpolation along z-axis
     float final = (1-tz)*fx1 + (tz)*fx2;
-
+    if(final < 0.0) {
+        printf("WHAT?!...\n");
+        printf("f1: %f\n", f1);
+        printf("f2: %f\n", f2);
+        printf("f3: %f\n", f3);
+        printf("f4: %f\n", f4);
+        printf("f5: %f\n", f5);
+        printf("f6: %f\n", f6);
+        printf("f7: %f\n", f7);
+        printf("f8: %f\n", f8);
+        printf("cx: %f cy: %f cz: %f\n", cx, cy, cz);
+        printf("tx: %f ty: %f tz: %f\n", tx, ty, tz);
+        printf("ix: %d iy: %d iz: %d\n", ix, iy, iz);
+    }
     return final;
 }
 
@@ -250,17 +264,20 @@ void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_
 
   //printf("MIN: %d, MAX: %d\n", min, max);
 
-  unsigned short tmp;
+  float tmp;
 
   for(int i = 0; i < (int)file_res.x(); i++)
   {
     for(int j = 0; j < (int)file_res.z(); j++)
     {
-      tmp = bufferShort[j * (int)file_res.x() + i];
-      //printf("tmp is huge! %d\n", tmp);
-      tmp = (int(tmp) - iso_min > 0) ? tmp : 0;
+      tmp = (float)bufferShort[j * (int)file_res.x() + i];
+      tmp = (tmp - iso_min > 0) ? tmp : 0;
       tmp = (tmp > iso_max) ? 0 : tmp;
-      add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);
+
+      assert((float)tmp >= 0.0);
+      assert((float)max >= 0.0);
+      if(tmp > 0.0)
+        add((int)(i * multiply), (int)(vol_res.y() - ((int)(y_val) + 1)), (int)(j * multiply), (float)tmp * m_density_mult * multiply / (float)max);
     }
   }
 }

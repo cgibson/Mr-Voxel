@@ -14,6 +14,9 @@ char* RGBColor::str( void ) {
  *----------------------------------------------------------------------------*/
 void RGBColor::clamp( double lower, double upper )
 {
+    //assert(p_r >= 0.0);
+    //assert(p_g >= 0.0);
+    //assert(p_b >= 0.0);
   if(p_r < 0.0) p_r = 0.0;
   else if(p_r > 1.0) p_r = 1.0;
 

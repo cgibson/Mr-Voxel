@@ -20,7 +20,7 @@ class RGBColor;
 // RENDER
 enum ambient_render_t { AMBIENT_NONE, AMBIENT_FLAT, AMBIENT_FULL };
 enum shading_render_t { SHADING_NONE, SHADING_FLAT, SHADING_SMOOTH };
-enum render_target_t { TARGET_FULL, TARGET_DIFFUSE, TARGET_AMBIENT, TARGET_LIGHT_CACHE };
+enum render_target_t { TARGET_FULL, TARGET_DIFFUSE, TARGET_AMBIENT, TARGET_LIGHT_CACHE_RESULT, TARGET_LIGHT_CACHE_TEST_COUNT };
 
 // IMAGE
 enum antialiasing_t { ANTIALIASING_NONE, ANTIALIASING_STRATEFIED };
@@ -29,6 +29,9 @@ enum file_out_t { FILE_INPUT_NAME, FILE_DATE, FILE_INPUT_NAME_AND_DATE,
 
 // SAMPLE
 enum sample_t { SAMPLE_RAND, SAMPLE_STRATEFIED, SAMPLE_GRID };
+
+// SCENE
+enum light_type_t { LIGHT_POINT, LIGHT_SPOTLIGHT };
 
 
 /* CLASS DEFINITIONS  *****************************************************/

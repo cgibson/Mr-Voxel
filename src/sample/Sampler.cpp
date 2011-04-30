@@ -16,7 +16,7 @@ namespace sample{
     }
 
     // From http://www.rorydriscoll.com/2009/01/07/better-sampling/
-    Vec3 sampleToHCoord(float us, float ts) {
+    inline Vec3 sampleToHCoord(float us, float ts) {
 
         const float r = sqrt(us);
         const float theta = 2 * PI * ts;
@@ -28,10 +28,23 @@ namespace sample{
 
     }
 
+    // Basically from PBRv2
+    inline Vec3 sampleToSCoord(float us, float ts, float min_u, float max_u, float min_t, float max_t) {
+
+        const float z = 1.f - 2.f * us;
+        const float r = sqrt(max(0.f, 1.f - z * z));
+        const float phi = 2.f * PI * ts;
+        const float x = r * cos(phi);
+        const float y = r * sin(phi);
+
+        return Vec3(x, y, z);
+
+    }
+
 
 
     // From http://www.rorydriscoll.com/2009/01/07/better-sampling/
-    Vec3 sampleToHCoordX(float us, float ts) {
+    inline Vec3 sampleToHCoordX(float us, float ts) {
 
         const float r = sin(us * PI / 2.);
         const float theta = 2 * PI * ts;
@@ -75,6 +88,12 @@ namespace sample{
         //_matrix = m.inverse();
     }
 
+    void
+    HemisphereSampler::reset() {
+        _ts = 0;
+        _us = 0;
+    }
+
     bool
     HemisphereSampler::getSample(Vec3* sample) {
         // End of the line
@@ -98,4 +117,43 @@ namespace sample{
 
         return true;
     }
+
+    SphericalSampler::SphericalSampler(int us, int ts, float min_u, float max_u, float min_t, float max_t)
+        : _min_u(min_u), _max_u(max_u), _min_t(min_t), _max_t(max_t), _max_us(us), _max_ts(ts), _us(0), _ts(0) {
+
+    }
+
+    void
+    SphericalSampler::reset() {
+        _ts = 0;
+        _us = 0;
+    }
+
+    bool
+    SphericalSampler::getSample(Vec3* sample) {
+        // End of the line
+        if(_ts == _max_ts){ /*printf("DONE\n");*/return false;}
+
+        // Jitter calculation
+        const float jitter_us = (drand48() - 0.f) * (1. / _max_us);
+        const float jitter_ts = (drand48() - 0.f) * (1. / _max_ts);
+
+        const Vec3 tmpSample = sampleToSCoord((_us / (float)_max_us) + jitter_us, (_ts / (float)_max_ts) + jitter_ts, _min_u, _max_u, _min_t, _max_t);
+
+        *sample = tmpSample;
+        sample->norm();
+
+        // Incrememt for next sample
+        if(++_us == _max_us) {
+            _us = 0;
+            ++_ts;
+        }
+
+        return true;
+    }
 }
+
+    //SphericalSampler::SphericalSampler(int us, int ts, bool random)
+    //    : _us_per_sampler(us), _ts_per_sampler(ts) {
+//
+    //}
