@@ -64,7 +64,7 @@ private:
         return r;
     }
 
-    void loadVolSlice(const std::string &file, const Vec3 &file_res, const Vec3 &vol_res, int y_val, int iso_min, int iso_max);
+    void loadVolSlice(const std::string &file1, const std::string &file2, float t, const Vec3 &file_res, const Vec3 &vol_res, int y_val, int iso_min, int iso_max);
 
     double m_density_mult;
 	BrickGrid m_brickData;

@@ -32,6 +32,8 @@ namespace config {
     extern bool reflection;
     extern bool refraction;
     extern Color background;
+    
+    extern float atten_k;
 
     // Render target
     extern render_target_t render_target;

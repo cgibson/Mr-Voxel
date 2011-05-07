@@ -41,8 +41,10 @@ namespace light{
                 Color Tr = 1.;
                 rndn = (smpl * surface.n);
                 sampleRay = Ray(surface.p + (surface.n * 0.05), smpl, 0.0);
-                amb = config::scenePtr->lightCache()->gather(sampleRay, &tt, &Tr) * rndn;
-
+                //if(config::useCache)
+                    amb = config::scenePtr->lightCache()->gather(sampleRay, &tt, &Tr) * rndn;
+                //else
+                //    amb = config::scenePtr->
                 //sampleRay = Ray(surface.p + (smpl * 0.0), smpl, 0.0, tt);
 
                 //VLi = config::volume_integrator->Li(sampleRay, &Tr);

@@ -29,23 +29,29 @@ void BrickDensityRegion::loadCT(string file, Vec3 file_res, Vec3 vol_res, int is
 
 	 m_brickData = BrickGrid(vol_res.x(),vol_res.y(),vol_res.z());
 
-     std::string tmp_str;
+     std::string tmp_str1, tmp_str2;
 
      double offset = file_res.y() / vol_res.y();
 
-     int tmp;
+     int tmp1, tmp2;
+     float tmpt;
 
      for(int i = 0; i < floor(vol_res.y()); i++) {
 
-        tmp = (int)(i * offset);
+        tmp1 = (int)(i * offset);
+        tmp2 = tmp1 + 1;
+	tmpt = ((float)i * offset) - tmp1;
+        if(tmp1 == 0)
+            tmp1 = 1;
+        if(tmp2 > file_res.y())
+            tmp2 = (int)(file_res.y() - 1);
+        std::stringstream out1, out2;
+        out1 << tmp1;
+        out2 << tmp2;
+        tmp_str1 = out1.str();
+        tmp_str2 = out2.str();
 
-        if(tmp == 0)
-            tmp = 1;
-        std::stringstream out;
-        out << tmp;
-        tmp_str = out.str();
-
-        loadVolSlice(file + tmp_str, file_res, vol_res, i, iso_min, iso_max);
+        loadVolSlice(file + tmp_str1, file + tmp_str2, tmpt, file_res, vol_res, i, iso_min, iso_max);
      }
 
 }
@@ -159,8 +165,8 @@ BrickDensityRegion::splat(int x, int y, int z, float val, int splat) {
 float BrickDensityRegion::interpolate(const float x, const float y, const float z, const VoxVal val) {
     
     // subtracting 0.5 to center
-    const float cx = x; - 0.5f;
-    const float cy = y; - 0.5f;
+    const float cx = x - 0.5f;
+    const float cy = y - 0.5f;
     const float cz = z - 0.5f;
 
     // integer (base case) for each voxel
@@ -222,7 +228,7 @@ float BrickDensityRegion::interpolate(const float x, const float y, const float 
     return final;
 }
 
-void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_res, const Vec3 &vol_res, int y_val, int iso_min, int iso_max) {
+void BrickDensityRegion::loadVolSlice(const std::string &file1, const std::string &file2, const float t, const Vec3 &file_res, const Vec3 &vol_res, int y_val, int iso_min, int iso_max) {
 
   if(file_res.x() < vol_res.x() || file_res.z() < vol_res.z()) {
     printf("Error: Volume must be at most file_resolution large.\n");
@@ -232,16 +238,30 @@ void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_
   const int size_squared = (int)(file_res.x() * file_res.z());
   const float multiply = (vol_res.x() / file_res.x());
   
-  char buffer[size_squared * 2];
-  ifstream inFile(file.c_str(), ios::in | ios::binary);
+  char buffer1[size_squared * 2];
+  char buffer2[size_squared * 2];
+  ifstream inFile1(file1.c_str(), ios::in | ios::binary);
+  ifstream inFile2(file2.c_str(), ios::in | ios::binary);
   
-  if((!inFile))
+  if((!inFile1))
   {
-    printf("An error occurred!  Could not read \"%s\"\n", file.c_str());
+    printf("An error occurred!  Could not read \"%s\"\n", file1.c_str());
     exit(1);
   }
 
-  if(!inFile.read(buffer, size_squared * 2))
+  if((!inFile2))
+  {
+    printf("An error occurred!  Could not read \"%s\"\n", file2.c_str());
+    exit(1);
+  }
+
+  if(!inFile1.read(buffer1, size_squared * 2))
+  {
+    printf("Could not read %d bytes of data\n", size_squared * 2);
+    exit(1);
+  }
+
+  if(!inFile2.read(buffer2, size_squared * 2))
   {
     printf("Could not read %d bytes of data\n", size_squared * 2);
     exit(1);
@@ -254,7 +274,9 @@ void BrickDensityRegion::loadVolSlice(const std::string &file, const Vec3 &file_
 
   for(int i = 0; i < size_squared; i++)
   {
-    bufferShort[i] = twoByte2ShortX(buffer + (2 * i));
+    const unsigned short t1 = twoByte2ShortX(buffer1 + (2 * i));
+    const unsigned short t2 = twoByte2ShortX(buffer2 + (2 * i));
+    bufferShort[i] = (unsigned short)((t1 * (1.-t)) + (t2 * t));
     if(bufferShort[i] > max)
       max = bufferShort[i];
     if(bufferShort[i] < min)

@@ -407,7 +407,8 @@ int Raycaster::surfelCast(
 
     float sample_size = config::lvoxel_size;
     float test_count = config::vol_tests_per_sample * config::vol_tests_per_sample * config::vol_tests_per_sample;
-    float test_step = sample_size / ((float)config::vol_tests_per_sample);
+    double test_step = (double)sample_size / ((double)config::vol_tests_per_sample);
+    assert(test_step > 0.0);
     float sample_size_div_two = sample_size * 0.5;
     float radius = sqrt(sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two);
     Color Tr, TrTot;
@@ -458,13 +459,14 @@ int Raycaster::surfelCast(
                             printf("S below 0.0: %s\n", sig_s.str());
 
 
-
-                        sig_t.clamp(0.0, 100.0);
-                        sig_s.clamp(0.0, 100.0);
+                        //sig_t.clamp(0.0, 100.0);
+                        //sig_s.clamp(0.0, 100.0);
 
 
                         if(!sig_s.isBlack() && !sig_t.isBlack())
                         {
+
+                            //printf("Sigma_s: %s\n", sig_s.str());
                             TrTot = 0.;
                             for(int i = 0; i < light_count; i++)
                             {

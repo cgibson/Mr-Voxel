@@ -6,6 +6,9 @@
  */
 
 #include "LVoxel.h"
+#include "../system/config.h"
+
+using namespace sys;
 
 LVoxel::~LVoxel() {
 }
@@ -50,11 +53,12 @@ LVoxel::test_intersect( const Ray &ray, double *t )
 
 int
 LVoxel::inside( const Vec3 &p ) {
-    return (p - position()).length() <= sqrt(area() * area());
+    return (p - position()).length() <= area() * 2.;//sqrt(area() * area());
 }
 
 Color
 LVoxel::integrate( Color* Tr) {
-    *Tr = (*Tr) * Exp(sigma_t() * 0.125 * -1);//_transmittance;//Exp(_transmittance * -1);
-    return *Tr * sigma_s() * 0.125 * _transmittance;
+    *Tr = (*Tr) * Exp(sigma_t() * config::lvoxel_size * -1);//_transmittance;//Exp(_transmittance * -1);
+    //printf("Sigma_s: %s\n", sigma_s().str());
+    return *Tr * sigma_s() * config::lvoxel_size * _transmittance;
 }

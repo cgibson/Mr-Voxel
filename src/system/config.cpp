@@ -73,9 +73,21 @@ namespace config {
             {
                 sscanf(tmpVal.c_str(), "%f", &surfel_size);
             }
+            else if( !(tmpVal = testCommand(argv, &current, "-K", "--atten-k")).empty() )
+            {
+                sscanf(tmpVal.c_str(), "%f", &atten_k);
+            }
+            else if( !(tmpVal = testCommand(argv, &current, "-G", "--gamma")).empty() )
+            {
+                sscanf(tmpVal.c_str(), "%f", &gamma_correction);
+            }
             else if( !(tmpVal = testCommand(argv, &current, "-LVS", "--lvoxel-size")).empty() )
             {
                 sscanf(tmpVal.c_str(), "%f", &lvoxel_size);
+            }
+            else if( !(tmpVal = testCommand(argv, &current, "-VSC", "--lvoxel-sample-count")).empty() )
+            {
+                sscanf(tmpVal.c_str(), "%f", &vol_tests_per_sample);
             }
             else if( !(tmpVal = testCommand(argv, &current, "-SW", "--sample-resolution")).empty() )
             {
@@ -146,6 +158,8 @@ namespace config {
     bool refraction = true;
     Color background = 0.;
 
+    float atten_k = 0.25;
+
     // Render targets
     render_target_t render_target = TARGET_FULL;
 
@@ -161,11 +175,10 @@ namespace config {
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
     int hemisphere_u = 4;
     int hemisphere_t = 8;
-    int sphere_samples = 4;
     Dimension light_sample_resolution = {800, 600};
     float surfel_size = 0.02;
     float surfel_grow = 8.0;
-    float vol_tests_per_sample = 3;
+    float vol_tests_per_sample = 4;
     float lvoxel_size = 0.125;
 
     // Scene information

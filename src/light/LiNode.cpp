@@ -151,7 +151,6 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
     double tmin = -1;
     double thit;
     double Att;
-    double K = 5.0;
     Color closest = config::background;
     Color tmp = 0.;
     Vec3 n;
@@ -220,8 +219,9 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
                         // But it makes stuff PRETTY :(((
                         if(s->normal() * (ray.direction * -1) > 0) {
 
-                            Att = 1. / (K * pow(thit, 2));
-                            closest = s->diffuse() * (*Tr);// * Att;
+                            Att = 1. / (config::atten_k * pow(thit, 2));
+                            Att = (Att > 1.0) ? 1.0 : Att;
+                            closest = s->diffuse() * (*Tr) * Att;
                         }
                         else
                             closest = 0.;
@@ -244,8 +244,9 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
 
             //tmpRay.maxt = tClosest;
             if(s->test_intersect(tmpRay, &thit) && !s->inside(tmpRay.start)) {
-                Att = 1. / (K * pow(thit, 2));
-                vRet = vRet + s->integrate(Tr);// * Att;
+                Att = 1. / (config::atten_k * pow(thit, 2));
+                Att = (Att > 1.0) ? 1.0 : Att;
+                vRet = vRet + s->integrate(Tr) * Att;
                 //printf("Tr: %s\nReturned: %s\n", Tr.str(), vRet.str());
             }
 
