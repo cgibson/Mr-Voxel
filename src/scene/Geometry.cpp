@@ -656,6 +656,7 @@ char* Triangle::str( void )
           corner2.str(),
           corner3.str());
 
+  /*
   Modifier* current = *modifiers;
 
   for(count = 0; count < modifier_count; count++)
@@ -663,6 +664,65 @@ char* Triangle::str( void )
     strcat(buffer, "\n\t");
     strcat(buffer, modifiers[count]->str());
   }
+   * */
+  return buffer;
+}
+
+
+SmoothTriangle::SmoothTriangle(Vec3 c1, Vec3 n1, Vec3 c2, Vec3 n2, Vec3 c3, Vec3 n3):_n1(n1), _n2(n2), _n3(n3),Triangle(c1,c2,c3)
+{
+  
+}
+
+Vec3
+SmoothTriangle::get_normal( Vec3 p )
+{
+    Vec3 abcCross; (corner2 - corner1).cross(corner3 - corner1, &abcCross);
+    Vec3 pbcCross; (corner2 - p).cross(corner3 - p, &pbcCross);
+    Vec3 pcaCross; (corner3 - p).cross(corner1 - p, &pcaCross);
+    Vec3 pabCross; (corner1 - p).cross(corner2 - p, &pabCross);
+
+    Vec3 N = abcCross;
+    N.norm();
+
+    float areaABC = N.dot(abcCross);
+
+    float areaPBC = N.dot(pbcCross);
+    float a = areaPBC / areaABC;
+
+    float areaPCA = N.dot(pcaCross);
+    float b = areaPCA / areaABC;
+
+    float areaPAB = N.dot(pabCross);
+    float c = areaPAB / areaABC;
+
+    Vec3 final = _n1 * a + _n2 * b + _n3 * c;
+    final.norm();
+    return final;
+}
+
+
+char* SmoothTriangle::str( void )
+{
+  char *buffer = (char*)calloc(500, sizeof(char));
+  int count = 0;
+  sprintf(buffer, "[TRIANGLE]\n\tCorner1: %s\n\tNormal1: %s\n\tCorner2: %s\n\tNormal2: %s\n\tCorner3: %s\n\tNormal3: %s\n",
+          corner1.str(),
+          _n1.str(),
+          corner2.str(),
+          _n2.str(),
+          corner3.str(),
+          _n3.str());
+
+  /*
+  Modifier* current = *modifiers;
+
+  for(count = 0; count < modifier_count; count++)
+  {
+    strcat(buffer, "\n\t");
+    strcat(buffer, modifiers[count]->str());
+  }
+   * */
   return buffer;
 }
 

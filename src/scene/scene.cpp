@@ -64,18 +64,91 @@ Scene::intersect(const Ray &ray, Surface* const surface) {
     return static_cast<BBNode*>(mObjectBVH)->intersect(ray, surface);
 }
 
+bool
+Scene::intersections(const Ray &ray, vector<Surface> *surfaceList) {
+
+    if(mObjectBVH == NULL)
+        return false;
+
+    return static_cast<BBNode*>(mObjectBVH)->intersections(ray, surfaceList);
+}
+
+BBNode construct_bb(vector<SceneObject*> objs)
+{
+  TYPE type;
+  BBNode tmp_node, ret_node;
+  int bb_built = false;
+
+  vector<SceneObject*>::iterator it;
+
+  for(it = objs.begin(); it != objs.end(); it++)
+  {;
+    type = (*it)->getType();
+    if(type == NODE)
+    {
+      tmp_node = BBNode(((BBNode*)*it)->min, ((BBNode*)*it)->max);
+    }else{
+      tmp_node = ((GeomObj*)*it)->construct_bb();
+    }
+    if(!bb_built)
+    {
+      ret_node = tmp_node;
+      bb_built = true;
+    }else{
+      ret_node = ret_node.combine(tmp_node);
+    }
+
+  }
+  return ret_node;
+}
+
 /*
  * Split all SceneObjects down a given axis.  All objects are added to a 
  * parent bounding box and the box is split along the given axis
  *----------------------------------------------------------------------------*/
-void split(ObjectList A, ObjectList *l1, ObjectList *l2, AXIS axis)
+void split(vector<SceneObject*> A, vector<SceneObject*> *l1, vector<SceneObject*> *l2, AXIS axis)
 {
   int i;
   int rotate = 0;
   Vec3 cur_center, list_center;
-  BBNode node = A.construct_bb();
+  BBNode node = construct_bb(A);
   list_center = node.getCenter();
 
+  /*
+  printf("node length: %s", (node.max - node.min).str());
+  //*/
+  //*
+  float axisLen = 0.0;
+
+  axis = YZ;
+  axisLen = node.max.x() - node.min.x();
+
+  float tmp;
+
+  tmp = node.max.y() - node.min.y();
+  if(tmp > axisLen)
+  {
+      axis = XZ;
+      axisLen = tmp;
+  }
+
+  tmp = node.max.z() - node.min.z();
+  if(tmp > axisLen)
+  {
+      axis = XY;
+      axisLen = tmp;
+  }
+
+//*/
+
+  /*
+  switch(axis){
+      case XY: printf(" GOING XY\n"); break;
+      case XZ: printf(" GOING XZ\n"); break;
+      case YZ: printf(" GOING YZ\n"); break;
+  }
+  //*/
+  
   // For every object in the list
   for(i = 0; i < A.size(); i++)
   {
@@ -96,55 +169,70 @@ void split(ObjectList A, ObjectList *l1, ObjectList *l2, AXIS axis)
       // handle a cut along the z axis
       case XY:
         if(cur_center.z() < list_center.z())
-          l1->add(A[i]);
+          l1->push_back(A[i]);
         else if(cur_center.z() > list_center.z())
-          l2->add(A[i]);
+          l2->push_back(A[i]);
 	// if the object falls in the middle of the axis
         else
         {
 	  // rotate which list you hand off the center object to
           if(rotate % 2)
-            l1->add(A[i]);
+            l1->push_back(A[i]);
           else
-            l2->add(A[i]);
+            l2->push_back(A[i]);
           rotate++;
         }
         break;
       // handle a cut along the y axis
       case XZ:
         if(cur_center.y() < list_center.y())
-          l1->add(A[i]);
+          l1->push_back(A[i]);
         else if(cur_center.y() > list_center.y())
-          l2->add(A[i]);
+          l2->push_back(A[i]);
 	// if the object falls in the middle of the axis
         else
         {
 	  // rotate which list you hand off the center object to
           if(rotate % 2)
-            l1->add(A[i]);
+            l1->push_back(A[i]);
           else
-            l2->add(A[i]);
+            l2->push_back(A[i]);
           rotate++;
         }
         break;
       // handle a cut along the x axis
       case YZ:
         if(cur_center.x() < list_center.x())
-          l1->add(A[i]);
+          l1->push_back(A[i]);
         else if(cur_center.x() > list_center.x())
-          l2->add(A[i]);
+          l2->push_back(A[i]);
 	// if the object falls in the middle of the axis
         else
         {
 	  // rotate which list you hand off the center object to
           if(rotate % 2)
-            l1->add(A[i]);
+            l1->push_back(A[i]);
           else
-            l2->add(A[i]);
+            l2->push_back(A[i]);
           rotate++;
         }
         break;
     }
+  }
+  if(l1->size() == 0)
+  {
+      for(int i = 0; i < l2->size() / 2; i++)
+      {
+        l1->push_back(l2->back());
+        l2->pop_back();
+      }
+  }else if(l2->size() == 0)
+  {
+      for(int i = 0; i < l1->size() / 2; i++)
+      {
+          l2->push_back(l1->back());
+          l1->pop_back();
+      }
   }
 }
 
@@ -152,7 +240,7 @@ void split(ObjectList A, ObjectList *l1, ObjectList *l2, AXIS axis)
  * Recurse through the list, spatially subdividing the objects and building 
  * a hierarchical box structure
  *----------------------------------------------------------------------------*/
-BBNode *recurseHierarchy(ObjectList A, AXIS axis)
+BBNode *recurseHierarchy(vector<SceneObject*> A, AXIS axis)
 {
   BBNode *node1, *node2;
   // if this is an empty list
@@ -199,12 +287,13 @@ BBNode *recurseHierarchy(ObjectList A, AXIS axis)
   // otherwise, there are too many objects, split the list
   }else
   {
-    ObjectList l1, l2;
+    vector<SceneObject*> l1, l2;
     
     // split the list along an axis
     split(A, &l1, &l2, axis);
     
     // rotate the axis so we don't always cute the same way
+    
     switch(axis)
     {
       case XY:;
@@ -243,8 +332,8 @@ void Scene::generateBoxHierarchy( void )
   TYPE type;
   BBNode *node;
 
-  ObjectList list;
-  ObjectList list_vol;
+  vector<SceneObject*> list;
+  vector<SceneObject*> list_vol;
   
   // create object list
   for(i = 0; i < mObjectCount; i++)
@@ -260,7 +349,7 @@ void Scene::generateBoxHierarchy( void )
 		    node = new BBNode(mObjects[i]->construct_bb());
 		    node->child_l = mObjects[i];
 		    node->child_r = NULL;
-		    list.add(node);
+		    list.push_back(node);
 	    }
     }
   }
@@ -270,7 +359,7 @@ void Scene::generateBoxHierarchy( void )
     node = new BBNode(mVolumes[i]->bounds());
     node->child_l = mVolumes[i];
     node->child_r = NULL;
-    list_vol.add(node);
+    list_vol.push_back(node);
   }
 
   printf("list size: %d\n", list_vol.size());

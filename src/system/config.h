@@ -55,6 +55,7 @@ namespace config {
     extern float surfel_grow;
     extern float lvoxel_size;
     extern float vol_tests_per_sample;
+    extern bool useCache;
 
     // Scene information
     extern Scene *scenePtr;

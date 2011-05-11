@@ -14,17 +14,17 @@ char* RGBColor::str( void ) {
  *----------------------------------------------------------------------------*/
 void RGBColor::clamp( double lower, double upper )
 {
-    //assert(p_r >= 0.0);
-    //assert(p_g >= 0.0);
-    //assert(p_b >= 0.0);
-  if(p_r < 0.0) p_r = 0.0;
-  else if(p_r > 1.0) p_r = 1.0;
+    assert(p_r >= -0.001);
+    assert(p_g >= -0.001);
+    assert(p_b >= -0.001);
+  if(p_r < lower) p_r = lower;
+  else if(p_r > upper) p_r = upper;
 
-  if(p_g < 0.0) p_g = 0.0;
-  else if(p_g > 1.0) p_g = 1.0;
+  if(p_g < lower) p_g = lower;
+  else if(p_g > upper) p_g = upper;
 
-  if(p_b < 0.0) p_b = 0.0;
-  else if(p_b > 1.0) p_b = 1.0;
+  if(p_b < lower) p_b = lower;
+  else if(p_b > upper) p_b = upper;
 }
 
 /*

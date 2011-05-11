@@ -2,6 +2,9 @@
 #define BBNODE_H_
 
 #include "Object.h"
+#include <vector>
+
+using std::vector;
 
 class Surface;
 
@@ -26,6 +29,7 @@ public:
   Vec3 getCenter();
 
   bool intersect(const Ray &ray, Surface* surface);
+  bool intersections(const Ray &ray, vector<Surface> *surfaceList);
 
   int has_right()
   {

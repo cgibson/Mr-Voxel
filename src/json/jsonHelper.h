@@ -312,6 +312,141 @@ LightSource *parseLight(Json::Value val)
   return light;
 }
 
+vector<SmoothTriangle*>
+readObj( string path )
+{
+    FILE *file = fopen( path.c_str(), "rb" );
+    if ( !file )
+    {
+        printf("Failed to load model %s\n", path.c_str());
+        exit(1);
+    }
+
+    Vec3 tmpVec;
+    int v1,v2,v3;
+    int n1,n2,n3;
+    char buffer[300];
+
+    vector<Vec3> vectors;
+    vector<Vec3> normals;
+    vector<SmoothTriangle*> tris;
+    SmoothTriangle *tri;
+
+    int line = 1;
+    
+    while(fgets(buffer, 300, file) != NULL)
+    {
+        
+        if(sscanf(buffer, "v %lf %lf %lf\n", &tmpVec.x(), &tmpVec.z(), &tmpVec.y()) == 3)
+        {
+            vectors.push_back(tmpVec);
+        }else if(sscanf(buffer, "vn %lf %lf %lf\n", &tmpVec.x(), &tmpVec.z(), &tmpVec.y()) == 3)
+        {
+            normals.push_back(tmpVec);
+        }else if(sscanf(buffer, "f %d//%d %d//%d %d//%d\n", &v1, &n1, &v2, &n2, &v3, &n3) == 6)
+        {
+            if((v1-1) < 0 || (v1-1) > (vectors.size()-1) ||
+               (v2-1) < 0 || (v2-1) > (vectors.size()-1) ||
+               (v3-1) < 0 || (v3-1) > (vectors.size()-1) ||
+               (n1-1) < 0 || (n1-1) > (normals.size()-1) ||
+               (n2-1) < 0 || (n2-1) > (normals.size()-1) ||
+               (n3-1) < 0 || (n3-1) > (normals.size()-1))
+            {
+                printf("Error: out-of-bounds vector or normal on line %d\n", line);
+            }else{
+                tri = new SmoothTriangle(vectors[v1-1], normals[n1-1], vectors[v2-1], normals[n2-1], vectors[v3-1], normals[n3-1]);
+                tris.push_back(tri);
+            }
+
+        }else{
+            //printf("Read in unknown on line %d: [%s]\n", line, buffer);
+        }
+        line++;
+    }
+
+    return tris;
+}
+
+void parseModel(Json::Value val, Scene *scene)
+{
+  string file = val["file"].asString();
+  double size = val["size"].asDouble();
+
+  Color pigment = parseColor(val["pigment"]);
+  Finish finish = parseFinish(val["finish"]);
+
+  //TODO: add modifiers
+  //parseModifiers(val["modifiers"], (GeomObj*)plane);
+
+  vector<SmoothTriangle*> tris = readObj(file);
+
+  vector<SmoothTriangle*>::iterator it;
+
+  Vec3 min, max;
+  it = tris.begin();
+
+  BBNode tmpNode;
+  tmpNode = (*it)->construct_bb();
+
+  min = tmpNode.min;
+  max = tmpNode.max;
+
+  // Identify bounds
+  for(;it != tris.end(); it++)
+  {
+      tmpNode = (*it)->construct_bb();
+      if(tmpNode.min.x() < min.x())
+          min.x(tmpNode.min.x());
+      if(tmpNode.min.y() < min.y())
+          min.y(tmpNode.min.y());
+      if(tmpNode.min.z() < min.z())
+          min.z(tmpNode.min.z());
+
+      if(tmpNode.max.x() > max.x())
+          max.x(tmpNode.max.x());
+      if(tmpNode.max.y() > max.y())
+          max.y(tmpNode.max.y());
+      if(tmpNode.max.z() > max.z())
+          max.z(tmpNode.max.z());
+  }
+
+  // Center triangles
+  Vec3 offset = (max + min) / 2.;
+  min = min - offset;
+  max = max - offset;
+
+  float farthest;
+
+  farthest = fabs(min.x());
+  if(farthest < fabs(max.x())) farthest = fabs(max.x());
+
+  if(farthest < fabs(max.y())) farthest = fabs(max.y());
+  if(farthest < fabs(max.y())) farthest = fabs(max.y());
+
+  if(farthest < fabs(max.z())) farthest = fabs(max.z());
+  if(farthest < fabs(max.z())) farthest = fabs(max.z());
+
+  float scaleFactor = size / farthest;
+
+  // Offset/scale triangles
+  for(it = tris.begin(); it != tris.end(); it++)
+  {
+      (*it)->c1(((*it)->c1() - offset) * scaleFactor);
+      (*it)->c2(((*it)->c2() - offset) * scaleFactor);
+      (*it)->c3(((*it)->c3() - offset) * scaleFactor);
+  }
+
+  int count = 0;
+  for(it = tris.begin(); it != tris.end(); it++)
+  {
+      (*it)->finish = finish;
+      (*it)->pigment.rgbf = pigment;
+      //if(count < 50000)
+        scene->addObject((GeomObj*)*it);
+      count++;
+  }
+}
+
 void parseBoxes(Json::Value boxes, Scene *scene)
 {
   for ( int index = 0; index < boxes.size(); ++index )
@@ -348,6 +483,12 @@ void parseLights(Json::Value lights, Scene *scene)
     scene->addLightSource(parseLight( lights[index] ));
 }
 
+void parseModels(Json::Value models, Scene *scene)
+{
+  for ( int index = 0; index < models.size(); ++index )
+    parseModel( models[index], scene );
+}
+
 bool parseWorld(Json::Value val, Scene *scene)
 {
   
@@ -356,6 +497,7 @@ bool parseWorld(Json::Value val, Scene *scene)
     parsePlanes(val["planes"], scene);
     parsePolygons(val["polygons"], scene);
     parseVolumes(val["volumes"], scene);
+    parseModels(val["models"], scene);
     parseLights(val["lights"], scene);
     return true;
 }

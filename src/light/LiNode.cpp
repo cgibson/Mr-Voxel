@@ -258,6 +258,9 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
 
     *t = tmin;
 
+    closest.clamp(0.0, 10000.0);
+    tmp.clamp(0.0, 10000.0);
+
     return closest + tmp;
 }
 
@@ -456,7 +459,7 @@ LiNode::inside(const shared_ptr<LiSample> obj) {
     if( sphere_pos.z() < _min.z()) dmin += sqrt( sphere_pos.z() - _min.z()); else
     if( sphere_pos.z() > _max.z()) dmin += sqrt( sphere_pos.z() - _max.z());
 
-    if( dmin <= obj->area() ) return true;
+    if( dmin <= (obj->area()) ) return true;
 
     return false;
 }

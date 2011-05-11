@@ -18,10 +18,10 @@ namespace this_thread = boost::this_thread;
 /*
  * Default Raycaster Constructor given the current scene
  *----------------------------------------------------------------------------*/
-Raycaster::Raycaster( Scene* scene )
+Raycaster::Raycaster()
 {
   mCastMode = PERSPECTIVE;
-  _camera = *scene->getCamera();
+  _camera = *(config::scenePtr->getCamera());
   Vec3 right = _camera.right;
   Vec3 up = _camera.up;
   double ratio =  right.norm() / up.norm();
@@ -32,7 +32,6 @@ Raycaster::Raycaster( Scene* scene )
   mBottom = -_camera.fov_ratio;
 
   mNear = 0.5;
-  mScene = scene;
   config::background = Color(0.0, 0.0, 0.0, 1.0);
 
 
@@ -42,7 +41,7 @@ Raycaster::Raycaster( Scene* scene )
 /*
  * Default Raycaster Constructor given the current scene with an overrided camera
  *----------------------------------------------------------------------------*/
-Raycaster::Raycaster( Scene* scene, const Camera &cam )
+Raycaster::Raycaster( const Camera &cam )
 {
   mCastMode = PERSPECTIVE;
   _camera = cam;
@@ -56,7 +55,6 @@ Raycaster::Raycaster( Scene* scene, const Camera &cam )
   mBottom = -_camera.fov_ratio;
 
   mNear = 0.5;
-  mScene = scene;
   config::background = Color(0.0, 0.0, 0.0, 1.0);
 
   _matrix = _camera.perspectiveMatrix();
@@ -68,13 +66,15 @@ Raycaster::Raycaster( Scene* scene, const Camera &cam )
  * ---------------------------------------------------------------------------*/
 
 Color Raycaster::sumLights( const Surface &surface, const Ray &ray, int specular, int ambient, bool gather ) {
-    Color result; // resulting color to be returned
+    Color result = 0.; // resulting color to be returned
 
     Vec3 V = ray.direction * -1;
 
     // Gather indirect light
-    result = light::shadeIndirect(surface, gather, ambient);
-
+    if(ambient != 0)
+    {
+        result = light::shadeIndirect(surface, gather, ambient);
+    }
     // Determine diffuse light
     result = result + light::shadeDiffuse(V, surface, specular);
     
@@ -84,7 +84,7 @@ Color Raycaster::sumLights( const Surface &surface, const Ray &ray, int specular
 /*
  * New Handle Intersect Code
  * ---------------------------------------------------------------------------*/
-Color Raycaster::handleIntersect( const Ray &ray, int depth )
+Color Raycaster::handleIntersect( const Ray &ray, int depth, bool ambientTest = true, bool attenuateDist = false )
 {
     Color color;
 
@@ -96,11 +96,11 @@ Color Raycaster::handleIntersect( const Ray &ray, int depth )
     }
 
     // Check for intersect.  Throw away ray if no intersect
-    if( !mScene->intersect(ray, &surface) ) {
+    if( !config::scenePtr->intersect(ray, &surface) ) {
         Color vol_color(0.);
         Color vol_transmittance(1.);
 
-        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance );
+        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, INFINITY), &vol_transmittance, ambientTest );
 
         return (config::background * vol_transmittance) + vol_color;
     }
@@ -123,7 +123,7 @@ Color Raycaster::handleIntersect( const Ray &ray, int depth )
             surface.n = surface.n * -1;
         }
         
-        color = color + sumLights(surface, ray, 1, 1, true);
+        color = color + sumLights(surface, ray, 1, ambientTest ? 1 : 0, true);
 
         int success;
         Vec3 Drefract;
@@ -159,7 +159,7 @@ Color Raycaster::handleIntersect( const Ray &ray, int depth )
         Color vol_color(0.);
         Color vol_transmittance(1.);
 
-        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance );
+        vol_color = config::volume_integrator->Li( Ray(ray.start, ray.direction, 0.0, surface.t), &vol_transmittance, ambientTest );
         
         //return color + reflect_color * reflection;
         if(!success && surface.finish.refraction ) {
@@ -168,6 +168,13 @@ Color Raycaster::handleIntersect( const Ray &ray, int depth )
 
         color = color * (1 - surface.color.f()) + (color_reflect * surface.finish.reflection)
                + (color_refract * surface.color.f());
+
+        if(attenuateDist)
+        {
+            float Att = 1. / (config::atten_k * pow(surface.t, 2));
+            Att = (Att > 1.0) ? 1.0 : Att;
+            color = color * Att;
+        }
 
       Color tmp = (color * vol_transmittance) + (vol_color);
 
@@ -220,13 +227,13 @@ Color Raycaster::cast( int x, int y, int width, int height )
         case TARGET_LIGHT_CACHE_RESULT:
         {
             Color Tr = 1.;
-            color = mScene->lightCache()->gather(ray, &t, &Tr);
+            color = config::scenePtr->lightCache()->gather(ray, &t, &Tr);
         }
             break;
         case TARGET_LIGHT_CACHE_TEST_COUNT:
         {
             int testCount;
-            mScene->lightCache()->getTestCount(ray, &testCount);
+            config::scenePtr->lightCache()->getTestCount(ray, &testCount);
             testCount = (testCount < 255) ? testCount : 255;
             //printf("TEST: %d\n", testCount);
             color = (float)testCount / 50.;
@@ -245,7 +252,7 @@ Color Raycaster::cast( int x, int y, int width, int height )
 }
 
 int Raycaster::iterate( Ray *ray, Surface *surface) {
-    if(mScene->intersect(*ray, surface)) {
+    if(config::scenePtr->intersect(*ray, surface)) {
         (*ray).start = (*ray)(surface->t);
         return 1;
     }
@@ -350,6 +357,26 @@ int Raycaster::raycast(
   return 0;
 }
 
+void
+Raycaster::addSurfel(const Surface &surf, const Ray &ray)
+{
+    const Vec3 surfel_p = ray(surf.t);
+    const Vec3 surfel_n = surf.n;
+    const Color color = sumLights(surf, ray, 0, 0, false);
+    const float invvdotn = 1. - abs(surf.n.dot(ray.direction));
+
+    float growth = invvdotn;// + (surf.t / 20.);
+    //growth = (growth > 1.0) ? 1.0 : growth;
+    
+
+    float size = config::surfel_size + (config::surfel_size * config::surfel_grow * growth);
+
+    shared_ptr<Surfel> surfel_ptr = shared_ptr<Surfel>(new Surfel(surfel_p, surfel_n, color, size));
+
+    config::scenePtr->addSurfel(surfel_ptr);
+
+}
+
 /*
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
@@ -364,12 +391,12 @@ int Raycaster::surfelCast(
   Color color;
   int x, y;
 
-  Surface surf;
   Ray ray;
+  int surfelCount = 0;
 
-  float vdotn;
+  Surface surf;
 
-  mScene->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
+  config::scenePtr->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
   for( x = 0; x < size.width; x+=step_x ) {
 
@@ -379,17 +406,26 @@ int Raycaster::surfelCast(
       
       color = 0;
 
-      while(mScene->intersect(ray, &surf)) {
+      vector<Surface> isectList;
+
+      vector<Surface>::iterator surfit;
+
+
+      /*
+      if(!config::scenePtr->intersections(ray, &isectList))
+          continue;
+      for(surfit = isectList.begin(); surfit != isectList.end(); surfit++) {
+          surf = *surfit;
+       //*/
+      while(config::scenePtr->intersect(ray, &surf)) {
 
             // Invert backwards normals
             if(surf.objPtr->getType() == TRIANGLE && surf.n.dot(ray.direction * -1) < 0) {
                 surf.n = surf.n * -1;
             }
 
-            vdotn = abs(surf.n.dot(ray.direction));
-
-          color = sumLights(surf, ray, 0, 0, false);
-          mScene->addSurfel(shared_ptr<Surfel>(new Surfel(ray(surf.t), surf.n, color, config::surfel_size + (config::surfel_size * config::surfel_grow * (1 - vdotn)))));
+          addSurfel(surf, ray);
+          surfelCount++;
           ray.start = ray(surf.t + 0.1);
           
       }
@@ -399,8 +435,8 @@ int Raycaster::surfelCast(
 
 
 
-    const int numVolumes = mScene->getVolumeCount();
-    VolumeRegion **volumes = mScene->getVolumes();
+    const int numVolumes = config::scenePtr->getVolumeCount();
+    VolumeRegion **volumes = config::scenePtr->getVolumes();
 
     VolumeRegion *volume;
     Vec3 min, max;
@@ -420,6 +456,8 @@ int Raycaster::surfelCast(
     LightSource* light;
 
     Surface surface;
+
+    int lvoxelCount = 0;
 
     if(numVolumes > 0) {
 
@@ -483,7 +521,8 @@ int Raycaster::surfelCast(
                             }
 
 
-                            mScene->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), TrTot, sig_t, sig_s, radius)));
+                            config::scenePtr->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), TrTot, sig_t, sig_s, radius)));
+                            lvoxelCount++;
                         }
                     }
 
@@ -492,7 +531,10 @@ int Raycaster::surfelCast(
         }
     }
 
-  mScene->lightCache()->postprocess();
+  printf("Lvoxel Count: %d\n", lvoxelCount);
+  printf("surfel Count: %d\n", surfelCount);
+
+  config::scenePtr->lightCache()->postprocess();
 
   return 0;
 }

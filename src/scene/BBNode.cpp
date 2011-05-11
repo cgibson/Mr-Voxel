@@ -404,3 +404,60 @@ BBNode::intersect(const Ray & ray, Surface* surface) {
         return false;
     }
 }
+
+bool
+BBNode::intersections(const Ray & ray, vector<Surface> *surfaceList) {
+
+    //vector<Surface*> list_l, list_r;
+    double t = 0;
+    Vec3 n;
+    int hit;
+    int hit_l = false;
+    int hit_r = false;
+    double epsilon = 0.001f;
+    TYPE type = getType();
+
+    // if the object is a node
+    if(type == NODE) {
+        // check to make sure it hits
+        hit = test_intersect(ray, &t, &n);
+
+        // return false if no hit, no need to delve deeper
+        if(!hit)
+            return false;
+
+        // recurse into the left child
+        if(has_left()) {
+            if(child_l->getType() == NODE) {
+                hit_l = static_cast<BBNode*>(child_l)->intersections(ray, surfaceList);
+            }else{
+                Surface surface;
+                if(hit_l = child_intersect(ray, &surface, child_l))
+                    surfaceList->push_back(surface);
+            }
+        }
+
+        // recurse into the right child
+        if(has_right()) {
+            if(child_r->getType() == NODE) {
+                hit_r = static_cast<BBNode*>(child_r)->intersections(ray, surfaceList);
+            }else{
+                Surface surface;
+                if(hit_r = child_intersect(ray, &surface, child_r))
+                    surfaceList->push_back(surface);
+            }
+        }
+        if(!hit_l && !hit_r)
+        {
+            return false;
+        }
+        return true;
+
+        // otherwise, the current node is a scene object
+    }
+    else {
+        printf("ERROR: Deprecated code\n");
+        exit(1);
+        return false;
+    }
+}

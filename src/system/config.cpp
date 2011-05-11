@@ -43,6 +43,10 @@ namespace config {
             {
                 multi_threading = false;
             }
+            else if( !(tmpVal = testCommand(argv, &current, "-NC", "--nocache", false)).empty() )
+            {
+                useCache = false;
+            }
             else if( !(tmpVal = testCommand(argv, &current, "-A", "--ambient")).empty() )
             {
                 if(tmpVal == "FULL")
@@ -177,9 +181,10 @@ namespace config {
     int hemisphere_t = 8;
     Dimension light_sample_resolution = {800, 600};
     float surfel_size = 0.02;
-    float surfel_grow = 8.0;
+    float surfel_grow = 3.0;
     float vol_tests_per_sample = 4;
     float lvoxel_size = 0.125;
+    bool useCache = true;
 
     // Scene information
     Scene *scenePtr = NULL;

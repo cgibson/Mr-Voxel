@@ -134,6 +134,7 @@ public:
   LiNode* initCache(Vec3 min, Vec3 max){ mLiCache = new LiNode(min, max); }
 
   bool intersect(const Ray &ray, Surface * const surface);
+  bool intersections(const Ray &ray, vector<Surface> *surfaceList);
 
 private:
 

@@ -125,9 +125,36 @@ public:
   virtual BBNode construct_bb( void );
   virtual inline TYPE getType( void ){ return TRIANGLE; }
 
+  inline void c1(Vec3 c){ corner1 = c; }
+  inline void c2(Vec3 c){ corner2 = c; }
+  inline void c3(Vec3 c){ corner3 = c; }
+
+  inline Vec3 c1(){ return corner1; }
+  inline Vec3 c2(){ return corner2; }
+  inline Vec3 c3(){ return corner3; }
+
+protected:
   Vec3 corner1;
   Vec3 corner2;
   Vec3 corner3;
+};
+
+class SmoothTriangle : public Triangle{
+public:
+  SmoothTriangle( Vec3 c1, Vec3 n1, Vec3 c2, Vec3 n2, Vec3 c3, Vec3 n3);
+  virtual Vec3 get_normal( Vec3 pt );
+  virtual char* str( void );
+
+  inline Vec3 normal1(){ return _n1; }
+  inline Vec3 normal2(){ return _n2; }
+  inline Vec3 normal3(){ return _n3; }
+
+  inline void normal1(Vec3 n){ _n1 = n; }
+  inline void normal2(Vec3 n){ _n2 = n; }
+  inline void normal3(Vec3 n){ _n3 = n; }
+
+private:
+  Vec3 _n1, _n2, _n3;
 };
 
 /*

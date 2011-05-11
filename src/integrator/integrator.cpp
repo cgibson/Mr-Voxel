@@ -1,8 +1,9 @@
 #include "integrator.h"
+#include "../raycast.h"
 #include "../sample/Sampler.h"
 
 Spectrum
-VolumeIntegrator::Li(Ray ray, Spectrum *T) {
+VolumeIntegrator::Li(Ray ray, Spectrum *T, bool ambientTest = true) {
 
     int numSamples;
 
@@ -104,7 +105,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
         
         Color AdTot = 0.;
 
-        if(config::ambience == AMBIENT_FULL && true && !ss.isBlack())
+        if(config::ambience == AMBIENT_FULL && !ss.isBlack() && ambientTest)
         {
             int sAmt;
             if(Tr.toTrans() > 0.8) {
@@ -130,7 +131,13 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T) {
                     indirRay.direction.norm();
                     double tt;
                     Color aTr = 1.;
-                    Spectrum Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
+                    Spectrum Ad;
+                    if(config::useCache)
+                    {
+                        Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
+                    }else{
+                        Ad = Raycaster::handleIntersect(indirRay, 1, false, true);
+                    }
                     AdTot = AdTot + Ad * ss;// * volumes[0]->phase(p, w, wL * 1);
                 }
 
