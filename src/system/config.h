@@ -50,11 +50,13 @@ namespace config {
     extern sample_t hemisphere_sampler;
     extern int hemisphere_u;
     extern int hemisphere_t;
+    extern int volume_samples;
+    extern int lvoxel_samples;
     extern Dimension light_sample_resolution;
     extern float surfel_size;
     extern float surfel_grow;
     extern float lvoxel_size;
-    extern float vol_tests_per_sample;
+    extern bool useLvoxels;
     extern bool useCache;
 
     // Scene information

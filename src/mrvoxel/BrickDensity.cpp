@@ -1,4 +1,5 @@
 #include "BrickDensity.h"
+#include "voxelbox/VoxelBox.h"
 
 BrickDensityRegion::BrickDensityRegion(
 		Vec3 min, Vec3 max, Spectrum absorbtion,Spectrum scatter,
@@ -22,6 +23,23 @@ void BrickDensityRegion::set(int i, int j, int k, float val) {
 
 void BrickDensityRegion::loadCT(string file, Vec3 file_res, Vec3 vol_res) {
     loadCT(file, file_res, vol_res, 0, USHRT_MAX);
+
+}
+
+void BrickDensityRegion::loadBrickFileFormat(string file, float iso_min, float iso_max) {
+    m_brickData = VoxelBox::load(file);
+
+    for(int i= 0; i < m_brickData.size_x(); i++) {
+        for(int j= 0; j < m_brickData.size_y(); j++) {
+            for(int k= 0; k < m_brickData.size_z(); k++) {
+                Voxel *v = m_brickData(i,j,k);
+                float density = (*v)(DENSITY);
+                density = (density < iso_min) ? 0 : density;
+                density = (density > iso_max) ? 0 : density;
+                v->set(0, density * m_density_mult);
+            }
+        }
+    }
 
 }
 

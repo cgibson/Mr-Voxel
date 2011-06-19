@@ -23,20 +23,17 @@ public:
   Color initialCast( const Ray &ray, int depth );
   void addSurfel(const Surface &surf, const Ray &ray);
   int raycast( 
-            int start_x,
-            int start_y,
-            int end_x,
-            int end_y,
             int width,
             int height,
-            int depth,
             ImageWriter *writer);
 
-  int surfelCast(
+  void surfelCast(
             const Dimension &size,
             int step_x,
             int step_y,
             ImageWriter *writer);
+
+  Surfel* genSurfel(const Surface &surf, const Ray &ray);
 private:
   int mDepth;
   int mCastMode;

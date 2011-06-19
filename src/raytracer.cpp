@@ -16,52 +16,13 @@
 #include "json/jsonparser.h"
 #include "system/config.h"
 #include "integrator/integrator.h"
+#include <omp.h>
 
 using namespace std;
 using namespace boost;
 using namespace sys;
 
 Raycaster *raycaster;
-
-struct raytracer
-{
-    raytracer(int start_x, int start_y, int end_x, int end_y, int width,
-              int height, int depth, ImageWriter *writer, int threadId)
-        : m_start_x(start_x)
-        , m_start_y(start_y)
-        , m_end_x(end_x)
-        , m_end_y(end_y)
-        , m_width(width)
-        , m_height(height)
-        , m_depth(depth)
-        , m_writer(writer)
-    	, m_threadId(threadId)
-    {
-    }
-    
-    void operator()()
-    {
-        //printf("Thread [%d] STARTED\n", m_threadId);
-        //printf("\tWith dimensions: [%d,%d] to [%d,%d]\n", m_start_x,m_start_y,m_end_x,m_end_y);
-       raycaster->raycast( m_start_x, 
-               m_start_y,
-               m_end_x,
-               m_end_y,
-               m_width,
-               m_height,
-               m_depth,
-               m_writer
-       );
-       //printf("Thread [%d] FINISHED\n", m_threadId);
-    }
-
-    const int m_start_x, m_start_y;
-    const int m_end_x, m_end_y;
-    const int m_width, m_height;
-    const int m_depth;
-    const int m_threadId;
-    ImageWriter *m_writer;
-};
 
 int main(int argc, char* argv[])
 {
@@ -88,84 +49,39 @@ int main(int argc, char* argv[])
   
   raycaster = new Raycaster();
 
-  int cores;
-  int corethreadcount;
-  int jobs;
   Dimension img_size = config::image_resolution;
-
-  if(config::multi_threading) {
-      cores = config::core_count;
-      corethreadcount = config::core_thread_count;
-      jobs = config::thread_jobs;
-  }else{
-      cores = 1;
-      corethreadcount = 1;
-      jobs = 1;
-  }
-
-  raytracer *rtrcs[jobs];
-  thread thrds[jobs];
-  
-  int start = 0;
-  int end = 0;
-
 
   printf("|0...............................................100|\n|");
 
-  // Hard coding light cast camera for now.
-  Camera lightCamera;
-  lightCamera.fov = (45. / 360.) * 2 * PI;
-  lightCamera.fov_ratio = sin(lightCamera.fov / 2.0);
-  //lightCamera.location = Vec3(0, 3, -10);
-  //lightCamera.look_at = Vec3(0, 3, 0);
-  lightCamera.location = Vec3(-4,0,0);
-  lightCamera.look_at = Vec3(5,0,0);
-  lightCamera.right = Vec3(1.33, 0, 0);
-  lightCamera.up = Vec3(0,1,0);
 
-  Raycaster lightCast(lightCamera);
+    if((config::ambience == AMBIENT_FULL) && config::useCache)
+    {
 
-  if((config::ambience == AMBIENT_FULL) && config::useCache)
-  {
-    //while( end < jobs )
-    //{
-    //  start = end;
-    //  end = ((end + corse*corethreadcount) < jobs ? (end + cores*corethreadcount) : jobs);
-    //  for(int i = start; i < end-1; i++) {
-        //lghts[i] = new lightcaster( 
-    //  }
-    //}
-    lightCast.surfelCast(config::light_sample_resolution, 1, 1, &writer);
-  }
 
-  end = 0;
-  start = 0;
+        config::scenePtr->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
 
-  while( end < jobs)
-  {
-	  start = end;
-	  end = ((end + cores*corethreadcount) < jobs ? (end + cores*corethreadcount) : jobs);
+        // Hard coding light cast camera for now.
+        Camera lightCamera;
+        lightCamera.fov = (60. / 360.) * 2 * PI;
+        lightCamera.fov_ratio = sin(lightCamera.fov / 2.0);
+        lightCamera.location = Vec3(0, 3, -10);
+        lightCamera.look_at = Vec3(0, 3, 0);
+        //lightCamera.location = Vec3(-4,0,0);
+        //lightCamera.look_at = Vec3(5,0,0);
+        lightCamera.right = Vec3(1.33, 0, 0);
+        lightCamera.up = Vec3(0,1,0);
 
-	  printf("Starting JOBS %d - %d\n", start, end-1);
+        Raycaster lightCast(lightCamera);
+        lightCast.surfelCast(config::light_sample_resolution, 1, 1, &writer);
+    }
 
-	  for(int i = start; i < end-1; i++) {
-		//printf("CREATED JOB [%d]\n", i);
-		rtrcs[i] = new raytracer( 0, i * img_size.height / jobs, img_size.width,
-				(i + 1) * img_size.height / jobs, img_size.width, img_size.height, config::render_depth, &writer, i );
-		thrds[i] = thread{*rtrcs[i]};
-	  }
+  LiNode* root = config::scenePtr->lightCache();
 
-		rtrcs[end-1] = new raytracer( 0, (end-1) * img_size.height / jobs, img_size.width,
-				(end) * img_size.height / jobs, img_size.width, img_size.height, config::render_depth, &writer, end-1 );
-	  (*rtrcs[end-1])();
+  if(config::ambience == AMBIENT_FULL && config::useCache)
+    printf("LIGHT CACHE SIZE: %d\n", root->size_of());
 
-	  for(int i = start; i < end-1; i++) {
-		//printf("Thread[%d] prepare\n", i);
-		//thrds[i]->interrupt();
-		thrds[i].join();
-		//printf("Thread[%d] join\n", i);
-	  }
-  }
+  raycaster->raycast(img_size.width, img_size.height, &writer);
+
   
   printf("|\n");
   

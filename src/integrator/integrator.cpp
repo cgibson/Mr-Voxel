@@ -51,6 +51,8 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T, bool ambientTest = true) {
     Vec3 pPrev;
     Vec3 w = ray.direction * -1;
 
+    sample::SphericalSamplerRD sampler = sample::SphericalSamplerRD(16,16);
+
     Spectrum Tr(1.);
     for( int i = 0; i < numSamples; ++i, t0 += step )
     {
@@ -101,7 +103,7 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T, bool ambientTest = true) {
 
         }
 
-        float pdf = 6. / (1. * PI);
+        float pdf = 2. / (1. * PI);
         
         Color AdTot = 0.;
 
@@ -109,39 +111,43 @@ VolumeIntegrator::Li(Ray ray, Spectrum *T, bool ambientTest = true) {
         {
             int sAmt;
             if(Tr.toTrans() > 0.8) {
-                sAmt = 16;
+                sAmt = config::volume_samples;
             }else if(Tr.toTrans() > 0.5) {
-                sAmt = 8;
+                sAmt = config::volume_samples >> 1;
             }else if(Tr.toTrans() > 0.3) {
-                sAmt = 4;
+                sAmt = config::volume_samples >> 2;
             }else{
-                sAmt = 2;
+                sAmt = config::volume_samples >> 3;
             }
 
-            if(sAmt > 0)
+            if(sAmt > 0 && config::useLvoxels)
             {
-                sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt, true);
-
+                //sample::SphericalSampler sampler = sample::SphericalSampler(sAmt,sAmt);
                 Vec3 smpl;
-                while(sampler.getSample(&smpl))
+                Color aTr;
+                Spectrum Ad;
+                Ray indirRay;
+                double tt;
+                //while(sampler.getSample(&smpl))
+                #pragma omp parallel for private(Ad, tt, aTr, indirRay) shared(AdTot) schedule(dynamic, 4)
+                for(int i = 0; i < sAmt; i++)
                 {
-                    Ray indirRay;
+                    sampler.getSample(&smpl);
                     // Indirect lighting
                     indirRay = Ray(p, smpl);
                     indirRay.direction.norm();
-                    double tt;
-                    Color aTr = 1.;
-                    Spectrum Ad;
+                    aTr = 1.;
                     if(config::useCache)
                     {
                         Ad = config::scenePtr->lightCache()->gather(indirRay, &tt, &aTr);
                     }else{
                         Ad = Raycaster::handleIntersect(indirRay, 1, false, true);
                     }
+                    #pragma omp critical
                     AdTot = AdTot + Ad * ss;// * volumes[0]->phase(p, w, wL * 1);
                 }
 
-                AdTot = AdTot / (pdf * sAmt * sAmt);
+                AdTot = AdTot / (pdf * sAmt);
             }
             
         }

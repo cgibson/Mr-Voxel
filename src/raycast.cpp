@@ -4,6 +4,7 @@
 #include "raycast.h"
 #include "light/brdf.h"
 #include "integrator/integrator.h"
+#include <omp.h>
 
 //using namespace light;
 using namespace sys;
@@ -291,13 +292,8 @@ void Raycaster::cam2World( int x, int y, int width, int height, Ray *external_ra
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
 int Raycaster::raycast(
-        int start_x,
-        int start_y,
-        int end_x,
-        int end_y,
         int width,
         int height,
-        int depth,
         ImageWriter *writer)
 {
   const int rays = width * height;
@@ -309,23 +305,38 @@ int Raycaster::raycast(
   double low = -1;
   double high = -1;
   int x, y;
-  mDepth = depth;
+  mDepth = config::render_depth;
 
-  for( x = start_x; x < end_x; x++ ) {
-
-    //boost::xtime xt;
-    //boost::xtime_get(&xt, boost::TIME_UTC);
-    //xt.nsec += 10000;
-    this_thread::sleep(boost::posix_time::milliseconds(1));
-
-    for( y = start_y; y < end_y; y++ ) {
+    #define CHUNKSIZE 5
+  //*
+    #pragma omp parallel for shared(percent_done,rays_done,writer,print_percent,high,low),private(y,color), schedule(dynamic, CHUNKSIZE), collapse(1)
+/*
+  for( int i = 0; i < width * height; i++) {
+      x = (i / height);
+      y = (i % height);
+//*/
+  for( x = 0; x < width; x++ ) {
+    for( y = 0; y < height; y++ ) {
 
       if(low == -1) {
           low = color.r();
           high = color.r();
       }
       color = cast(x, y, width, height);
-
+      /*
+      int th_id = omp_get_thread_num();
+      switch(th_id % 5) {
+          case 0: color = Color(1,0,0);
+              break;
+          case 1: color = Color(1,1,0);
+              break;
+          case 2: color = Color(0,1,0);
+              break;
+          case 3: color = Color(0,1,1);
+              break;
+          case 4: color = Color(0,0,1);
+              break;
+      }//*/
       writer->setPixel(x, y,
               color.r(),
               color.g(),
@@ -354,6 +365,7 @@ int Raycaster::raycast(
       }
     }
   }
+
   return 0;
 }
 
@@ -367,7 +379,7 @@ Raycaster::addSurfel(const Surface &surf, const Ray &ray)
 
     float growth = invvdotn;// + (surf.t / 20.);
     //growth = (growth > 1.0) ? 1.0 : growth;
-    
+
 
     float size = config::surfel_size + (config::surfel_size * config::surfel_grow * growth);
 
@@ -377,46 +389,48 @@ Raycaster::addSurfel(const Surface &surf, const Ray &ray)
 
 }
 
+Surfel*
+Raycaster::genSurfel(const Surface &surf, const Ray &ray)
+{
+    const Vec3 surfel_p = ray(surf.t);
+    const Vec3 surfel_n = surf.n;
+    const Color color = sumLights(surf, ray, 0, 0, false);
+    const float invvdotn = 1. - abs(surf.n.dot(ray.direction));
+
+    float growth = invvdotn;// + (surf.t / 20.);
+    //growth = (growth > 1.0) ? 1.0 : growth;
+
+
+    float size = config::surfel_size + (config::surfel_size * config::surfel_grow * growth);
+
+    return new Surfel(surfel_p, surfel_n, color, size);
+
+}
+
 /*
  * Default Raycast Constructor with given width, height and filename
  *----------------------------------------------------------------------------*/
-int Raycaster::surfelCast(
+void Raycaster::surfelCast(
         const Dimension &size,
         int step_x,
         int step_y,
         ImageWriter *writer)
 {
 
-  //writer.fill( 0, 0, 0, 0 );
-  Color color;
-  int x, y;
-
   Ray ray;
   int surfelCount = 0;
 
   Surface surf;
 
-  config::scenePtr->initCache(Vec3(-15, -15, -15), Vec3(15, 15, 15));
+    #define CHUNKSIZE 5
+  //*
+    #pragma omp parallel for private(surf, ray), schedule(dynamic, CHUNKSIZE)
+  for( int x = 0; x < size.width; x+=step_x ) {
 
-  for( x = 0; x < size.width; x+=step_x ) {
-
-    for( y = 0; y < size.height; y+=step_y ) {
+    for( int y = 0; y < size.height; y+=step_y ) {
 
       cam2World(x, y, size.width, size.height, &ray);
-      
-      color = 0;
 
-      vector<Surface> isectList;
-
-      vector<Surface>::iterator surfit;
-
-
-      /*
-      if(!config::scenePtr->intersections(ray, &isectList))
-          continue;
-      for(surfit = isectList.begin(); surfit != isectList.end(); surfit++) {
-          surf = *surfit;
-       //*/
       while(config::scenePtr->intersect(ray, &surf)) {
 
             // Invert backwards normals
@@ -424,14 +438,31 @@ int Raycaster::surfelCast(
                 surf.n = surf.n * -1;
             }
 
-          addSurfel(surf, ray);
+
+            //*
+          #pragma omp critical
+            {
+              //surfel_ptr = genSurfel(surf, ray);
+              //surfelList.push_back(surfel_ptr);
+              addSurfel(surf, ray);
+            }
+            //*/
+              //addSurfel(surf, ray);
+              //surfel_ptr = genSurfel(surf, ray);
+              //surfelList.push_back(surfel_ptr);
+
+          #pragma omp atomic
           surfelCount++;
           ray.start = ray(surf.t + 0.1);
           
       }
-
     }
   }
+
+  //for(vector<Surfel* >::iterator surfit = surfelList.begin(); surfit != surfelList.end(); surfit++)
+  //{
+ //     config::scenePtr->addSurfel(shared_ptr<Surfel>(*surfit));
+//  }
 
 
 
@@ -442,8 +473,8 @@ int Raycaster::surfelCast(
     Vec3 min, max;
 
     float sample_size = config::lvoxel_size;
-    float test_count = config::vol_tests_per_sample * config::vol_tests_per_sample * config::vol_tests_per_sample;
-    double test_step = (double)sample_size / ((double)config::vol_tests_per_sample);
+    float test_count = config::lvoxel_samples * config::lvoxel_samples * config::lvoxel_samples;
+    double test_step = (double)sample_size / ((double)config::lvoxel_samples);
     assert(test_step > 0.0);
     float sample_size_div_two = sample_size * 0.5;
     float radius = sqrt(sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two + sample_size_div_two * sample_size_div_two);
@@ -459,14 +490,19 @@ int Raycaster::surfelCast(
 
     int lvoxelCount = 0;
 
-    if(numVolumes > 0) {
+    if(numVolumes > 0 && config::useLvoxels) {
 
         // ADD all volume representations to the scene
         for(int i = 0; i < numVolumes; i++) {
             volume = volumes[i];
             min = volume->bounds().min;
             max = volume->bounds().max;
-            for(float x = min.x(); x < max.x(); x += sample_size) {
+
+            int x_samples = (int)((max.x() - min.x()) / sample_size);
+            
+            #pragma omp parallel for private(shadow_ray, Tr, TrTot, light, surface), schedule(dynamic, CHUNKSIZE)
+            for(int i = 0; i < x_samples; i++) {
+                float x = min.x() + i * sample_size;
                 for(float y = min.y(); y < max.y(); y += sample_size) {
                     for(float z = min.z(); z < max.z(); z += sample_size) {
 
@@ -521,7 +557,10 @@ int Raycaster::surfelCast(
                             }
 
 
+                            #pragma omp critical
                             config::scenePtr->addLVoxel(shared_ptr<LVoxel>(new LVoxel(p, Color(0.1,0.1,0.1), TrTot, sig_t, sig_s, radius)));
+
+                            #pragma omp atomic
                             lvoxelCount++;
                         }
                     }
@@ -534,7 +573,11 @@ int Raycaster::surfelCast(
   printf("Lvoxel Count: %d\n", lvoxelCount);
   printf("surfel Count: %d\n", surfelCount);
 
-  config::scenePtr->lightCache()->postprocess();
+  printf("LVOXEL SIZEOF: %lu\n", sizeof(LVoxel));
+  printf("SURFEL SIZEOF: %lu\n", sizeof(Surfel));
 
-  return 0;
+  printf("LVOXEL DATA SIZE: %lu\n", lvoxelCount * sizeof(LVoxel));
+  printf("SURFEL DATA SIZE: %lu\n", surfelCount * sizeof(Surfel));
+
+  config::scenePtr->lightCache()->postprocess();
 }

@@ -7,7 +7,7 @@
 #include <limits.h>
 #include "VolumeRegion.h"
 #include "../ocean/SciDataParser.h"
-#include "Brick.h"
+#include "voxelbox/Brick.h"
 
 class BrickDensityRegion : public DensityRegion {
 public:
@@ -34,6 +34,7 @@ public:
     float interpolate( float x, float y, float z, VoxVal val );
     void loadCT(string file, Vec3 file_res, Vec3 vol_res);
     void loadCT(string file, Vec3 file_res, Vec3 vol_res, int iso_min, int iso_max);
+    void loadBrickFileFormat(string file, float iso_min, float iso_max);
     void loadOceanData(string file, Vec3 vol_res, int iso_min, int iso_max);
     void set(int i, int j, int k, float val);
 

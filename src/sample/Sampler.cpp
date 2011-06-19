@@ -29,7 +29,7 @@ namespace sample{
     }
 
     // Basically from PBRv2
-    inline Vec3 sampleToSCoord(float us, float ts, float min_u, float max_u, float min_t, float max_t) {
+    inline Vec3 sampleToSCoord(float us, float ts) {
 
         const float z = 1.f - 2.f * us;
         const float r = sqrt(max(0.f, 1.f - z * z));
@@ -39,6 +39,20 @@ namespace sample{
 
         return Vec3(x, y, z);
 
+    }
+
+    inline void bind_val(float *val, float lbound, float ubound) {
+        if(ubound < lbound) {
+            float tmp = ubound;
+            ubound = lbound;
+            lbound = tmp;
+        }
+        
+        float diff = ubound - lbound;
+
+        // Assuming min and max are 0 and 1 respectively for value
+        (*val) *= diff;
+        (*val) += lbound;
     }
 
 
@@ -103,7 +117,10 @@ namespace sample{
         const float jitter_us = (drand48() - 0.f) * (1. / _max_us);
         const float jitter_ts = (drand48() - 0.f) * (1. / _max_ts);
 
-        const Vec3 tmpSample = sampleToHCoord((_us / (float)_max_us) + jitter_us, (_ts / (float)_max_ts) + jitter_ts);
+        float us_val = (_us / (float)_max_us) + jitter_us;
+        float ts_val = (_ts / (float)_max_ts) + jitter_ts;
+
+        const Vec3 tmpSample = sampleToHCoord(us_val, ts_val);
 
         *sample = _matrix * Vec4(tmpSample,0);
         sample->norm();
@@ -118,8 +135,8 @@ namespace sample{
         return true;
     }
 
-    SphericalSampler::SphericalSampler(int us, int ts, float min_u, float max_u, float min_t, float max_t)
-        : _min_u(min_u), _max_u(max_u), _min_t(min_t), _max_t(max_t), _max_us(us), _max_ts(ts), _us(0), _ts(0) {
+    SphericalSampler::SphericalSampler(int us, int ts, float lbound_us, float ubound_us, float lbound_ts, float ubound_ts)
+        : _lbound_us(lbound_us), _ubound_us(ubound_us), _lbound_ts(lbound_ts), _ubound_ts(ubound_ts), _max_us(us), _max_ts(ts), _us(0), _ts(0) {
 
     }
 
@@ -138,7 +155,13 @@ namespace sample{
         const float jitter_us = (drand48() - 0.f) * (1. / _max_us);
         const float jitter_ts = (drand48() - 0.f) * (1. / _max_ts);
 
-        const Vec3 tmpSample = sampleToSCoord((_us / (float)_max_us) + jitter_us, (_ts / (float)_max_ts) + jitter_ts, _min_u, _max_u, _min_t, _max_t);
+        float us_val = (_us / (float)_max_us) + jitter_us;
+        float ts_val = (_ts / (float)_max_ts) + jitter_ts;
+
+        bind_val(&us_val, _lbound_us, _ubound_us);
+        bind_val(&ts_val, _lbound_ts, _ubound_ts);
+
+        const Vec3 tmpSample = sampleToSCoord(us_val, ts_val);
 
         *sample = tmpSample;
         sample->norm();
@@ -151,6 +174,46 @@ namespace sample{
 
         return true;
     }
+
+
+    SphericalSamplerRD::SphericalSamplerRD(int us, int ts):_us_per_sampler(us / 4), _ts_per_sampler(ts / 4)
+    {
+        samplers[0] = new SphericalSampler(_us_per_sampler, _ts_per_sampler, 0.0, 0.5, 0.0, 0.5);
+        samplers[1] = new SphericalSampler(_us_per_sampler, _ts_per_sampler, 0.5, 1.0, 0.0, 0.5);
+        samplers[2] = new SphericalSampler(_us_per_sampler, _ts_per_sampler, 0.5, 1.0, 0.5, 1.0);
+        samplers[3] = new SphericalSampler(_us_per_sampler, _ts_per_sampler, 0.0, 0.5, 0.5, 1.0);
+    }
+
+    void
+    SphericalSamplerRD::reset()
+    {
+        samplers[0]->reset();
+        samplers[1]->reset();
+        samplers[2]->reset();
+        samplers[3]->reset();
+    }
+
+    bool
+    SphericalSamplerRD::getSample(Vec3 *sample)
+    {
+        int sample_index = (int)(drand48() * 4.0);
+        if(!samplers[sample_index]->getSample(sample))
+        {
+            samplers[sample_index]->reset();
+            samplers[sample_index]->getSample(sample);
+        }
+        return true;
+    }
+
+
+    SphericalSamplerRD::~SphericalSamplerRD()
+    {
+        delete samplers[0];
+        delete samplers[1];
+        delete samplers[2];
+        delete samplers[3];
+    }
+
 }
 
     //SphericalSampler::SphericalSampler(int us, int ts, bool random)

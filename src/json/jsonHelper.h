@@ -247,6 +247,22 @@ VolumeRegion *parseVolume(Json::Value val)
 
       (dynamic_cast<BrickDensityRegion*>(region))->loadCT(file, file_res, vol_res, iso_min, iso_max);
 
+  }else if(!type.compare("brickfile")) {
+      double density = val["density"].asDouble();
+      Color absorbtion = parseColor(val["absorbtion"]);
+      Color scatter = parseColor(val["scatter"]);
+      Color emitt = parseColor(val["emitt"]);
+      double greenstein = val["greenstein"].asDouble();
+
+      string file = val["file"].asString();
+
+      double iso_min = val["iso_min"].asDouble();
+      double iso_max = val["iso_max"].asDouble();
+      
+        region = new BrickDensityRegion(min, max, absorbtion, scatter, greenstein, \
+                                             emitt, density);
+
+      (dynamic_cast<BrickDensityRegion*>(region))->loadBrickFileFormat(file, iso_min, iso_max);
   }else if(!type.compare("ocean")) {
 
       double density = val["density"].asDouble();

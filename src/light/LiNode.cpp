@@ -166,8 +166,12 @@ LiNode::gather( const Ray &ray, double *t, Color *Tr ) {
         vector<pair<double, int> >::iterator ch_It;
         double tmp_t;
         Vec3 tmp_n;
+
+        //#pragma omp parallel for private(tmp_t, tmp_n) shared(ray) schedule(dynamic, 2)
         for(int i = 0; i < 8; i++) {
             if(child(i) != NULL && child(i)->test_intersect(ray, &tmp_t, &tmp_n)) {
+
+                //#pragma omp critical
                 ch_hit.push_back(pair<double, int>(tmp_t,i));
             }
         }
@@ -343,10 +347,10 @@ LiNode::size_of() {
                 size += child(i)->size_of();
             }
         }
-            size += sizeof(m_children);
+            size += sizeof(OctreeNode*) * 8;
             return size;
     }else{
-        return sizeof(_surfelData) + (sizeof(shared_ptr<Surfel>) + sizeof(Surfel)) * _surfelCount;
+        return sizeof(_surfelData) + (sizeof(shared_ptr<Surfel>*) * _surfelCount) + (sizeof(shared_ptr<LVoxel>*) * _surfelCount);
     }
 
     return size;
@@ -379,13 +383,6 @@ LiNode::LiNode(Vec3 min, Vec3 max):OctreeNode(min,max), _surfelCount(0), _lvoxel
 
 int
 LiNode::add(const shared_ptr<LiSample> obj) {
-
-        //printf("Adding to NODE: %s - %s\n", m_min.str(), m_max.str());
-    /*
-    if(obj->getType() != SURFEL) {
-        return 0;
-    }
-    //*/
 
     if(!inside(obj))
         return 0;

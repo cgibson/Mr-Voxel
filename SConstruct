@@ -8,7 +8,7 @@ conf = Configure(env)
 
 
 #env.Append(CCFLAGS=['-g','-pg','-O3'], LINKFLAGS=['-pg'])
-env.Append(CCFLAGS=['-g','-O3'])
+env.Append(CCFLAGS=['-g','-O3','-fopenmp'])
 #env.Append(CCFLAGS=['-g'])
 
 
@@ -37,4 +37,4 @@ if conf.CheckDeclaration("__i386__"):
 else:
 	objects = objects + ['lib/x86-64/libjson_linux-gcc-4.4.1_libmt.a'];
 
-env.Program('raytracer', objects, LIBS=['boost_thread-mt'], LIBPATH='.')
+env.Program('raytracer', objects, LIBS=['boost_thread-mt','gomp','VoxelBox'], LIBPATH='.')

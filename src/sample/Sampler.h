@@ -46,7 +46,7 @@ namespace sample {
 
     class SphericalSampler : public Sampler<Vec3> {
     public:
-        SphericalSampler(int us, int ts, float min_u = -1., float max_u = 1., float min_t = 0., float max_t = 2.f * PI);
+        SphericalSampler(int us = 4, int ts = 4, float lbound_us = 0., float ubound_us = 1., float lbound_ts = 0., float ubound_ts = 1.);
         bool getSample(Vec3* sample);
         void reset();
 
@@ -54,20 +54,21 @@ namespace sample {
         int _max_us;
         int _max_ts;
         int _us, _ts;
-        float _min_u, _max_u;
-        float _min_t, _max_t;
+        float _lbound_us, _ubound_us;
+        float _lbound_ts, _ubound_ts;
     };
 
     class SphericalSamplerRD : public Sampler<Vec3> {
     public:
         SphericalSamplerRD(int us, int ts);
+        ~SphericalSamplerRD();
         bool getSample(Vec3* sample);
         void reset();
 
     protected:
         int _us_per_sampler;
         int _ts_per_sampler;
-        SphericalSampler samplers[4];
+        SphericalSampler *samplers[4];
     };
 
 }

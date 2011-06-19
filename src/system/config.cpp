@@ -47,6 +47,10 @@ namespace config {
             {
                 useCache = false;
             }
+            else if( !(tmpVal = testCommand(argv, &current, "-NLV", "--nolvoxels", false)).empty() )
+            {
+                useLvoxels = false;
+            }
             else if( !(tmpVal = testCommand(argv, &current, "-A", "--ambient")).empty() )
             {
                 if(tmpVal == "FULL")
@@ -89,9 +93,9 @@ namespace config {
             {
                 sscanf(tmpVal.c_str(), "%f", &lvoxel_size);
             }
-            else if( !(tmpVal = testCommand(argv, &current, "-VSC", "--lvoxel-sample-count")).empty() )
+            else if( !(tmpVal = testCommand(argv, &current, "-VSC", "--lvoxel-samples")).empty() )
             {
-                sscanf(tmpVal.c_str(), "%f", &vol_tests_per_sample);
+                sscanf(tmpVal.c_str(), "%d", &lvoxel_samples);
             }
             else if( !(tmpVal = testCommand(argv, &current, "-SW", "--sample-resolution")).empty() )
             {
@@ -108,6 +112,10 @@ namespace config {
             else if( !(tmpVal = testCommand(argv, &current, "-HT", "--hemisphere-t")).empty() )
             {
                 sscanf(tmpVal.c_str(), "%d", &hemisphere_t);
+            }
+            else if( !(tmpVal = testCommand(argv, &current, "-VS", "--vol-samples")).empty() )
+            {
+                sscanf(tmpVal.c_str(), "%d", &volume_samples);
             }
             else if( !(tmpVal = testCommand(argv, &current, "-HX", "--hemisphere-res")).empty() )
             {
@@ -179,11 +187,13 @@ namespace config {
     sample_t hemisphere_sampler = SAMPLE_STRATEFIED;
     int hemisphere_u = 4;
     int hemisphere_t = 8;
+    int volume_samples = 64;
+    int lvoxel_samples = 4;
     Dimension light_sample_resolution = {800, 600};
     float surfel_size = 0.02;
     float surfel_grow = 3.0;
-    float vol_tests_per_sample = 4;
     float lvoxel_size = 0.125;
+    bool useLvoxels = true;
     bool useCache = true;
 
     // Scene information
